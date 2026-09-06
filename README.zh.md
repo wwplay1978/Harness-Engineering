@@ -18,7 +18,7 @@ AI coding 对个人很好用——一旦到团队（或第二台机器、或下�
 - 质量是模型当天的心情。模型升级会悄悄改变行为，没有任何一道门说"这算完成"。
 - 同样的坑反复踩：聊天记录当文档、"看着对"当评审、嗓门大的提示词说了算。
 
-Harness Engineering 的回答（源自团队实践文献，见[参考文献](#参考文献)）：把 AI 当成**可被规则约束、可被度量反馈的工程单元**，用你拥有的线束包住它——
+Harness Engineering 的回答（呼应 OpenAI 的智能体优先实地报告，见[参考文献](#参考文献)）：把 AI 当成**可被规则约束、可被度量反馈的工程单元**，用你拥有的线束包住它——
 
 - 模型不可控，线束可控；
 - 规则、技能与工具访问活在**版本化仓库**里，不在谁的聊天窗口里；
@@ -111,8 +111,7 @@ Harness-Engineering/
 
 ## 参考文献
 
-- 《驾驭AI Coding：一份面向团队的 Harness Engineering 落地规范》（腾讯技术工程）——六支柱、3+1 Phase 奠基框架
-- 《玩转 AI Coding：一份面向团队的 Harness Engineering 实践指南》——独立团队实践、五层闭环、team-harness 仓库、规则流转
+- [Harness Engineering: Leveraging Codex in an Agent-First World](https://openai.com/index/harness-engineering/)（OpenAI）——智能体优先的实地报告：为期五个月的实验，人做线束工程师（harness engineer）、智能体写代码
 - [hindsight (vectorize.io)](https://github.com/vectorize-io/hindsight) · [basic-memory](https://github.com/basicmachines-co/basic-memory) · [git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner)——关键开源组件
 
 ## 许可证

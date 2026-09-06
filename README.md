@@ -18,7 +18,7 @@ AI coding works great for an individual — and breaks the moment a team (or a s
 - Quality is whatever the model happens to produce that day. Model upgrades silently change behavior; there is no gate that says *this* is done.
 - The same trap repeats: chat transcripts become the documentation, "looks right" becomes the review, and the loudest prompt wins.
 
-Harness Engineering's answer (tracing back to the team-practice literature — see [References](#references)): treat the AI as an **engineering unit that can be constrained by rules and improved by measurement**. Wrap it in a harness you own:
+Harness Engineering's answer (echoing OpenAI's agent-first field report — see [References](#references)): treat the AI as an **engineering unit that can be constrained by rules and improved by measurement**. Wrap it in a harness you own:
 
 - the model is uncontrollable — the harness is controllable;
 - rules, skills and tool access live in a **versioned repo**, not in someone's chat window;
@@ -112,8 +112,7 @@ Design decisions worth stealing:
 
 ## References
 
-- 《驾驭AI Coding：一份面向团队的 Harness Engineering 落地规范》(Tencent Tech Blog) — foundational six-pillar, 3+1-phase framework
-- 《玩转 AI Coding：一份面向团队的 Harness Engineering 实践指南》 — independent team practice, five-layer loop, team-harness repo, rules lifecycle
+- [Harness Engineering: Leveraging Codex in an Agent-First World](https://openai.com/index/harness-engineering/) (OpenAI) — the agent-first field report: a five-month experiment where humans worked as harness engineers and the agent wrote the code
 - [hindsight (vectorize.io)](https://github.com/vectorize-io/hindsight) · [basic-memory](https://github.com/basicmachines-co/basic-memory) · [git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner) — key open-source components
 
 ## License
