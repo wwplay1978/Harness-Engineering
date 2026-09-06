@@ -60,7 +60,7 @@ const cliOnPath = (name, pathHint) => {
   // 通用名防误报：解析路径或 npm shim 文件内容含包名 hint 才判在位
   // （npm 全局 shim 路径只有 bin 名，真实模块路径在 shim 文本内）
   if (lines.some(l => l.toLowerCase().includes(pathHint.toLowerCase()))) return true;
-  for (const l of lines.slice(0, 2)) {
+  for (const l of lines) {
     for (const cand of [l, l + '.cmd']) {
       try {
         if (readFileSync(cand, 'utf8').toLowerCase().includes(pathHint.toLowerCase())) return true;
@@ -71,9 +71,9 @@ const cliOnPath = (name, pathHint) => {
 };
 const HOST_CANDIDATES = [
   { name: 'zcode', dirs: [join(HOME, '.zcode')], config: join(HOME, '.zcode', 'cli', 'config.json'), adapted: '已适配（六票实证，C1/C2/C3 结论见 08）' },
-  { name: 'claude-code', dirs: [join(HOME, '.claude'), join(HOME, '.claude.json')], config: join(HOME, '.claude', 'settings.json'), adapted: '未适配（适配包 templates/adapters/claude-code/，装机四步待 N19，见 docs/18 §2）' },
-  { name: 'kimi-code', dirs: [join(HOME, '.kimi-code'), join(HOME, '.kimicode')], config: null, adapted: '未适配（适配包 templates/adapters/kimi-code/；agents 契约官方文档实证，见 docs/18 §3）' },
-  { name: 'codex', dirs: [join(HOME, '.codex')], config: join(HOME, '.codex', 'config.toml'), adapted: '未适配（hooks.json PreToolUse 可阻断 apply_patch，官方实证；适配包 templates/adapters/codex/，见 docs/18 §4）' },
+  { name: 'claude-code', dirs: [join(HOME, '.claude'), join(HOME, '.claude.json')], config: join(HOME, '.claude', 'settings.json'), cli: 'claude', adapted: '未适配（适配包 templates/adapters/claude-code/，装机四步待 N19，见 docs/18 §2）' },
+  { name: 'kimi-code', dirs: [join(HOME, '.kimi-code'), join(HOME, '.kimicode')], config: null, cli: 'kimi', adapted: '未适配（适配包 templates/adapters/kimi-code/；agents 契约官方文档实证，见 docs/18 §3）' },
+  { name: 'codex', dirs: [join(HOME, '.codex')], config: join(HOME, '.codex', 'config.toml'), cli: 'codex', adapted: '未适配（hooks.json PreToolUse 可阻断 apply_patch，官方实证；适配包 templates/adapters/codex/，见 docs/18 §4）' },
   { name: 'opencode', dirs: [join(HOME, '.config', 'opencode'), join(HOME, '.opencode')], config: null, cli: 'opencode', adapted: '未适配（阻断=插件 tool.execute.before throw；适配包 templates/adapters/opencode/，见 docs/18 §5）' },
   // pi 是通用名，where/which 可能命中无关同名二进制——cliPathHint 要求解析路径含 pi-coding-agent 才判在位
   { name: 'pi-agent', dirs: [join(HOME, '.pi')], config: null, cli: 'pi', cliPathHint: 'pi-coding-agent', adapted: '未适配（无原生子代理——单代理角色卡降级；guard=扩展 block；适配包 templates/adapters/pi-agent/，见 docs/18 §6）' },
