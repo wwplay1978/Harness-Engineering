@@ -64,7 +64,7 @@ planner ─▶ developer ─▶ code-reviewer ─▶ qa-tester ─▶ reviewer�
 2. **物理隔离**。一票一 worktree；PreToolUse hook 阻断对主检出白名单外路径的写入（`exit 2`）。宪法（AGENTS.md）设计上只能人改。
 3. **对抗门禁**。合并前 red-teamer 专攻 review+QA 双漏的问题（边界/并发/数据/失败级联/隐含假设/安全/性能），按票定级 full/fast/skip。
 4. **修复路由**。attempt ≥2 起改派钉强模型的 rerun 变体；累计 >4 轮升级人工。
-5. **归档也是核心要素不容妥协**。每票收尾必做：合并结论入记忆、Obsidian 知识草稿、度量（含 ±行数）、分支清理——喂给下一票的知识飞轮。
+5. **归档不容妥协**。每票收尾必做：合并结论入记忆、Obsidian 知识草稿、度量（含 ±行数）、分支清理——喂给下一票的知识飞轮。
 
 ### 快速开始
 
