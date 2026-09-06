@@ -1,7 +1,7 @@
 # 02 · 团队核心：六角色流水线的 ZCode 移植方案（四角色移植 + archiver 与 red-teamer 新增）
 
 > 资产来源：AITrader 四角色团队（Kimi Code，v1.2，2026-08-30 真实工单验证通过）
-> 原方案：`C:\Forex\Project\AITrader\docs\team\kimi-code-agent-team-plan.md`
+> 原方案：AITrader 项目内 `docs/team/kimi-code-agent-team-plan.md`（内部存档，未随公开版发布）
 > 本文只讲**移植到 ZCode 的差异与动作**；角色行为规范、流水线逻辑、验证制度全部原样继承，不重述。
 
 ## 1. 为什么四角色是团队核心

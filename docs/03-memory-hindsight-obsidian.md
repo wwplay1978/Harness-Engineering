@@ -99,7 +99,7 @@ ZCode 会话
 
 ### 4.1 现状与目录分工
 
-vault 示例（替换为你自己的路径）：`<your-vault>`，Johnny Decimal 结构：
+vault 示例（按你本机实际库路径替换，如 `C:/Users/你的用户名/Documents/MyObsidian`），Johnny Decimal 结构：
 
 ```
 00-Inbox / 10-Outbox / 20-日记 / 30-知识库 / 40-配置库 / 50-项目库 / 70-工作区 / 80-模板 / 90-附件
@@ -130,11 +130,12 @@ vault 示例（替换为你自己的路径）：`<your-vault>`，Johnny Decimal 
 
 ```bash
 hindsight-obsidian-sync reconcile \
-  --vault "<your-vault-path>" \
+  --vault "C:/Users/你的用户名/Documents/MyObsidian" \
   --bank knowledge \
   --api-url http://localhost:8888 \
   --include "30-知识库" --include "50-项目库" --include "70-工作区/10-ZCODE"
 ```
+（`--vault` 改为你本机 Obsidian 库的实际路径，正斜杠写法；`--include` 为可重复单值，逗号形态无效。）
 
 首跑实操注记（2026-09-06）：
 1. **`--include` 是可重复单值参数，不是逗号分隔**（逗号形态整串被当一个文件夹名——旧版本文档曾写错，此为设计期预警翻车点的实锤）；

@@ -1,6 +1,6 @@
 # ── 六角色 harness 三正式 hooks（N18 适配包，docs/18 §3）────────────────
 # 并入 ~/.kimi-code/config.toml 尾部。__HARNESS__ 替换为 harness 仓库绝对路径
-# （正斜杠，如 C:/Forex/Project/Harness-Engineering）。
+# （正斜杠，如 C:/Harness-Engineering）。
 # 铁律：hooks 注册由人工粘贴写入（agent 只提供本块，05 §3 人闸）。
 # 事件名/matcher/exit 2 阻断语义 = AITrader 实证形态（docs/02 §2）。
 

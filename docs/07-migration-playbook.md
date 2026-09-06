@@ -9,19 +9,22 @@
 
 ```bash
 # 首次：把本仓库 clone 到本机（下文所有 HARNESS= 均指向它；已 clone 过可跳过）
-git clone https://github.com/wwplay1978/Harness-Engineering.git /c/Forex/Project/Harness-Engineering
+git clone https://github.com/wwplay1978/Harness-Engineering.git C:/Harness-Engineering
 
-cd /c/Forex/Project/Harness-Engineering
-cmd //c templates\\installer\\check-env.cmd    # 可选参数：--project <目标项目根> --vault <vault路径>
-# 或（node 已在 PATH 时直接）：node templates/installer/check-env.mjs --vault <vault路径> --project <项目根>
+cd C:/Harness-Engineering
+node templates/installer/check-env.mjs    # 可选参数：--project <目标项目根> --vault <vault路径>
 ```
 
-零依赖引导（缺 node 会停在第一步并给安装指引）→ 深探运行时/宿主/hindsight/记忆组件/vault/项目结构 → 产出 `env-config.json`（profile 分级 full/core-plus/minimal + 按 docs/16 §4 适配矩阵生成的适配建议）与 `hindsight-params.cmd`（安装参数，不含 key）。**hindsight 安装一律用参数化脚本 v5，先 `--rehearse` 只读预演**：
+> 未装 Node 时改用零依赖引导（在 cmd 或 PowerShell 里直接运行，**不要**放进 bash）：
+> `C:\Harness-Engineering\templates\installer\check-env.cmd`（参数照加在后面）
 
-```bash
-cmd //c "...\templates\installer\install-hindsight-service.cmd" --rehearse hindsight-params.cmd   # 预演（无需提权）
-# 确认后在管理员终端去掉 --rehearse 正式安装
+零依赖引导（缺 node 会停在第一步并给安装指引）→ 深探运行时/宿主/hindsight/记忆组件/vault/项目结构 → 产出 `env-config.json`（profile 分级 full/core-plus/minimal + 按 docs/16 §4 适配矩阵生成的适配建议）与 `hindsight-params.cmd`（安装参数，不含 key）。**hindsight 安装一律用参数化脚本 v5，先 `--rehearse` 只读预演**（.cmd 安装器在 cmd/PowerShell 原生运行，勿在 bash 里跑）：
+
 ```
+C:\Harness-Engineering\templates\installer\install-hindsight-service.cmd --rehearse "%TEMP%\harness-install\hindsight-params.cmd"
+（PowerShell 写法：& "C:\Harness-Engineering\templates\installer\install-hindsight-service.cmd" --rehearse "$env:TEMP\harness-install\hindsight-params.cmd"）
+```
+确认预演输出无误后，在**管理员**终端去掉 `--rehearse` 正式安装。
 
 宿主无关化设计与完整适配矩阵见 docs/16（ZCode 只是首个已适配宿主；Claude Code / Kimi Code / PI agent 按 16 §2 四步适配）。**推荐路径**：把 docs/17 §3 的 kickoff 提示词复制给目标机的 AI agent，由它按人机分工协议代跑本手册全流程（agent 执行一切可执行项，人工仅处理提权/GUI/登录/key 四类）。
 
@@ -29,7 +32,7 @@ cmd //c "...\templates\installer\install-hindsight-service.cmd" --rehearse hinds
 
 | 组件 | 动作 | 状态（2026-09-02 盘点） |
 |---|---|---|
-| git + git-worktree-runner | `git config --global alias.gtr '!/c/Users/<you>/git-worktree-runner/bin/git-gtr'` | ✅ 已在位（AITrader 实施） |
+| git + git-worktree-runner | `git config --global alias.gtr '!~/git-worktree-runner/bin/git-gtr'`（gtr 本体按 16 §3 clone 到用户主目录） | ✅ 已在位（AITrader 实施） |
 | uv + basic-memory | `uv tool install basic-memory`（当前 v0.22.1；项目 config 模板已钉 `basic-memory@0.22.1` 防跨机漂移） | ✅ 已在位 |
 | mattpocock/skills | `~/.agents/skills/`（ZCode 与 Kimi 共扫） | ✅ 已在位 |
 | 六角色子代理（四角色移植 + archiver + red-teamer；3 个 *-rerun 变体由生成器物化） | `node templates/tools/sync-harness.mjs --apply` 一键分发（手动替代：cp `templates/agents/*.md` → `~/.zcode/agents/`） | ✅ 已部署，sync 体检全绿（2026-09-05 起 sync 自动化，N11） |
@@ -42,8 +45,8 @@ cmd //c "...\templates\installer\install-hindsight-service.cmd" --rehearse hinds
 ## 第 1 步：复制团队机制目录到新项目
 
 ```bash
-HARNESS=/c/Forex/Project/Harness-Engineering   # 本仓库 clone 位（下同；克隆到别处则全部同步替换）
-NEW=/c/Forex/project/改成新项目目录名   # ← 本块唯一需要改的行（改完再整段粘贴）
+HARNESS=C:/Harness-Engineering   # 本仓库 clone 位（下同；克隆到别处则全部同步替换）
+NEW=C:/Projects/改成新项目目录名   # ← 本块唯一需要改的行（改完再整段粘贴）
 if [ ! -d "$NEW" ]; then echo "⚠️ 目录不存在：$NEW（全新项目先：mkdir -p \"$NEW\" && cd \"$NEW\" && git init -b main）"; exit 1; fi
 cd "$NEW" && git rev-parse --git-dir >/dev/null 2>&1 || { echo "⚠️ 请先 git init（全新项目：git init -b main）"; exit 1; }
 git rev-parse --verify main >/dev/null 2>&1 || { echo "⚠️ 默认分支必须为 main（全部 --from main / --merged main 约定依赖它）"; exit 1; }
@@ -57,8 +60,8 @@ ls .zcode/ docs/ && echo OK
 ## 第 2 步：生成工作区 AGENTS.md（索引式，≤100 行）
 
 ```bash
-HARNESS=/c/Forex/Project/Harness-Engineering   # 与第 1 步保持一致
-NEW=/c/Forex/project/改成新项目目录名   # ← 与第 1 步保持一致
+HARNESS=C:/Harness-Engineering   # 与第 1 步保持一致
+NEW=C:/Projects/改成新项目目录名   # ← 与第 1 步保持一致
 cp "$HARNESS/templates/AGENTS-template.md" "$NEW/AGENTS.md"
 # 然后人工编辑：填项目名、技术栈、构建/测试命令、目录约定（10 分钟）
 grep -c "团队流水线" "$NEW/AGENTS.md"   # 预期输出 1
@@ -74,7 +77,7 @@ grep -c "committed on user authorization" "$NEW/AGENTS.md"   # 预期输出 1（
 模板 `templates/zcode-config-template.json` 即纯 MCP 版：basic-memory（需把 `--project` 参数改成新项目名）；hindsight knowledge bank MCP（`http://localhost:8888/mcp/knowledge/`）Phase 2 起按 03 文档 2.4 节追加。**另需创建 marker 文件**（inject-memory 依赖，第 4 步一并完成）。
 
 ```bash
-NEW=/c/Forex/project/改成新项目目录名   # ← 与前面步骤保持一致
+NEW=C:/Projects/改成新项目目录名   # ← 与前面步骤保持一致
 PROJ=$(basename "$NEW" | tr 'A-Z' 'a-z')
 sed -i "s/PROJECTNAME/$PROJ/g" "$NEW/.zcode/config.json"
 grep "$PROJ" "$NEW/.zcode/config.json"   # ⚠️ 必须看到含新项目名的输出——sed 未匹配也返回 0，只能 grep 验证
@@ -83,7 +86,7 @@ grep "$PROJ" "$NEW/.zcode/config.json"   # ⚠️ 必须看到含新项目名的
 ## 第 4 步：登记记忆库（basic-memory，六角色团队记忆）
 
 ```bash
-NEW=/c/Forex/project/改成新项目目录名   # ← 与前面步骤保持一致
+NEW=C:/Projects/改成新项目目录名   # ← 与前面步骤保持一致
 PROJ=$(basename "$NEW" | tr 'A-Z' 'a-z')
 cd "$NEW" && mkdir -p memory && basic-memory project add "$PROJ" "$(cygpath -m "$NEW/memory")" && basic-memory project list | tail -3
 echo "$PROJ" > "$NEW/.zcode/memory-project"   # inject-memory hook 的项目名标记（缺失则注入 hook 静默失效）
@@ -95,7 +98,7 @@ hindsight 侧（Phase 2 起）：确认 `HINDSIGHT_DYNAMIC_BANK_ID=true` 生效�
 ## 第 5 步：git 入库
 
 ```bash
-NEW=/c/Forex/project/改成新项目目录名   # ← 与前面步骤保持一致
+NEW=C:/Projects/改成新项目目录名   # ← 与前面步骤保持一致
 cd "$NEW" && git add .zcode docs AGENTS.md memory && \
 git commit -m "feat: harness engineering mechanism (from Harness-Engineering templates)" && git status --short
 # 预期：提交成功，status 无输出
@@ -104,13 +107,15 @@ git commit -m "feat: harness engineering mechanism (from Harness-Engineering tem
 ## 第 6 步：三项快速验证
 
 ```bash
-NEW=/c/Forex/project/改成新项目目录名   # ← 与前面步骤保持一致
+NEW=C:/Projects/改成新项目目录名   # ← 与前面步骤保持一致
 PROJ=$(basename "$NEW" | tr 'A-Z' 'a-z')   # 本块自足声明（每块可独立执行）
 # ① gtr 自检（必绿）
 cd "$NEW" && git gtr doctor | tail -3
 # ② guard 模拟触发（预期：阻断提示 + exit=2；脚本用用户级注册的 harness 仓库执行位副本；
 #    cwd 必须用 Windows 形态 cygpath -m）
-HARNESS=/c/Forex/Project/Harness-Engineering   # 与第 1 步保持一致
+HARNESS=C:/Harness-Engineering   # 与第 1 步保持一致
+# 执行位不存在时先创建（人工在终端跑；三正式脚本注册路径指向它，见 user-config-hooks 模板）：
+[ -d "$HARNESS/.zcode/hooks" ] || { mkdir -p "$HARNESS/.zcode/hooks" && cp "$HARNESS"/templates/hooks/*.mjs "$HARNESS/.zcode/hooks/"; }
 echo "{\"cwd\":\"$(cygpath -m "$NEW")\",\"tool_input\":{\"path\":\"src/x.js\"}}" | node "$HARNESS/.zcode/hooks/guard-worktree.mjs"; echo "exit=$?"
 # ③ 记忆注入验证：先造数据再测——空库输出为空无法区分"正常"与"hook 失效"（防假绿）
 basic-memory tool write-note --title "verify-01" --folder decisions "迁移验证条目" --project "$PROJ" >/dev/null 2>&1
@@ -124,8 +129,8 @@ echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node "$
 角色/技能/生成器/路由表修订合入本仓库后，一条命令分发到用户域（新项目接入前也建议先跑 `--check` 体检）：
 
 ```bash
-node /c/Forex/Project/Harness-Engineering/templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1）
-node /c/Forex/Project/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
+node C:/Harness-Engineering/templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1）
+node C:/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
 ```
 
 - **自动集**：六角色 base、harness-audit 技能、变体生成器、models.config.json——源=templates/（git 版本化），用户域均为部署副本

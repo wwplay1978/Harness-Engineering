@@ -22,8 +22,8 @@
 
 | 事项 | 说明 |
 |---|---|
-| **怎么获取** | git 在位时一条命令：`git clone https://github.com/wwplay1978/Harness-Engineering.git /c/Forex/Project/Harness-Engineering`；无 git：任意机器浏览器打开该仓库 → Code → Download ZIP → 解压到同一位置 |
-| **放到哪** | 建议固定 `/c/Forex/Project/Harness-Engineering`（本文所有示例路径按此写死）；放别处也行，**记下绝对路径并同步改下文所有示例**——它就是提示词里的第一个占位符（REPO） |
+| **怎么获取** | git 在位时一条命令：`git clone https://github.com/wwplay1978/Harness-Engineering.git C:/Harness-Engineering`；无 git：任意机器浏览器打开该仓库 → Code → Download ZIP → 解压到 `C:\Harness-Engineering` |
+| **放到哪** | 建议固定 `C:\Harness-Engineering`（本文所有示例路径按此写死）；放别处也行，**记下绝对路径并同步改下文所有示例**——它就是提示词里的第一个占位符（REPO） |
 | **复制什么** | **整仓即可**（`docs/` + `templates/`）——S4/S5 要用 templates 全家（六角色/hooks 源/AGENTS 模板/config 模板/路由表/skill/工具脚本）；**不要自行裁剪**"只拷部分文件"。ZCode 宿主的 hooks 执行位（`<REPO>/.zcode/hooks/`）公开仓不带，稍后由人工按 07 第 0 步从 `templates/hooks/` 复制创建 |
 | **完成校验** | 目标机该目录下能看到三个标志物即仓库在位：`docs\16-host-agnostic-installer.md`、`templates\installer\check-env.cmd`、`templates\agents\`（六个角色 .md） |
 
@@ -49,7 +49,7 @@
 
 ### 2.5.4 发送
 
-1. 在目标机用宿主 AI 工具打开会话，**工作目录切到 REPO 根**（按 2.5.1 默认即 `C:\Forex\Project\Harness-Engineering` 目录下开会话）；
+1. 在目标机用宿主 AI 工具打开会话，**工作目录切到 REPO 根**（按 2.5.1 默认即 `C:\Harness-Engineering` 目录下开会话）；
 2. 复制 §3 提示词全文，**替换两处占位符**（REPO 绝对路径、目标项目路径）；
 3. 粘贴发送。之后节奏由 agent 按 S0–S8 推进，人只按分工表应答。
 
@@ -58,7 +58,7 @@
 ```text
 角色：Harness 安装助手（宿主无关：ZCode / Claude Code / Kimi Code 等任何具备文件读写与终端执行能力的 AI agent 皆可）。
 
-背景：本机要接入六角色 Harness 工程化体系（规范仓库已就位于本机：<REPO 在本机的绝对路径，按 §2.5.1 默认即 C:\Forex\Project\Harness-Engineering>，下称 REPO；若本提示词由人从别处复制而来且 REPO 尚未就位，先指导人按 §2.5.1 clone 仓库再继续）。目标项目：<目标项目根目录，没有就填"暂无，先装全局件">。
+背景：本机要接入六角色 Harness 工程化体系（规范仓库已就位于本机：<REPO 在本机的绝对路径，按 §2.5.1 默认即 C:\Harness-Engineering>，下称 REPO；若本提示词由人从别处复制而来且 REPO 尚未就位，先指导人按 §2.5.1 clone 仓库再继续）。目标项目：<目标项目根目录，没有就填"暂无，先装全局件">。
 
 开工前按序精读（读完复述三段式流程与分工原则给我确认）：
 1. REPO/docs/16-host-agnostic-installer.md（三段式：检测→安装→适配；宿主能力矩阵；组件×缺失适配矩阵）

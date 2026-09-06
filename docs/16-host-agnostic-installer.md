@@ -50,7 +50,7 @@ check-env.cmd/mjs    →    参数化安装脚本            →    按组件在
   npm install -g @vectorize-io/hindsight-obsidian   # vault→bank 同步 CLI（官方包）
   # gtr（来源考证 2026-09-06：github.com/coderabbitai/git-worktree-runner）
   git clone https://github.com/coderabbitai/git-worktree-runner.git "$env:USERPROFILE\git-worktree-runner"
-  git config --global alias.gtr "!$env:USERPROFILE/git-worktree-runner/bin/git-gtr"
+  git config --global alias.gtr '!~/git-worktree-runner/bin/git-gtr'
   ```
   另三项无包管理器，按下方手工获取：
 

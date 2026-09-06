@@ -9,7 +9,7 @@ description: 对启用了 Harness Engineering 体系的项目做合规审计评�
 
 ## 输入
 
-- 目标项目根目录（必给）；harness 规范仓库路径（下称 REPO，默认 `C:\Forex\Project\Harness-Engineering\docs\`，审计前向人确认实际 clone 位；按需查阅 02/04/05/07 为准绳）。
+- 目标项目根目录（必给）；harness 规范仓库路径（下称 REPO，默认 `C:\Harness-Engineering\docs\`，审计前向人确认实际 clone 位；按需查阅 02/04/05/07 为准绳）。
 
 ## 七维度评分表（满分 100）
 
