@@ -1,0 +1,121 @@
+# Harness Engineering
+
+English | [中文](README.zh.md)
+
+**Agent = Model + Harness.** Models churn every quarter; your engineering standards shouldn't. Harness Engineering turns "good code" from a property of the model into a property of the *system* — a versioned, measurable, self-improving harness around any AI coding agent.
+
+This repository is a **battle-tested, host-agnostic harness specification + installer toolkit**: a six-role agent pipeline (planner → developer → code-reviewer → qa-tester → red-teamer → archiver), physical write-isolation guardrails, three-layer memory (basic-memory / hindsight / Obsidian), an executable audit spec, and a three-phase installer (detect → install → adapt) that can be driven end-to-end by an AI agent with a human only for elevation, GUI installs, credentials, and decisions.
+
+> Validated in a real pilot project: 6 tickets end-to-end, 0 implementation defects found in QA, adversarial red-team hits with zero overlap vs. review+QA, independent harness audit baseline 93/100 (A).
+
+---
+
+## Why Harness Engineering?
+
+AI coding works great for an individual — and breaks the moment a team (or a second machine, or a next quarter) gets involved:
+
+- Everyone maintains their own prompts and project rules; nothing is inherited, nothing is auditable. When a person leaves, their "AI experience" leaves with them.
+- Quality is whatever the model happens to produce that day. Model upgrades silently change behavior; there is no gate that says *this* is done.
+- The same trap repeats: chat transcripts become the documentation, "looks right" becomes the review, and the loudest prompt wins.
+
+Harness Engineering's answer (tracing back to the team-practice literature — see [References](#references)): treat the AI as an **engineering unit that can be constrained by rules and improved by measurement**. Wrap it in a harness you own:
+
+- the model is uncontrollable — the harness is controllable;
+- rules, skills and tool access live in a **versioned repo**, not in someone's chat window;
+- every change flows Spec → Code → Review → QA → Adversarial check → **human merge** → Archive, with evidence on disk.
+
+## What is Harness Engineering?
+
+The harness is the engineering layer between an LLM and productive, governable coding work. Six pillars:
+
+| Pillar | What it governs here |
+|---|---|
+| Context | Index-style constitution (AGENTS.md ≤100 lines), spec-first docs tree (`specs/tickets/reviews/changes`) |
+| Tools | Three-layer capability stack: Rules → Skills → MCP; per-role tool allowlists (reviewer read-only, planner no-Write) |
+| Orchestration | Six-role pipeline with model routing and rerun variants for repair rounds |
+| Memory | Team memory (basic-memory, git-tracked) · individual memory (hindsight) · human knowledge base (Obsidian) |
+| Evaluation | L1–L4 quality gates, metrics ledger, `harness-audit` 7-dimension executable spec |
+| Guardrails | Physical write-isolation hooks, main-branch direct-commit whitelist, human-only constitution |
+
+Work flows through **Plan → Code → Deliver → Archive (+ knowledge retention)** — the "+1" Archive phase is where process assets become searchable team knowledge.
+
+## How to do it
+
+The pipeline (full detail in [`docs/02`](docs/02-team-core.md)):
+
+```
+planner ─▶ developer ─▶ code-reviewer ─▶ qa-tester ─▶ reviewer (tests-only)
+   │           ▲             │ pass             │
+   │           └─ fix rounds ┘                  ▼
+   │                                          red-teamer (full/fast/skip)
+   │                                           │
+   └── spec upgrade loop ◀── changes/ ◀── 【HUMAN: merge decision】
+                                               │
+                                          archiver (7-step SOP: memory, ticket
+                                          status, Obsidian draft + reconcile,
+                                          metrics incl. ±lines, worktree cleanup)
+```
+
+Core disciplines:
+
+1. **Spec before code.** No ticket, no worktree. Spec gaps flow through a three-stage `changes/` chain and are folded back by the planner (r1→rN).
+2. **Physical isolation.** Developer work happens in one worktree per ticket; a PreToolUse hook blocks writes to the main checkout outside whitelisted doc paths (`exit 2`). The constitution (AGENTS.md) is human-only by design.
+3. **Adversarial gate.** Before merge, a red-teamer attacks what review+QA both missed (boundaries, concurrency, data, failure cascades, hidden assumptions, security, performance), graded full/fast/skip per ticket.
+4. **Repair routing.** From attempt ≥2, rerun variants dispatch with a stronger pinned model; >4 attempts escalate to a human.
+5. **Archive as a first-class phase.** Every ticket ends with consolidated memory, an Obsidian knowledge draft, metrics (including ±lines), and branch cleanup — the knowledge flywheel that feeds the next ticket.
+
+### Getting started
+
+Preferred: let an AI agent drive the whole installation (it runs every executable step; you handle elevation / GUI / credentials / decisions only) — the kickoff prompt and human-prep checklist are in [`docs/17`](docs/17-agent-assisted-install.md). Manual path: environment probe → parameterized installers → adaptation, per [`docs/16`](docs/16-host-agnostic-installer.md) and [`docs/07`](docs/07-migration-playbook.md).
+
+```bash
+git clone https://github.com/wwplay1978/Harness-Engineering.git
+node templates/installer/check-env.mjs          # read-only probe: profile + adaptation plan
+templates/installer/install-hindsight-service.cmd --rehearse   # dry-run before any real install
+```
+
+## Architecture & design highlights
+
+```
+Harness-Engineering/
+├── docs/        reusable spec layer (concepts, six roles, memory, eval, guardrails,
+│                migration playbook, toolchain portability, host-agnostic installer,
+│                agent-assisted install) — docs/06/08–14 are internal engineering
+│                archives and intentionally not published
+├── templates/
+│   ├── agents/            6 role files (+3 rerun variants generated by tooling)
+│   ├── hooks/             guard / inject-memory / report-worktrees (payload-dual-read)
+│   ├── installer/         check-env probe · parameterized NSSM service installer
+│   │                      (v5, --rehearse) · pg0 junction fix (v3)
+│   ├── tools/             sync-harness distributor · role-variant generator
+│   ├── skills/            harness-audit executable spec
+│   ├── AGENTS-template.md constitution skeleton (incl. commit whitelist)
+│   ├── models.config.json per-role model routing table
+│   └── *.json             user-level hooks template · project MCP template
+```
+
+Design decisions worth stealing:
+
+- **Host-agnostic by contract.** The governance core is conventions + artifacts (constitution, role discipline, docs tree, git flow) — any agent host providing dispatch, subagents, blocking hooks, MCP and skills can carry it. ZCode is the first fully validated adapter; Claude Code / Kimi Code follow a documented 4-step adaptation discipline ([`docs/16 §2`](docs/16-host-agnostic-installer.md)).
+- **Single source of truth + one-command distribution.** `templates/` is canonical; `sync-harness.mjs --apply` deploys to the user domain and reports drift (it deliberately *never* writes the executed hook copies — an AI must not be able to swap the running guard).
+- **Graceful degradation.** Every component is optional with a documented workflow adaptation: full / core-plus / minimal profiles; the probe classifies your machine and emits an `adaptation-plan.md`.
+- **Security rails baked in.** API keys never touch disk or agent transcripts; elevated scripts require a `--rehearse` dry-run first; hooks registration and the constitution are permanently human-hands; installer outputs auto-redirect out of git work trees.
+- **Ops-hardened on Windows.** ASCII-only batch files (ANSI codepage quirk), `chcp 65001` for non-ASCII usernames, UTF-8 service env (GBK crash lesson), process-name-whitelist kills, model `config.json` sentinels.
+
+## Measurement & continuous improvement
+
+- **Metrics ledger per ticket** (`docs/04`): attempts, review rounds, QA rounds, QA defects, first-pass rate, test count, ±lines — recorded by the archiver, reviewed on a rolling cadence.
+- **`harness-audit`**: an executable 7-dimension, 100-point audit spec (constitution quality, rules & enforcement, skills layering, tools, SDD process, engineering gates, memory & archive) producing S/A/B/C/D with P0–P3 remediation — quarterly, plus after major spec changes. Pilot baseline: 93/A.
+- **Quality gates that actually bite**: first-pass ≠ 100% in early tickets is *healthy* — it means reviewer/QA gates catch real issues; severity trends should decay over time (P1 → P2/P3 in the pilot).
+- **Feedback loops**: spec-gap `changes/` chain (same-day upgrades), audit findings back-fed into specs, adversarial-review overlap-rate tracking (pilot: red-team hits had zero overlap with review+QA).
+- **Knowledge flywheel**: ticket → workspace draft (instantly searchable via vault→bank reconcile) → human curation into the final zone → next ticket's recall. Three layers closed-loop.
+
+## References
+
+- 《驾驭AI Coding：一份面向团队的 Harness Engineering 落地规范》(Tencent Tech Blog) — foundational six-pillar, 3+1-phase framework
+- 《玩转 AI Coding：一份面向团队的 Harness Engineering 实践指南》 — independent team practice, five-layer loop, team-harness repo, rules lifecycle
+- [hindsight (vectorize.io)](https://github.com/vectorize-io/hindsight) · [basic-memory](https://github.com/basicmachines-co/basic-memory) · [git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner) — key open-source components
+
+## License
+
+[MIT](LICENSE)

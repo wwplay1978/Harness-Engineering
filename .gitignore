@@ -1,0 +1,4 @@
+# installer run artifacts (check-env.mjs outputs - machine-local, never commit)
+env-config.json
+hindsight-params.cmd
+adaptation-plan.md

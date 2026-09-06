@@ -1,0 +1,48 @@
+{
+  "_readme": "OPT-2 分级模型路由表（唯一事实来源=Zcode_T1/templates/models.config.json；本文件是其部署副本，由 templates/tools/sync-harness.mjs --apply 覆盖，勿直接手改）。defaults=inherit 跟随主会话；rerun 变体钉更强模型。模型 ID 形态：builtin:<provider>/<ModelName>（已证实：builtin:zai-coding-plan/GLM-5.3；候选：GLM-5-Turbo）。改源头后 sync --apply，再 node ~/.zcode/tools/generate-role-variants.mjs 重新物化变体，最后新开会话生效（C1）。routing 是 main agent 的派发约定（无自动执行器）；attempt 计数宿主=ticket 文件运行记录。",
+  "defaults": {
+    "planner": "inherit",
+    "developer": "inherit",
+    "code-reviewer": "inherit",
+    "qa-tester": "inherit",
+    "archiver": "inherit"
+  },
+  "routing": [
+    {
+      "role": "developer",
+      "escalation": [
+        {
+          "on": "review_failed",
+          "to": "developer-rerun",
+          "guard": "首跑之后的第一轮修复即触发（attempt>=2；attempt 口径=ticket 运行记录中该角色累计派发次数，首跑=1）",
+          "cap": "attempts>4 停止自动升级转人工决策",
+          "action": "派发上下文附 reviewer blocking 清单与 spec 锚点"
+        },
+        {
+          "on": "qa_failed",
+          "to": "developer-rerun",
+          "guard": "同上（attempt>=2）",
+          "cap": "同上",
+          "action": "派发上下文附 QA 缺陷报告路径与复现步骤"
+        }
+      ]
+    },
+    {
+      "role": "code-reviewer",
+      "escalation": [
+        { "on": "rerun_review（r>=2 的复审）", "to": "code-reviewer-rerun", "cap": "同 developer" }
+      ]
+    },
+    {
+      "role": "qa-tester",
+      "escalation": [
+        { "on": "retest（修复轮后的复测）", "to": "qa-tester-rerun", "cap": "同 developer" }
+      ]
+    }
+  ],
+  "variants": {
+    "developer-rerun": { "base": "developer", "model": "builtin:zai-coding-plan/GLM-5.3" },
+    "code-reviewer-rerun": { "base": "code-reviewer", "model": "builtin:zai-coding-plan/GLM-5.3" },
+    "qa-tester-rerun": { "base": "qa-tester", "model": "builtin:zai-coding-plan/GLM-5.3" }
+  }
+}
