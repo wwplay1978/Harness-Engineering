@@ -47,21 +47,31 @@ rt.npm = { ...ok(npmLs.status === 0), version: npmLs.status === 0 ? ver(npmLs) :
 out.runtimes = rt;
 
 // ── 2) 宿主（AI coding 工具）────────────────────────────
+// 探测双通道（N18 教训）：CLI 在位但配置目录未生成会漏报（pi 首装案例），目录在位但 CLI 已卸载会虚报
+// （opencode 案例）——故 dirs 之外可选 cli 字段走 PATH 探测，任一命中即"在位"。
+const cliOnPath = name => {
+  const r = process.platform === 'win32'
+    ? spawnSync('where', [name], { encoding: 'utf8', timeout: 5000 })
+    : spawnSync('which', [name], { encoding: 'utf8', timeout: 5000 });
+  return r.status === 0 && !!(r.stdout || '').trim();
+};
 const HOST_CANDIDATES = [
   { name: 'zcode', dirs: [join(HOME, '.zcode')], config: join(HOME, '.zcode', 'cli', 'config.json'), adapted: '已适配（六票实证，C1/C2/C3 结论见 08）' },
-  { name: 'claude-code', dirs: [join(HOME, '.claude'), join(HOME, '.claude.json')], config: join(HOME, '.claude', 'settings.json'), adapted: '未适配（同族 schema，按 docs/16 §2 四步重验）' },
-  { name: 'kimi-code', dirs: [join(HOME, '.kimi-code'), join(HOME, '.kimicode')], config: null, adapted: '未适配（AITrader 基座实证，frontmatter 见 02 §3）' },
-  { name: 'codex', dirs: [join(HOME, '.codex')], config: join(HOME, '.codex', 'config.toml'), adapted: '未适配（hooks 面以 sandbox/approval 为主，guard 需重设计，见 16 §2）' },
-  { name: 'opencode', dirs: [join(HOME, '.config', 'opencode'), join(HOME, '.opencode')], config: null, adapted: '未适配（agents/权限模型与阻断语义待核验，见 16 §2）' },
-  { name: 'pi-agent', dirs: [join(HOME, '.pi')], config: null, adapted: '未证实——按 docs/16 §2 矩阵自查后四步' },
+  { name: 'claude-code', dirs: [join(HOME, '.claude'), join(HOME, '.claude.json')], config: join(HOME, '.claude', 'settings.json'), adapted: '未适配（适配包 templates/adapters/claude-code/，装机四步待 N19，见 docs/18 §2）' },
+  { name: 'kimi-code', dirs: [join(HOME, '.kimi-code'), join(HOME, '.kimicode')], config: null, adapted: '未适配（适配包 templates/adapters/kimi-code/；agents 契约官方文档实证，见 docs/18 §3）' },
+  { name: 'codex', dirs: [join(HOME, '.codex')], config: join(HOME, '.codex', 'config.toml'), adapted: '未适配（hooks.json PreToolUse 可阻断 apply_patch，官方实证；适配包 templates/adapters/codex/，见 docs/18 §4）' },
+  { name: 'opencode', dirs: [join(HOME, '.config', 'opencode'), join(HOME, '.opencode')], config: null, cli: 'opencode', adapted: '未适配（阻断=插件 tool.execute.before throw；适配包 templates/adapters/opencode/，见 docs/18 §5）' },
+  { name: 'pi-agent', dirs: [join(HOME, '.pi')], config: null, cli: 'pi', adapted: '未适配（无原生子代理——单代理角色卡降级；guard=扩展 block；适配包 templates/adapters/pi-agent/，见 docs/18 §6）' },
   { name: 'deepseek-harness', dirs: [], config: null, adapted: '未适配（框架型宿主不驻留用户目录，探测恒"未发现"属预期；适配=打包为其插件，见 16 §2）' },
 ];
 out.hosts = [];
 for (const h of HOST_CANDIDATES) {
-  const present = h.dirs.some(d => existsSync(d));
+  const dirHit = h.dirs.some(d => existsSync(d));
+  const cliHit = h.cli ? cliOnPath(h.cli) : false;
+  const present = dirHit || cliHit;
   const cfg = h.config ? existsSync(h.config) : null;
-  out.hosts.push({ name: h.name, present, configPresent: cfg, adapted: h.adapted });
-  console.log(`[宿主]   ${h.name.padEnd(12)} ${present ? '✓ 在位' + (cfg === false ? '（config 未初始化）' : '') : '— 未发现'}  适配态：${h.adapted}`);
+  out.hosts.push({ name: h.name, present, configPresent: cfg, adapted: h.adapted, viaCli: cliHit && !dirHit ? h.cli : undefined });
+  console.log(`[宿主]   ${h.name.padEnd(12)} ${present ? '✓ 在位' + (cfg === false ? '（config 未初始化）' : '') + (cliHit && !dirHit ? `（CLI ${h.cli} 在 PATH，配置目录未生成）` : '') : '— 未发现'}  适配态：${h.adapted}`);
 }
 const adaptedHost = out.hosts.find(h => h.present && h.name === 'zcode');
 

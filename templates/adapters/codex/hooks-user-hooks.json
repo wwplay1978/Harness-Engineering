@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"__HARNESS__/.zcode/hooks/guard-worktree.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"__HARNESS__/.zcode/hooks/inject-memory.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"__HARNESS__/.zcode/hooks/report-worktrees.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,3 +2,6 @@
 env-config.json
 hindsight-params.cmd
 adaptation-plan.md
+
+# adapter generator artifacts
+templates/adapters/dist/

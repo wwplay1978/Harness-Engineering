@@ -29,6 +29,7 @@
 | [15-toolchain-portability.md](15-toolchain-portability.md) | 工具链清单与可移植性（缺失降级矩阵/AITrader 适配/跨机安装） | 迁移必读 |
 | [16-host-agnostic-installer.md](16-host-agnostic-installer.md) | 宿主无关化与三段式安装器（检测→安装→适配；installer/ 工具） | 迁移必读 |
 | [17-agent-assisted-install.md](17-agent-assisted-install.md) | Agent 辅助安装方案（目标机 agent 提示词：人机分工协议+八步骨架） | 迁移必读 |
+| [18-host-adapters.md](18-host-adapters.md) | 五宿主适配包（claude-code/kimi-code/codex/opencode/pi-agent 判级证据+适配产物+装机验证清单） | 迁移必读 |
 
 ## 模板（迁移时复制）
 
@@ -39,6 +40,7 @@
 | [../templates/user-config-hooks-template.json](../templates/user-config-hooks-template.json) | 用户级 hooks 注册形态（guard/inject/report 三正式脚本） | `~/.zcode/cli/config.json`（参考） |
 | [../templates/agents/](../templates/agents/) | 六个角色子代理文件（ZCode 格式：四角色移植 + archiver + red-teamer；另 3 个 *-rerun 变体由生成器物化） | `~/.zcode/agents/`（用户域，全局一次；sync-harness.mjs --apply 分发） |
 | [../templates/hooks/](../templates/hooks/) | guard/inject/report 三正式 hook 脚本（含真实 schema 适配） | 用户级 hooks 目录（参考部署形态） |
+| [../templates/adapters/](../templates/adapters/) | 五宿主适配包（物化器 + hooks 粘贴块 + opencode/pi guard 移植；docs/18） | 逐宿主见 templates/adapters/<host>/README.md |
 
 ## 作用域约定（重要）
 

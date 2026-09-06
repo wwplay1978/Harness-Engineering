@@ -12,16 +12,16 @@
 
 ## 2. 宿主能力矩阵（harness 五项机制需求）
 
-按宿主成行（⚠️=文档可见但未实测；未证实=无可靠资料，须先自查）：
+按宿主成行（⚠️=文档可见但未实测；未证实=无可靠资料，须先自查；**证据级别与逐宿主细节见 docs/18**）：
 
 | 宿主 | 派发/子代理 | 可阻断 hooks | MCP | 技能 | 适配态 |
 |---|---|---|---|---|---|
 | **ZCode** | ✅ 六角色实证 | ✅ exit 2 实测；注册优先级 C2 实测 | ✅ | ✅ ~/.agents/skills 共扫 | **已适配**（六票实证） |
-| **Claude Code** | ✅ subagents 同族（未实测） | 同族 schema 高置信（未实测）；注册/优先级需重验 | ✅ | ✅ skills（路径形态待验） | 未适配（四步） |
-| **Kimi Code** | ✅ AITrader 四角色 v1.2 实证（frontmatter 见 02 §3） | ✅ guard 机制源头；事件集异（含 SubagentStop）、payload=`path`（guard 已双读）；C1/C2 类需重验 | ✅ | ✅ 与 ZCode 共扫 | 未适配（四步） |
-| **Codex (OpenAI)** | ⚠️ 无原生多角色派发（AGENTS.md 起源地 + prompts 机制，角色需借 prompts/单会话模拟） | ⚠️ 无 PreToolUse 型阻断——以 sandbox/approval 策略替代，guard 需改造为外挂检查或接受纪律降级 | ✅ config.toml | ✅ AGENTS.md + ~/.codex/prompts | 未适配（四步，hooks 面需重新设计） |
-| **OpenCode** | ⚠️ 内置 agents/权限模型（未实测） | ⚠️ 插件/事件系统存在，阻断语义待核验 | ✅ | ✅ AGENTS.md | 未适配（四步） |
-| **Pi Agent** | 未证实 | 未证实 | 未证实 | 未证实 | 用本矩阵自查后按四步 |
+| **Claude Code** | ✅ subagents 同族（~/.claude/agents/） | ✅ 同族 schema（settings.json hooks；注册/优先级待装机） | ✅ | ✅ | 适配包已产出（adapters/claude-code，装机四步待 N19） |
+| **Kimi Code** | ✅ AITrader v1.2 实证 + 官方文档（~/.kimi-code/agents/ 与 ~/.agents/agents/；model 键不支持） | ✅ guard 机制源头；本机 config.toml [[hooks]] 实证；payload=`path`（guard 已双读） | ✅ | ✅ ~/.agents/skills 共扫（文档实证） | 适配包已产出（adapters/kimi-code，装机四步待 N19） |
+| **Codex (OpenAI)** | ✅ multi_agent stable + ~/.codex/agents/*.toml（spawn_agent；项目级定义有上游 bug——用用户级） | ✅ hooks.json 体系官方实证：PreToolUse 阻断 apply_patch/Edit/Write（官方自注：护栏非完全强制边界） | ✅ config.toml | ✅ AGENTS.md + prompts | 适配包已产出（adapters/codex，装机四步待 N19） |
+| **OpenCode** | ✅ agents/ 目录 + mode: subagent + @mention 派发（本机 GSD 样本 + 官方文档） | ✅ 插件 tool.execute.before throw 即阻断（官方文档；本机插件样本印证加载形态） | ✅ | ✅ AGENTS.md | 适配包已产出（adapters/opencode，装机四步待 N19） |
+| **Pi Agent** | ❌ 无原生子代理（官方 README 明示）——单代理角色卡降级 | ✅ 扩展 tool_call → {block:true}（官方文档；写入隔离等价物理防线） | 未证实（N18 未核验） | ✅ Agent Skills 标准 + ~/.agents/skills 共扫 | 适配包已产出（adapters/pi-agent，降级形态，装机四步待 N19） |
 | **DeepSeek Harness** | ✅ 框架宣称"一切皆插件"（plugin.json 可声明 agents） | ⚠️ 声明支持 hooks，阻断语义待实测 | ✅ 可声明 mcpServers | ✅ 可声明 skills/commands | 未适配（框架型宿主：适配=把六角色+guard 打包为其插件） |
 
 新宿主一律先查此矩阵——**标 ⚠️/未证实的项就是四步中②③的验证重点**；矩阵未列的宿主（新兴工具）按同一五机制自查后补行入表。
@@ -90,6 +90,6 @@ check-env.cmd/mjs    →    参数化安装脚本            →    按组件在
 ## 6. 未竟项与实测边界（诚实声明）
 
 - **v5 安装脚本的真实安装路径未在本机执行**（保护在跑的生产服务）——预演模式与参数装载已实测；真实路径为 v4 已验证代码的参数化改写，首次真实使用必须在目标机按"预演 → 正式"纪律完成；模型完整性以目录内 `config.json` 为哨兵（空目录/半下载会在预演与正式路径双双拦截）。
-- Claude Code / Kimi Code / PI agent 的**适配器实现**未做——矩阵与适配纪律已定，需在真实目标机按 §2 四步走完后在 08 附录补记实测结论；
-- PI agent 能力未证实，勿在未走 §2 ④前假设其具备阻断 hooks；
+- 五宿主**适配包已产出**（2026-09-06，`templates/adapters/` + docs/18：claude-code / kimi-code / codex / opencode / pi-agent），但**装机实测未做**——16 §2 四步①–④完整走完前仍按"未适配"对待，首装实测随 N19，结论回灌 docs/18 §8；
+- pi 无原生子代理为官方明示的产品设计（非未证实项）——已按单代理角色卡降级适配，其 MCP 面仍待装机核验；
 - hindsight 是否有 Kimi 集成仍未证实（15 §2），AITrader 迁移按"hindsight 缓行"处理。

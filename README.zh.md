@@ -97,7 +97,7 @@ Harness-Engineering/
 
 值得抄走的设计决策：
 
-- **契约级宿主无关**。治理内核是"约定 + 工件"（宪法、角色纪律、文档树、git 流程）——任何具备派发/子代理/可阻断 hooks/MCP/技能五项机制的宿主都能承载。ZCode 是首个完整实证的适配；主流宿主——Claude Code、Kimi Code、Codex、OpenCode、Pi Agent、DeepSeek Harness——按文档化的四步适配纪律接入（[`docs/16 §2`](docs/16-host-agnostic-installer.md)）。
+- **契约级宿主无关**。治理内核是"约定 + 工件"（宪法、角色纪律、文档树、git 流程）——任何具备派发/子代理/可阻断 hooks/MCP/技能五项机制的宿主都能承载。ZCode 是首个完整实证的适配；主流宿主——Claude Code、Kimi Code、Codex、OpenCode、Pi Agent、DeepSeek Harness——按文档化的四步适配纪律接入（[`docs/16 §2`](docs/16-host-agnostic-installer.md)）；其中五宿主（Claude Code、Kimi Code、Codex、OpenCode、Pi Agent）的适配包已就绪，见 [`templates/adapters/`](templates/adapters/)（[`docs/18`](docs/18-host-adapters.md)），装机实测为首装步骤）。
 - **单一事实来源 + 一条命令分发**。`templates/` 为权威源；`sync-harness.mjs --apply` 分发到用户域并体检漂移（它**刻意不写** hooks 执行位——AI 不能换掉正在运行的 guard）。
 - **优雅降级**。每个组件都可选，缺失即按文档化矩阵降级：full / core-plus / minimal 三档 profile；探测脚本自动分级并产出 `adaptation-plan.md`。
 - **安全护栏内建**。API key 永不落盘、不进智能体会话；提权脚本必须先 `--rehearse` 干跑；hooks 注册与宪法永久人手；安装器产物自动重定向出 git 工作树。
