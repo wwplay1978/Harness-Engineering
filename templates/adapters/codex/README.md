@@ -17,6 +17,7 @@
 - ✅ 本机 `[features] hooks = true`、`multi_agent = true`（stable，0.153.4 features list 实测）。
 - ⚠️ 官方自注边界："部分专用工具路径可退出默认 hook 路径——hooks 属护栏（guardrail）而非完全强制边界"。写入隔离第一道物理防线仍成立，验收话术按护栏口径。
 - ⚠️ 装机验证项：guard 的 payload 字段映射（apply_patch 的 `tool_input` 是否含逐文件路径——**先跑探针**；若只有整块 patch 文本，需给 guard 加 codex 分支后才能绿，属预期装机工作）。
+- ⚠️ **探针完成前，guard 对 apply_patch 等价零防护**：guard 对无路径可判的 payload 是 fail-open（与 .mjs 同语义）——注册了 hooks.json 不等于防线已生效，完成探针/字段适配前不得按"已部署物理防线"对待。
 - ⚠️ 上游已知问题（记录，不阻塞）：项目级 `.codex/config.toml` 自定义角色对 spawn_agent 不可见（#14579）→ 一律放用户级 `~/.codex/agents/`；spawn_agent schema 暴露跨平台不一致（#26828）→ 异常时走 prompts 角色卡降级。
 
 ## 安装步骤

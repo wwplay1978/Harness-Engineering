@@ -13,7 +13,7 @@
 
 - ✅ 在位实测：v2.1.220；`~/.claude/agents/`（空目录在位）；settings.json 仅 env 段。
 - ✅ 同族 schema（ZCode 即 Claude Code 系产物：PreToolUse/UserPromptSubmit、exit 2 阻断、matcher 形态一致）。
-- ⚠️ 装机验证项：`disallowedTools` 键物理生效性（Claude Code 文档主推 `tools` 正向清单；未知键有静默忽略风险——planner 的禁 Edit/Bash 需实测确认，guard 为兜底物理防线）。
+- ⚠️ 装机验证项：`disallowedTools` 键物理生效性（Claude Code 文档主推 `tools` 正向清单；未知键有静默忽略风险——planner 的禁 Edit/Bash 需实测确认，guard 为兜底物理防线）。**若实测被忽略的既定对策**：planner 变体改物化 `tools` 正向清单（Read/Grep/Glob/Skill 等穷举），不改 guard。
 - ⚠️ 装机验证项：hooks 注册优先级（用户级/项目级覆盖关系，对齐 C2 类行为重验，四步④）。
 
 ## 安装步骤（agent 可代做 vs 人闸）

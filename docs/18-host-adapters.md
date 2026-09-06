@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | **claude-code** (2.1.220) | ✅ 同族 subagents（`~/.claude/agents/`，文档+同族 lineage） | ✅ 同族 hooks：settings.json、PreToolUse、exit 2（文档+lineage；注册/优先级待装机） | ✅ | ✅ | `~/.claude/agents/*.md` |
 | **kimi-code** (0.41.0) | ✅ 实证（AITrader v1.2）+文档（`~/.kimi-code/agents/`、`~/.agents/agents/`） | ✅ 实证（本机 config.toml `[[hooks]]` PreToolUse+matcher；exit 2 为 guard 机制源头） | ✅ | ✅ 文档实证共扫 `~/.agents/skills/` | `~/.kimi-code/agents/*.md` |
-| **codex** (0.153.4) | ✅ 文档+本机特性开关（multi_agent stable=true；`~/.codex/agents/*.toml`，spawn_agent 派发） | ✅ 文档（`~/.codex/hooks.json`，PreToolUse 阻断 apply_patch/Edit/Write；官方自注"护栏非完全强制边界"） | ✅ config.toml 实证 | ✅ AGENTS.md + prompts 实证 | `~/.codex/agents/*.toml`（+prompts 降级卡） |
+| **codex** (0.153.4) | ⚠️ 形态=第三方指南口径（官方 agents/multi-agent 页当日 404 未证实；multi_agent 特性开关 stable=true 为本机实证）——`~/.codex/agents/*.toml` + spawn_agent | ✅ 文档（`~/.codex/hooks.json`，PreToolUse 阻断 apply_patch/Edit/Write；官方自注"护栏非完全强制边界"） | ✅ config.toml 实证 | ✅ AGENTS.md + prompts 实证 | `~/.codex/agents/*.toml`（+prompts 降级卡） |
 | **opencode** (1.18.29) | ✅ 文档+本机 GSD 样本（agents/ 目录、`mode: subagent`、@mention 派发） | ✅ 文档（插件 `tool.execute.before` throw 即阻断；本机插件样本证实加载形态） | ✅ | ✅ AGENTS.md | `~/.config/opencode/agents/*.md` |
 | **pi-agent** (0.85.1) | ❌ 无原生子代理（官方 README 明示）→ **单代理角色卡降级** | ✅ 文档（扩展 `pi.on("tool_call")` → `{block:true}`；路径保护为官方场景） | 未证实（N18 未核验） | ✅ 文档实证共扫 `~/.agents/skills/` | `~/.pi/agent/prompts/*.md`（/命令 角色卡） |
 
@@ -66,7 +66,7 @@ adapters/
 
 - **判级改写依据**（16 §2 旧判级"无 PreToolUse 型阻断"作废）：官方 hooks 文档——`~/.codex/hooks.json`（用户级）+ `<repo>/.codex/hooks.json`（项目级）双层加载；事件族与 Claude Code 同型（SessionStart/UserPromptSubmit/PreToolUse/PostToolUse/SubagentStart/Stop…）；**apply_patch 触发 PreToolUse**（matcher 认 `apply_patch`/`Edit`/`Write`，输入 tool_name 报 `apply_patch`）；阻断三形态（`permissionDecision:"deny"` / `{"decision":"block"}` / exit 2+stderr）。本机 `[features] hooks = true`、`multi_agent = true`（stable，features list 实测）。
 - **诚实边界**：官方自注"部分专用工具路径可退出默认 hook 路径——hooks 属护栏（guardrail）而非完全强制边界"，验收话术按护栏口径；托管工具（如 WebSearch）不触发 PreToolUse。
-- **角色形态**：`~/.codex/agents/*.toml`（name/description/instructions；multi_agent spawn_agent 派发）为主，`~/.codex/prompts/*.md` 单会话角色卡为降级备选。项目级自定义角色对 spawn_agent 不可见（上游 #14579）→ 一律用户级；schema 暴露跨平台不一致（#26828）→ 异常走 prompts 卡。
+- **角色形态**（⚠️ 来源=第三方指南 morphllm/proflead/firecrawl + 上游 issue 讨论；官方 agents/multi-agent 文档页当日 404，键名以装机实测为准）：`~/.codex/agents/*.toml`（name/description/instructions；multi_agent spawn_agent 派发）为主，`~/.codex/prompts/*.md` 单会话角色卡为降级备选。项目级自定义角色对 spawn_agent 不可见（上游 #14579）→ 一律用户级；schema 暴露跨平台不一致（#26828）→ 异常走 prompts 卡。
 - **装机验证重点**：**payload 探针必做**——apply_patch 的 `tool_input` 是否含逐文件路径；若只含整块 patch 文本，guard 需加 codex 字段分支后才能绿（预期装机工作，非阻塞）。
 - **环境修复备注**：本机原安装损坏（npm 未按 ARM64 解析出 win32-x64 依赖报错）；`npm install -g @openai/codex@latest` 重装拉到 codex-win32-arm64 原生包后 0.153.4 正常。
 
@@ -99,4 +99,4 @@ adapters/
 ## 9. 证据来源（2026-09-06 读档）
 
 - 本机实测：`claude --version` / `kimi --version` / `codex features list` / `opencode --version` / `pi --help`；`~/.kimi-code/config.toml` 既有 hooks 实例；`~/.config/opencode/{agents,plugins}` GSD 样本；codex 官方包平台依赖（npm view optionalDependencies）。
-- 官方文档：Claude Code（同族 lineage + settings/hooks schema）；Kimi Code `llms-full.txt`（agents/skills 目录与 frontmatter 全表）；Codex `learn.chatgpt.com/docs/hooks`（hooks.json/事件/阻断/工具覆盖表）+ config-reference（multi_agent 工具族）+ 上游 issues #14579/#26828；OpenCode `opencode.ai/docs/plugins`（throw 阻断）与 `/docs/agents`（目录/frontmatter/派发）；pi 官方文档（npm 包内 docs/：extensions.md、skills.md、prompt-templates.md）。
+- 官方文档：Claude Code（同族 lineage + settings/hooks schema）；Kimi Code `llms-full.txt`（agents/skills 目录与 frontmatter 全表）；Codex `learn.chatgpt.com/docs/hooks`（hooks.json/事件/阻断/工具覆盖表）+ config-reference（multi_agent 工具族，搜索摘要口径）+ 上游 issues #14579/#26828；**codex agents/*.toml 形态=第三方指南（morphllm/proflead/firecrawl），官方页 404 未证实**；OpenCode `opencode.ai/docs/plugins`（throw 阻断）与 `/docs/agents`（目录/frontmatter/派发）；pi 官方文档（npm 包内 docs/：extensions.md、skills.md、prompt-templates.md）。
