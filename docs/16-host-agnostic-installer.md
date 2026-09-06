@@ -12,13 +12,19 @@
 
 ## 2. 宿主能力矩阵（harness 五项机制需求）
 
-| 机制 | 需求要点 | ZCode | Claude Code | Kimi Code | PI agent 等 |
+按宿主成行（⚠️=文档可见但未实测；未证实=无可靠资料，须先自查）：
+
+| 宿主 | 派发/子代理 | 可阻断 hooks | MCP | 技能 | 适配态 |
 |---|---|---|---|---|---|
-| Agent 派发/子代理 | 按名派发、回收末条消息 | ✅ 六角色实证 | ✅ subagents 同族机制（未实测） | ✅ AITrader 四角色 v1.2 实证；frontmatter 差异见 02 §3 映射表 | 未证实——用本矩阵自查 |
-| hooks 可阻断 | PreToolUse 级 exit/码阻断写入（guard 物理强制的前提） | ✅ exit 2 实测 | 同族 schema，高置信（未实测） | ✅ guard 机制源头在 Kimi；事件集不同（有 SubagentStop），payload 字段 `path`（guard 已双读） | 未证实 |
-| hooks 注册与优先级 | 用户级注册、覆盖行为可预期 | ✅ C2 实测（用户级覆盖项目级） | 需重验 | 需重验（C1/C2/C3 为 ZCode 结论，不可平移） | 未证实 |
-| MCP | 标准 MCP 客户端（basic-memory 工具无关） | ✅ | ✅ | ✅ | 未证实 |
-| 技能 | ~/.agents/skills 类扫描（或等价） | ✅ 与 Kimi 共扫 | ✅ skills 机制存在（路径形态待验） | ✅ | 未证实 |
+| **ZCode** | ✅ 六角色实证 | ✅ exit 2 实测；注册优先级 C2 实测 | ✅ | ✅ ~/.agents/skills 共扫 | **已适配**（六票实证） |
+| **Claude Code** | ✅ subagents 同族（未实测） | 同族 schema 高置信（未实测）；注册/优先级需重验 | ✅ | ✅ skills（路径形态待验） | 未适配（四步） |
+| **Kimi Code** | ✅ AITrader 四角色 v1.2 实证（frontmatter 见 02 §3） | ✅ guard 机制源头；事件集异（含 SubagentStop）、payload=`path`（guard 已双读）；C1/C2 类需重验 | ✅ | ✅ 与 ZCode 共扫 | 未适配（四步） |
+| **Codex (OpenAI)** | ⚠️ 无原生多角色派发（AGENTS.md 起源地 + prompts 机制，角色需借 prompts/单会话模拟） | ⚠️ 无 PreToolUse 型阻断——以 sandbox/approval 策略替代，guard 需改造为外挂检查或接受纪律降级 | ✅ config.toml | ✅ AGENTS.md + ~/.codex/prompts | 未适配（四步，hooks 面需重新设计） |
+| **OpenCode** | ⚠️ 内置 agents/权限模型（未实测） | ⚠️ 插件/事件系统存在，阻断语义待核验 | ✅ | ✅ AGENTS.md | 未适配（四步） |
+| **Pi Agent** | 未证实 | 未证实 | 未证实 | 未证实 | 用本矩阵自查后按四步 |
+| **DeepSeek Harness** | ✅ 框架宣称"一切皆插件"（plugin.json 可声明 agents） | ⚠️ 声明支持 hooks，阻断语义待实测 | ✅ 可声明 mcpServers | ✅ 可声明 skills/commands | 未适配（框架型宿主：适配=把六角色+guard 打包为其插件） |
+
+新宿主一律先查此矩阵——**标 ⚠️/未证实的项就是四步中②③的验证重点**；矩阵未列的宿主（新兴工具）按同一五机制自查后补行入表。
 
 **适配纪律**：新宿主接入 = ①按 02 §3 改写角色 frontmatter；②按其 hooks 文档重挂三正式脚本（guard 源码已双读 path/file_path）；③跑 07 手册第 6 步三项验证（guard 阻断/记忆注入/gtr doctor）——**项目侧 marker（`.zcode/memory-project`）与 MCP 注册路径在异宿主下的落点是适配器职责，③的注入验证会暴露此类差异**；④C1/C2 类行为重验并在 08 附录补记。**未走完①–④前，该宿主按"未适配"对待。**
 

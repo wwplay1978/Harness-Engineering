@@ -51,6 +51,10 @@ const HOST_CANDIDATES = [
   { name: 'zcode', dirs: [join(HOME, '.zcode')], config: join(HOME, '.zcode', 'cli', 'config.json'), adapted: '已适配（六票实证，C1/C2/C3 结论见 08）' },
   { name: 'claude-code', dirs: [join(HOME, '.claude'), join(HOME, '.claude.json')], config: join(HOME, '.claude', 'settings.json'), adapted: '未适配（同族 schema，按 docs/16 §2 四步重验）' },
   { name: 'kimi-code', dirs: [join(HOME, '.kimi-code'), join(HOME, '.kimicode')], config: null, adapted: '未适配（AITrader 基座实证，frontmatter 见 02 §3）' },
+  { name: 'codex', dirs: [join(HOME, '.codex')], config: join(HOME, '.codex', 'config.toml'), adapted: '未适配（hooks 面以 sandbox/approval 为主，guard 需重设计，见 16 §2）' },
+  { name: 'opencode', dirs: [join(HOME, '.config', 'opencode'), join(HOME, '.opencode')], config: null, adapted: '未适配（agents/权限模型与阻断语义待核验，见 16 §2）' },
+  { name: 'pi-agent', dirs: [join(HOME, '.pi')], config: null, adapted: '未证实——按 docs/16 §2 矩阵自查后四步' },
+  { name: 'deepseek-harness', dirs: [], config: null, adapted: '未适配（框架型宿主不驻留用户目录，探测恒"未发现"属预期；适配=打包为其插件，见 16 §2）' },
 ];
 out.hosts = [];
 for (const h of HOST_CANDIDATES) {
