@@ -1,8 +1,7 @@
 # 01 · Harness Engineering 理念与总体架构
 
-> 来源：腾讯技术工程《驾驭AI Coding：一份面向团队的 Harness Engineering 落地规范》（2026）
-> 原文：https://mp.weixin.qq.com/s/g4nTfxm7ebzRwkAVIGdIbg
-> 概念源头：OpenAI《Harness Engineering: Leveraging Codex in an Agent-First World》（2026-02）
+> 来源：OpenAI《Harness Engineering: Leveraging Codex in an Agent-First World》（2026-02）
+> 原文：https://openai.com/index/harness-engineering/
 
 ## 1. 核心理念
 

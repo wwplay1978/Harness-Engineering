@@ -6,7 +6,7 @@
 ## 一句话体系
 
 **Agent = Model + Harness。** 模型不可控，Harness 可控——把"好代码"标准写进系统里，让 AI 在约束下自己干活；流水的工具，铁打的规范。
-理念来源：腾讯技术工程《驾驭AI Coding：一份面向团队的 Harness Engineering 落地规范》（[原文](https://mp.weixin.qq.com/s/g4nTfxm7ebzRwkAVIGdIbg)）
+理念来源：OpenAI《Harness Engineering: Leveraging Codex in an Agent-First World》（[原文](https://openai.com/index/harness-engineering/)）
 
 ## 文档导航
 
