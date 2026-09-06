@@ -6,6 +6,8 @@ English | [中文](README.zh.md)
 
 This repository is a **battle-tested, host-agnostic harness specification + installer toolkit**: a six-role agent pipeline (planner → developer → code-reviewer → qa-tester → red-teamer → archiver), physical write-isolation guardrails, three-layer memory (basic-memory / hindsight / Obsidian), an executable audit spec, and a three-phase installer (detect → install → adapt) that can be driven end-to-end by an AI agent with a human only for elevation, GUI installs, credentials, and decisions.
 
+> **Core philosophy: humans steer, agents execute.**
+
 > Validated in a real pilot project: 6 tickets end-to-end, 0 implementation defects found in QA, adversarial red-team hits with zero overlap vs. review+QA, independent harness audit baseline 93/100 (A).
 
 ---

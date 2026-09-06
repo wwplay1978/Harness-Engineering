@@ -2,11 +2,13 @@
 
 [English](README.md) | 中文
 
-**Agent = Model + Harness（智能体 = 模型 + 线束）。** 模型每季度都在换，你的工程标准不该跟着换。Harness Engineering 把"好代码"从模型的属性变成**系统的属性**——围绕任意 AI coding 智能体，构建一套可版本化、可度量、自我改进的线束（harness）。
+**Agent = Model + Harness（智能体 = 模型 + 驾驭）。** 模型每季度都在换，你的工程标准不该跟着换。Harness Engineering 把"好代码"从模型的属性变成**系统的属性**——围绕任意 AI coding 智能体，构建一套可版本化、可度量、自我改进的 Harness（驾驭）。
 
-本仓库是一套**经真实项目验证的、宿主无关的 harness 规范 + 安装器工具包**：六角色智能体流水线（planner → developer → code-reviewer → qa-tester → red-teamer → archiver）、物理级写入隔离防线、三层记忆（basic-memory / hindsight / Obsidian）、可执行的审计规范，以及三段式安装器（检测 → 安装 → 适配）——全程可由 AI 智能体代跑，人只处理提权、GUI 安装、凭据与决策四类事项。
+> **核心哲学：人类掌舵，智能体执行。**
 
-> 试点实证：6 张工单端到端闭环、QA 实现缺陷 0、红队对抗命中与 review+QA 零重叠、独立 harness 审计基线 93/100（A）。
+本仓库是一套**经真实项目验证的、宿主无关的 Harness Engineering 规范 + 安装器工具包**：六角色智能体流水线（planner → developer → code-reviewer → qa-tester → red-teamer → archiver）、物理级写入隔离防线、三层记忆（basic-memory / hindsight / Obsidian）、可执行的审计规范，以及三段式安装器（检测 → 安装 → 适配）——全程可由 AI 智能体代跑，人只处理提权、GUI 安装、凭据与决策四类事项。
+
+> 试点实证：6 张工单端到端闭环、QA 实现缺陷 0、红队对抗命中与 review+QA 零重叠、独立 harness-audit 审计基线 93/100（A）。
 
 ---
 
@@ -18,15 +20,15 @@ AI coding 对个人很好用——一旦到团队（或第二台机器、或下�
 - 质量是模型当天的心情。模型升级会悄悄改变行为，没有任何一道门说"这算完成"。
 - 同样的坑反复踩：聊天记录当文档、"看着对"当评审、嗓门大的提示词说了算。
 
-Harness Engineering 的回答（呼应 OpenAI 的智能体优先实地报告，见[参考文献](#参考文献)）：把 AI 当成**可被规则约束、可被度量反馈的工程单元**，用你拥有的线束包住它——
+Harness Engineering 的回答（呼应 OpenAI 的智能体优先实地报告，见[参考文献](#参考文献)）：把 AI 当成**可被规则约束、可被度量反馈的工程单元**，用你拥有的 Harness（驾驭）包住它——
 
-- 模型不可控，线束可控；
+- 模型不可控，Harness 可控；
 - 规则、技能与工具访问活在**版本化仓库**里，不在谁的聊天窗口里；
 - 每个变更走 Spec → Code → Review → QA → 对抗审查 → **人合并** → 归档，证据全部落盘。
 
 ## 什么是 Harness Engineering？
 
-线束是 LLM 与"可治理的高效编码"之间的工程层，六大支柱：
+Harness（驾驭）是 LLM 与"可治理的高效编码"之间的工程层，六大支柱：
 
 | 支柱 | 本项目的落地 |
 |---|---|
@@ -111,7 +113,7 @@ Harness-Engineering/
 
 ## 参考文献
 
-- [Harness Engineering: Leveraging Codex in an Agent-First World](https://openai.com/index/harness-engineering/)（OpenAI）——智能体优先的实地报告：为期五个月的实验，人做线束工程师（harness engineer）、智能体写代码
+- [Harness Engineering: Leveraging Codex in an Agent-First World](https://openai.com/index/harness-engineering/)（OpenAI）——智能体优先的实地报告：为期五个月的实验，人做 harness engineer（驾驭工程师）、智能体写代码
 - [hindsight (vectorize.io)](https://github.com/vectorize-io/hindsight) · [basic-memory](https://github.com/basicmachines-co/basic-memory) · [git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner)——关键开源组件
 
 ## 许可证
