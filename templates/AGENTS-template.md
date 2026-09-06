@@ -71,6 +71,6 @@ planner → developer → code-reviewer → qa-tester → code-reviewer（增量
 
 ## 文档地图（渐进披露，按需读取）
 
-- 规范总纲与记忆/评估/约束设计：`C:\Forex\Project\Zcode_T1\docs\`（harness 仓库）
+- 规范总纲与记忆/评估/约束设计：harness 规范仓库 `<REPO>/docs/`（默认建议 `C:\Forex\Project\Harness-Engineering`，按实际 clone 位填写）
 - 本项目工件：`docs/specs/`（规格） `docs/tickets/`（票据） `docs/reviews/`（diff 快照与审查） `docs/changes/`（变更隔离） `docs/audits/`（harness-audit 报告） `docs/metrics.md`（度量）
 - `CONTEXT.md`（项目根，planner 的 grill-with-docs 产出，存在时；guard 白名单放行该文件）

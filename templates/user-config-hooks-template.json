@@ -1,5 +1,5 @@
 {
-  "_readme": "用户级 hooks 配置模板（~/.zcode/cli/config.json 的 hooks 段；全项目通用一次部署，2026-09-02 已按此部署）。实际部署时：hindsight 四条用绝对路径（Python 与脚本路径见 ~/.zcode/hooks/hindsight/）；三正式脚本路径指向 Zcode_T1 仓库 .zcode/hooks/（执行位，人工自 templates/hooks/ 同步——sync-harness.mjs 对此只报告不代写，防 AI 换掉运行中的 guard）；guard 靠白名单防跨项目泄漏（非团队项目静默放行）。与 hindsight 插件的 config 合并时保持事件分组结构。本模板省略 hindsight 四条（由 hindsight-zcode 安装器注册），只展示三正式脚本的注册形态。",
+  "_readme": "用户级 hooks 配置模板（~/.zcode/cli/config.json 的 hooks 段；全项目通用一次部署）。实际部署时：①三处 __HARNESS__ 替换为 harness 仓库绝对路径（正斜杠，即 .zcode/hooks/ 执行位所在——该执行位由人工自本仓库 templates/hooks/ 复制创建，sync-harness.mjs 对此只报告不代写，防 AI 换掉运行中的 guard）；②hindsight 四条用绝对路径（由 hindsight-zcode 安装器注册，本模板省略）；guard 靠白名单防跨项目泄漏（非团队项目静默放行）。与 hindsight 插件的 config 合并时保持事件分组结构。",
   "hooks": {
     "enabled": true,
     "events": {
@@ -9,7 +9,7 @@
           "hooks": [
             {
               "type": "command",
-              "command": "node \"C:/Forex/Project/Zcode_T1/.zcode/hooks/guard-worktree.mjs\"",
+              "command": "node \"__HARNESS__/.zcode/hooks/guard-worktree.mjs\"",
               "timeout": 5,
               "statusMessage": "写入隔离检查"
             }
@@ -21,7 +21,7 @@
           "hooks": [
             {
               "type": "command",
-              "command": "node \"C:/Forex/Project/Zcode_T1/.zcode/hooks/inject-memory.mjs\"",
+              "command": "node \"__HARNESS__/.zcode/hooks/inject-memory.mjs\"",
               "timeout": 10,
               "statusMessage": "团队记忆注入"
             }
@@ -31,7 +31,7 @@
           "hooks": [
             {
               "type": "command",
-              "command": "node \"C:/Forex/Project/Zcode_T1/.zcode/hooks/report-worktrees.mjs\"",
+              "command": "node \"__HARNESS__/.zcode/hooks/report-worktrees.mjs\"",
               "timeout": 10,
               "statusMessage": "分支状态检查（待合并/待归档）"
             }

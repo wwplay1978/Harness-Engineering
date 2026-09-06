@@ -22,10 +22,10 @@
 
 | 事项 | 说明 |
 |---|---|
-| **复制什么** | **Zcode_T1 整仓**（`docs/` + `templates/` + `memory/` + `.zcode/`）——S4/S5 要用 templates 全家（六角色/hooks 源/AGENTS 模板/config 模板/路由表/skill/工具脚本）与 `.zcode/hooks/` 执行位副本；**不要自行裁剪**"只拷部分文件" |
-| **放到哪** | 建议固定 `C:\Forex\Project\Zcode_T1`（与既有文档默认一致）；放别处也行，**记下绝对路径**——它就是提示词里的第一个占位符 |
-| **怎么复制** | 两种等价：① 有 git：`git clone <你的 Zcode_T1 远端> C:\Forex\Project\Zcode_T1`；② 无远端/无 git：源机整目录压缩 → U 盘/局域网拷贝 → 目标机解压（`.git` 可留可去：留=带历史可续接，去=更轻） |
-| **完成校验** | 目标机该目录下能看到三个标志物即整仓在位：`docs\16-host-agnostic-installer.md`、`templates\installer\check-env.cmd`、`templates\agents\`（六个角色 .md） |
+| **怎么获取** | git 在位时一条命令：`git clone https://github.com/wwplay1978/Harness-Engineering.git /c/Forex/Project/Harness-Engineering`；无 git：任意机器浏览器打开该仓库 → Code → Download ZIP → 解压到同一位置 |
+| **放到哪** | 建议固定 `/c/Forex/Project/Harness-Engineering`（本文所有示例路径按此写死）；放别处也行，**记下绝对路径并同步改下文所有示例**——它就是提示词里的第一个占位符（REPO） |
+| **复制什么** | **整仓即可**（`docs/` + `templates/`）——S4/S5 要用 templates 全家（六角色/hooks 源/AGENTS 模板/config 模板/路由表/skill/工具脚本）；**不要自行裁剪**"只拷部分文件"。ZCode 宿主的 hooks 执行位（`<REPO>/.zcode/hooks/`）公开仓不带，稍后由人工按 07 第 0 步从 `templates/hooks/` 复制创建 |
+| **完成校验** | 目标机该目录下能看到三个标志物即仓库在位：`docs\16-host-agnostic-installer.md`、`templates\installer\check-env.cmd`、`templates\agents\`（六个角色 .md） |
 
 （若已有目标项目，目录同样先就位并记下绝对路径=第二个占位符；暂无项目则提示词里填"暂无，先装全局件"。）
 
@@ -49,7 +49,7 @@
 
 ### 2.5.4 发送
 
-1. 在目标机用宿主 AI 工具打开会话，**工作目录切到 REPO 根**（如 ZCode：在 `C:\Forex\Project\Zcode_T1` 目录下开会话）；
+1. 在目标机用宿主 AI 工具打开会话，**工作目录切到 REPO 根**（按 2.5.1 默认即 `C:\Forex\Project\Harness-Engineering` 目录下开会话）；
 2. 复制 §3 提示词全文，**替换两处占位符**（REPO 绝对路径、目标项目路径）；
 3. 粘贴发送。之后节奏由 agent 按 S0–S8 推进，人只按分工表应答。
 
@@ -58,7 +58,7 @@
 ```text
 角色：Harness 安装助手（宿主无关：ZCode / Claude Code / Kimi Code 等任何具备文件读写与终端执行能力的 AI agent 皆可）。
 
-背景：本机要接入六角色 Harness 工程化体系（规范仓库已就位于本机：<Zcode_T1 仓库在本机的绝对路径>，下称 REPO；若本提示词由人从别处复制而来且 REPO 尚未就位，先指导人 clone/复制仓库再继续）。目标项目：<目标项目根目录，没有就填"暂无，先装全局件">。
+背景：本机要接入六角色 Harness 工程化体系（规范仓库已就位于本机：<REPO 在本机的绝对路径，按 §2.5.1 默认即 C:\Forex\Project\Harness-Engineering>，下称 REPO；若本提示词由人从别处复制而来且 REPO 尚未就位，先指导人按 §2.5.1 clone 仓库再继续）。目标项目：<目标项目根目录，没有就填"暂无，先装全局件">。
 
 开工前按序精读（读完复述三段式流程与分工原则给我确认）：
 1. REPO/docs/16-host-agnostic-installer.md（三段式：检测→安装→适配；宿主能力矩阵；组件×缺失适配矩阵）
@@ -79,7 +79,7 @@ S4 宿主配置：**仅当宿主为 ZCode（唯一已适配宿主）**——①�
 S5 项目接入（**仅当宿主为 ZCode**——07 手册六步全是 ZCode 路径：.zcode/config.json、.zcode/memory-project marker、inject-memory 读 marker）：config 模板复制与 PROJECTNAME 替换、AGENTS 模板落位（见分工表宪法行：你只给复制命令与模板内容，**复制与补项目信息由我执行**——AGENTS.md 只能人改，首次落位也不例外）、basic-memory 登记 + marker、git 入库、三项快速验证。若目标宿主非 ZCode：S5 降级为"记录项目接入待办（该宿主装机适配未完成——适配包与验证清单见 docs/18，07 六步的 .zcode 路径须按宿主落点改写）"，不复制 .zcode 结构。
 S6 阶段三适配：逐条落实 adaptation-plan.md（宪法条款开关/hooks 注册集/MCP 段/archiver SOP 步骤）；宪法类改动全部走"diff→批准"。
 S7 最终验证与验收单：07 第 6 步三项（gtr doctor / guard 模拟 exit=2 / 记忆注入）+ hindsight /health +（若装了 sync CLI）首次 reconcile 冒烟——**量大时注意 LLM 429 限流（03 §4.2 注 5：按目录分批 --include 或接受后台异步抽取）**；全部由你执行并逐项判定；**先重跑 check-env 得到最终 profile（S1 时 hooks 未注册会偏低，S4 注册后重测才准）**；通过后输出《安装验收单》：最终 profile、组件与防线注册态清单、每项验证的证据、遗留项与建议。
-S8 收尾回灌：把过程中新踩的坑按 REPO/docs/08 风格拟 1-2 条候选回灌条目（我不一定采纳），并提醒我将变更同步回 Zcode_T1 仓库。
+S8 收尾回灌：把过程中新踩的坑按 REPO/docs/18 §8 风格拟 1-2 条候选回灌条目（我不一定采纳），并提醒我把变更提交回 REPO 的远端仓库（自己的 fork 直接 push；无写权限则整理成 issue 或 PR 给原仓 wwplay1978/Harness-Engineering）。
 
 现在从 S0 开始。
 ```

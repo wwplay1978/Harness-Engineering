@@ -1,4 +1,4 @@
-// sync-harness.mjs — N11 规范分发自动化（Zcode_T1 templates/ → 用户域部署位）
+// sync-harness.mjs — N11 规范分发自动化（REPO templates/ → 用户域部署位）
 // 用法：
 //   node templates/tools/sync-harness.mjs            默认 --check：只读报告（有漂移 exit 1）
 //   node templates/tools/sync-harness.mjs --apply    同步【自动集】到用户域（写后回读校验）
@@ -33,7 +33,7 @@ const SYNC = [
 
 // ── hooks 执行位（只报告）+ 三正式注册（只报告）──────────────────
 const HOOKS = ['guard-worktree', 'inject-memory', 'report-worktrees'];
-const PROJECTS = ['C:/Forex/Project/web2api'];
+const PROJECTS = [];   // 新项目接入后把项目根路径加入此处（一行一个，正斜杠），该项目的结构盘点随跑随报
 
 let drift = 0, applied = 0, rolesOrModelsChanged = false;
 console.log(apply ? '== APPLY（写入用户域）==' : '== CHECK（默认只读；--apply 才写入）==');

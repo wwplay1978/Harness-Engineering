@@ -39,7 +39,7 @@ adapters/
 
 | 形态 | 宿主 | 阻断语义 | 载体 |
 |---|---|---|---|
-| stdin/exit 2（原版） | claude-code / kimi-code / codex | exit 2 + stderr gtr 指引 | 复用 `templates/hooks/guard-worktree.mjs`（Zcode_T1 `.zcode/hooks/` 执行位） |
+| stdin/exit 2（原版） | claude-code / kimi-code / codex | exit 2 + stderr gtr 指引 | 复用 `templates/hooks/guard-worktree.mjs`（REPO 的 `.zcode/hooks/` 执行位，人工自 templates/hooks/ 同步） |
 | 插件 throw | opencode | `tool.execute.before` 内 `throw new Error` | `adapters/opencode/plugins/harness-guard.js` |
 | 扩展 block | pi-agent | `pi.on("tool_call")` 返回 `{block:true, reason}` | `adapters/pi-agent/extensions/harness-guard.ts` |
 

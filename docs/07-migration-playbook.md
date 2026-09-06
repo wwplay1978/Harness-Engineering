@@ -8,7 +8,11 @@
 ## 第 -1 步：环境检测（新电脑 / 新宿主必跑；已就绪机器可跳过）
 
 ```bash
-cmd //c "C:\Forex\Project\Zcode_T1\templates\installer\check-env.cmd" --project <目标项目根>
+# 首次：把本仓库 clone 到本机（下文所有 HARNESS= 均指向它；已 clone 过可跳过）
+git clone https://github.com/wwplay1978/Harness-Engineering.git /c/Forex/Project/Harness-Engineering
+
+cd /c/Forex/Project/Harness-Engineering
+cmd //c templates\\installer\\check-env.cmd    # 可选参数：--project <目标项目根> --vault <vault路径>
 # 或（node 已在 PATH 时直接）：node templates/installer/check-env.mjs --vault <vault路径> --project <项目根>
 ```
 
@@ -38,7 +42,7 @@ cmd //c "...\templates\installer\install-hindsight-service.cmd" --rehearse hinds
 ## 第 1 步：复制团队机制目录到新项目
 
 ```bash
-HARNESS=/c/Forex/Project/Zcode_T1
+HARNESS=/c/Forex/Project/Harness-Engineering   # 本仓库 clone 位（下同；克隆到别处则全部同步替换）
 NEW=/c/Forex/project/改成新项目目录名   # ← 本块唯一需要改的行（改完再整段粘贴）
 if [ ! -d "$NEW" ]; then echo "⚠️ 目录不存在：$NEW（全新项目先：mkdir -p \"$NEW\" && cd \"$NEW\" && git init -b main）"; exit 1; fi
 cd "$NEW" && git rev-parse --git-dir >/dev/null 2>&1 || { echo "⚠️ 请先 git init（全新项目：git init -b main）"; exit 1; }
@@ -46,14 +50,14 @@ git rev-parse --verify main >/dev/null 2>&1 || { echo "⚠️ 默认分支必须
 mkdir -p .zcode docs/specs docs/tickets docs/reviews docs/changes
 cp "$HARNESS/templates/zcode-config-template.json" .zcode/config.json
 # 注（2026-09-06 C2 对齐）：hooks 不复制到项目——hooks 一律用户级（第 0 步），项目级同事件被覆盖丢弃；
-# 三正式脚本由用户级 config 直接执行 Zcode_T1 仓库内副本（.zcode/hooks/），项目无需任何 hook 文件
+# 三正式脚本由用户级 config 直接执行 harness 仓库内副本（$HARNESS/.zcode/hooks/，人工自 templates/hooks/ 同步——见第 0 步），项目无需任何 hook 文件
 ls .zcode/ docs/ && echo OK
 ```
 
 ## 第 2 步：生成工作区 AGENTS.md（索引式，≤100 行）
 
 ```bash
-HARNESS=/c/Forex/Project/Zcode_T1
+HARNESS=/c/Forex/Project/Harness-Engineering   # 与第 1 步保持一致
 NEW=/c/Forex/project/改成新项目目录名   # ← 与第 1 步保持一致
 cp "$HARNESS/templates/AGENTS-template.md" "$NEW/AGENTS.md"
 # 然后人工编辑：填项目名、技术栈、构建/测试命令、目录约定（10 分钟）
@@ -93,7 +97,7 @@ hindsight 侧（Phase 2 起）：确认 `HINDSIGHT_DYNAMIC_BANK_ID=true` 生效�
 ```bash
 NEW=/c/Forex/project/改成新项目目录名   # ← 与前面步骤保持一致
 cd "$NEW" && git add .zcode docs AGENTS.md memory && \
-git commit -m "feat: harness engineering mechanism (from Zcode_T1 templates)" && git status --short
+git commit -m "feat: harness engineering mechanism (from Harness-Engineering templates)" && git status --short
 # 预期：提交成功，status 无输出
 ```
 
@@ -104,9 +108,9 @@ NEW=/c/Forex/project/改成新项目目录名   # ← 与前面步骤保持一�
 PROJ=$(basename "$NEW" | tr 'A-Z' 'a-z')   # 本块自足声明（每块可独立执行）
 # ① gtr 自检（必绿）
 cd "$NEW" && git gtr doctor | tail -3
-# ② guard 模拟触发（预期：阻断提示 + exit=2；脚本用用户级注册的 Zcode_T1 执行位副本；
+# ② guard 模拟触发（预期：阻断提示 + exit=2；脚本用用户级注册的 harness 仓库执行位副本；
 #    cwd 必须用 Windows 形态 cygpath -m）
-HARNESS=/c/Forex/Project/Zcode_T1
+HARNESS=/c/Forex/Project/Harness-Engineering   # 与第 1 步保持一致
 echo "{\"cwd\":\"$(cygpath -m "$NEW")\",\"tool_input\":{\"path\":\"src/x.js\"}}" | node "$HARNESS/.zcode/hooks/guard-worktree.mjs"; echo "exit=$?"
 # ③ 记忆注入验证：先造数据再测——空库输出为空无法区分"正常"与"hook 失效"（防假绿）
 basic-memory tool write-note --title "verify-01" --folder decisions "迁移验证条目" --project "$PROJ" >/dev/null 2>&1
@@ -120,8 +124,8 @@ echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node "$
 角色/技能/生成器/路由表修订合入本仓库后，一条命令分发到用户域（新项目接入前也建议先跑 `--check` 体检）：
 
 ```bash
-node /c/Forex/Project/Zcode_T1/templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1）
-node /c/Forex/Project/Zcode_T1/templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
+node /c/Forex/Project/Harness-Engineering/templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1）
+node /c/Forex/Project/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
 ```
 
 - **自动集**：六角色 base、harness-audit 技能、变体生成器、models.config.json——源=templates/（git 版本化），用户域均为部署副本
@@ -138,7 +142,7 @@ node /c/Forex/Project/Zcode_T1/templates/tools/sync-harness.mjs --apply  # 同�
 | 软件/插件/技能/角色文件 | 用户域（`~/.zcode/`、`~/.agents/`、uv tools、npm -g） | 一次 |
 | hindsight 服务 + Obsidian 同步 | 用户域全局服务 | 一次（Phase 2） |
 | AGENTS.md / .zcode/config.json / docs/ 结构 / memory/ | 目标项目 | 每项目（本手册六步） |
-| 规范修订 | 本仓库（Zcode_T1）→ `sync-harness.mjs --apply` 再分发（hooks 执行位人工，见上节） | 变更时 |
+| 规范修订 | 本仓库（REPO，即 Harness-Engineering clone）→ `sync-harness.mjs --apply` 再分发（hooks 执行位人工，见上节） | 变更时 |
 
 ## 最小可用变体
 
