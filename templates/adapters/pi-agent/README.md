@@ -16,8 +16,8 @@
 - ✅ 技能：pi 实现 Agent Skills 标准，扫 `~/.pi/agent/skills/` **与 `~/.agents/skills/`**（与 ZCode/Kimi 共享，零成本）+ 项目 `.pi/skills/`、`.agents/skills/`。
 - ✅ 上下文：原生发现并加载 AGENTS.md / CLAUDE.md（`--no-context-files` 才关闭）。
 - ✅ 提示词模板：全局 `~/.pi/agent/prompts/*.md`，文件名即 `/命令`，frontmatter 仅 `description`（+可选 argument-hint）。
-- ⚠️ 装机验证项：tool_call 事件里 write/edit 的路径字段名（官方示例只见 `event.input.command`）；`ctx.cwd` 字段名；`bash` 工具的写路径是否需要单独拦（当前与 .mjs 同口径：只拦写文件工具）。
-- ⚠️ MCP/记忆面：pi 的 MCP 支持未在 N18 核验（文档集中 extensions/providers/packages）——basic-memory/hindsight 接入列为装机验证项；缺省降级为"角色文件开工必检条款 + Obsidian 直读"。
+- ⚠️ 装机验证项（2026-09-07 双确认后收窄）：`bash` 工具的写路径是否需要单独拦（当前与 .mjs 同口径：只拦写文件工具）；guard 扩展实拦冒烟。~~路径字段名/ctx.cwd~~ 已官方实证（`event.input.path` + `ctx.cwd`，官方示例 protected-paths.ts 与本仓 harness-guard.ts 逐点吻合）。
+- **MCP 定论（官方明示无内置 MCP——usage.md "intentionally does not include built-in MCP"）**：basic-memory/hindsight MCP 面不可用闭案，记忆面=角色开工必检条款 + Obsidian 直读（定论，非待验证项）。
 
 ## 安装步骤
 

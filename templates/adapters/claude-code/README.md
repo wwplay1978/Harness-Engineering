@@ -19,7 +19,7 @@
 
 ## 安装步骤（agent 可代做 vs 人闸）
 
-1. 【agent】`node templates/adapters/build-adapters.mjs` → 复制 `dist/claude-code/agents/*.md` 到 `~/.claude/agents/`。
+1. 【agent】`node templates/adapters/build-adapters.mjs` → 复制 `dist/claude-code/agents/*.md` 到 `~/.claude/agents/`；**复制技能**（subagent `skills` 字段全文预载的前提）：`mkdir -p ~/.claude/skills && cp -r ~/.agents/skills/{grill-with-docs,to-spec,to-tickets,wayfinder,code-review,tdd,diagnosing-bugs} ~/.claude/skills/`（本机无 `~/.agents/skills` 时从 REPO 侧技能包取，缺技能则先删角色文件里的 `skills:` 字段再派发，防告警）。
 2. 【人闸】把 `hooks-settings-snippet.json` 的 `hooks` 键并入 `~/.claude/settings.json`（已有 hooks 按事件合并）；`__HARNESS__` 替换为 harness 仓库绝对路径（正斜杠）。
 3. 【agent】payload 探针：临时把 guard 命令换成 `node __HARNESS__/templates/hooks/probe-payload.mjs`，在会话里做一次 Write，确认 stdin JSON 含 `cwd`、`tool_input.file_path`（guard 双读 file_path/path，理论上零改动），换回 guard。
 
