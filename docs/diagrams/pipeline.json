@@ -315,14 +315,29 @@
       "from": "qa",
       "to": "fix",
       "label": "缺陷退回",
-      "role": "error"
+      "role": "error",
+      "fromSide": "right",
+      "toSide": "right",
+      "variant": "dashed",
+      "via": [
+        [
+          770,
+          367
+        ],
+        [
+          770,
+          243
+        ]
+      ],
+      "labelSegment": 1
     },
     {
       "id": "fix-reviewer",
       "from": "fix",
       "to": "reviewer",
       "label": "复审",
-      "role": "branch"
+      "role": "branch",
+      "variant": "dashed"
     },
     {
       "id": "fix-escalate",
