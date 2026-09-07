@@ -45,9 +45,9 @@ Work flows through **Plan → Code → Deliver → Archive (+ knowledge retentio
 
 The pipeline — six roles, one ticket, from spec to archive (full detail in [`docs/02`](docs/02-team-core.md)):
 
-[![Six-role pipeline](docs/diagrams/pipeline-light.png)](docs/diagrams/pipeline.html)
+[![Six-role pipeline](docs/diagrams/pipeline-light.png)](https://pages.20081005.xyz/pipeline.html)
 
-**See it move**: [`docs/diagrams/pipeline.html`](docs/diagrams/pipeline.html) is the interactive, animated version — a self-contained HTML that plays a Live trace of one ticket's journey through all six roles, with Light/Dark toggle (`?theme=light`), pan/zoom, search, and guided chapters. GitHub shows it as source; open it locally after cloning. [All diagrams →](docs/diagrams/)
+**See it move**: the animated diagram is [live-hosted here](https://pages.20081005.xyz/pipeline.html) — click the image above to open the interactive version in your browser: it plays a Live trace of one ticket's journey through all six roles, with Light/Dark toggle (`?theme=light`), pan/zoom, search, and guided chapters. The same self-contained files also ship in this repo under [`docs/diagrams/`](docs/diagrams/) — clone and open locally if you prefer.
 
 Core disciplines:
 
@@ -79,9 +79,9 @@ templates/installer/install-hindsight-service.cmd --rehearse   # dry-run before 
 
 ## Architecture & design highlights
 
-[![System architecture](docs/diagrams/architecture-light.png)](docs/diagrams/architecture.html)
+[![System architecture](docs/diagrams/architecture-light.png)](https://pages.20081005.xyz/architecture.html)
 
-Interactive version: [`docs/diagrams/architecture.html`](docs/diagrams/architecture.html) — the human contract, host layer, six-role pipeline, physical write isolation, four-layer memory, and the spec feedback loop, with theme toggle, focus/search, and guided chapters.
+Interactive version: [live-hosted here](https://pages.20081005.xyz/architecture.html) — the human contract, host layer, six-role pipeline, physical write isolation, four-layer memory, and the spec feedback loop, with theme toggle, focus/search, and guided chapters.
 
 ```
 Harness-Engineering/

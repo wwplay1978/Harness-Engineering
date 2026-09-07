@@ -2,6 +2,8 @@
 
 风格统一、Light/Dark 双主题的交互式体系图，均为**零依赖单文件 HTML**（下载后双击即开）。
 
+**在线版（自建静态站）**：[architecture.html](https://pages.20081005.xyz/architecture.html) · [pipeline.html](https://pages.20081005.xyz/pipeline.html)（打开后点「动态」播放流水线 trace 动画）
+
 | 文件 | 内容 | 特性 |
 |---|---|---|
 | [`architecture.html`](architecture.html) | 体系总体架构：人机契约、宿主层、六角色、物理写入隔离、四层记忆、规范反馈环 | 主题切换、缩放平移、搜索聚焦、引导章节 |

@@ -45,9 +45,9 @@ Harness（驾驭）是 LLM 与"可治理的高效编码"之间的工程层，六
 
 流水线全貌——六角色、一张工单、从 spec 到归档（详见 [`docs/02`](docs/02-team-core.md)）：
 
-[![六角色流水线](docs/diagrams/pipeline-light.png)](docs/diagrams/pipeline.html)
+[![六角色流水线](docs/diagrams/pipeline-light.png)](https://pages.20081005.xyz/pipeline.html)
 
-**动起来看**：[`docs/diagrams/pipeline.html`](docs/diagrams/pipeline.html) 是交互式动画版——零依赖单文件 HTML，可播放 Live trace 动画逐棒点亮一票的完整旅程，支持 Light/Dark 主题切换（`?theme=light`）、缩放平移、搜索聚焦与引导章节。GitHub 页面显示的是源码，clone 或下载后本地打开即为完整效果。[全部图表 →](docs/diagrams/)
+**动起来看**：动画版已[部署上线](https://pages.20081005.xyz/pipeline.html)——点击上图即可在浏览器打开交互版，播放 Live trace 动画逐棒点亮一张工单的完整旅程，支持 Light/Dark 主题切换（`?theme=light`）、缩放平移、搜索聚焦与引导章节。相同的零依赖单文件也随仓库发布在 [`docs/diagrams/`](docs/diagrams/)，clone 后本地打开亦可。
 
 核心纪律：
 
@@ -79,9 +79,9 @@ templates/installer/install-hindsight-service.cmd --rehearse   # 正式安装前
 
 ## 架构规划与优势设计
 
-[![体系总体架构](docs/diagrams/architecture-light.png)](docs/diagrams/architecture.html)
+[![体系总体架构](docs/diagrams/architecture-light.png)](https://pages.20081005.xyz/architecture.html)
 
-交互版：[`docs/diagrams/architecture.html`](docs/diagrams/architecture.html)——人机契约、宿主层、六角色流水线、物理写入隔离、四层记忆与规范反馈环，支持主题切换、聚焦搜索与引导章节。
+交互版：[已部署上线](https://pages.20081005.xyz/architecture.html)——人机契约、宿主层、六角色流水线、物理写入隔离、四层记忆与规范反馈环，支持主题切换、聚焦搜索与引导章节。
 
 ```
 Harness-Engineering/
