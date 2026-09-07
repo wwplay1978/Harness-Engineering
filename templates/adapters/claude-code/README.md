@@ -20,8 +20,8 @@
 ## 安装步骤（agent 可代做 vs 人闸）
 
 1. 【agent】`node templates/adapters/build-adapters.mjs` → 复制 `dist/claude-code/agents/*.md` 到 `~/.claude/agents/`；**复制技能**（subagent `skills` 字段全文预载的前提）：`mkdir -p ~/.claude/skills && cp -r ~/.agents/skills/{grill-with-docs,to-spec,to-tickets,wayfinder,code-review,tdd,diagnosing-bugs} ~/.claude/skills/`（本机无 `~/.agents/skills` 时从 REPO 侧技能包取，缺技能则先删角色文件里的 `skills:` 字段再派发，防告警）。
-2. 【人闸】把 `hooks-settings-snippet.json` 的 `hooks` 键并入 `~/.claude/settings.json`（已有 hooks 按事件合并）；`__HARNESS__` 替换为 harness 仓库绝对路径（正斜杠）。
-3. 【agent】payload 探针：临时把 guard 命令换成 `node __HARNESS__/templates/hooks/probe-payload.mjs`，在会话里做一次 Write，确认 stdin JSON 含 `cwd`、`tool_input.file_path`（guard 双读 file_path/path，理论上零改动），换回 guard。
+2. 【agent 准备 + 人闸执行】**部署执行位**：人工把 REPO `templates/hooks/` 三个 .mjs 复制到 `~/.claude/hooks/harness/`（用户域，2026-09-07 起不指向任何仓库目录）；**注册**：`hooks-settings-snippet.json` 的 `hooks` 键并入 `~/.claude/settings.json`（已有 hooks 按事件合并），三处 `__HOME__` 替换为展开后的用户主目录绝对路径（正斜杠，如 `C:/Users/you`；禁用 `~` 字面量——命令串不展开 tilde）。
+3. 【agent】payload 探针：临时把 guard 命令换成 `node __HARNESS__/templates/hooks/probe-payload.mjs`（`__HARNESS__`=harness 仓库绝对路径，仅本步使用），在会话里做一次 Write，确认 stdin JSON 含 `cwd`、`tool_input.file_path`（guard 双读 file_path/path，理论上零改动），换回 guard。
 
 ## 装机验证（对齐 07 第 6 步三项 + 宿主特有）
 

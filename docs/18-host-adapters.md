@@ -39,11 +39,11 @@ adapters/
 
 | 形态 | 宿主 | 阻断语义 | 载体 |
 |---|---|---|---|
-| stdin/exit 2（原版） | claude-code / kimi-code / codex | exit 2 + stderr gtr 指引 | 复用 `templates/hooks/guard-worktree.mjs`（Zcode_T1 `.zcode/hooks/` 执行位） |
+| stdin/exit 2（原版） | claude-code / kimi-code / codex | exit 2 + stderr gtr 指引 | 复用 `templates/hooks/guard-worktree.mjs`（部署位=各宿主用户域 hooks 目录 `~/.<宿主>/hooks/harness/`，2026-09-07 起不指向仓库目录） |
 | 插件 throw | opencode | `tool.execute.before` 内 `throw new Error` | `adapters/opencode/plugins/harness-guard.js` |
 | 扩展 block | pi-agent | `pi.on("tool_call")` 返回 `{block:true, reason}` | `adapters/pi-agent/extensions/harness-guard.ts` |
 
-白名单（`/docs/`、`/memory/`、`/context.md`、`/templates/`）、`root + '/'` 前缀判定（防兄弟 worktree 目录误判）、fail-open 语义、AGENTS.md 与宿主配置目录不可写（防自毁防线）逐字保持。
+白名单（`/docs/`、`/memory/`、`/context.md`、`/templates/`）、`root + '/'` 前缀判定（防兄弟 worktree 目录误判）、fail-open 语义、AGENTS.md 与宿主配置目录不可写（防自毁防线）逐字保持。**自防御条款（2026-09-07 三形态同步携带）**：SHIELD 表内路径（各宿主 hooks 执行位 + 注册文件，`homedir()` 运行时计算）无论 cwd 一律阻断——注册文件在用户域（仓库外），旧版 root 前缀逻辑对其不设防（docs/05 §3、docs/08 回灌）。
 
 ### 1.3 三条纪律
 

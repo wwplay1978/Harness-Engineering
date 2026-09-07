@@ -1,5 +1,5 @@
 {
-  "_readme": "用户级 hooks 配置模板（~/.zcode/cli/config.json 的 hooks 段；全项目通用一次部署）。实际部署时：①三处 __HARNESS__ 替换为 harness 仓库绝对路径（正斜杠，即 .zcode/hooks/ 执行位所在——该执行位由人工自本仓库 templates/hooks/ 复制创建，sync-harness.mjs 对此只报告不代写，防 AI 换掉运行中的 guard）；②hindsight 四条用绝对路径（由 hindsight-zcode 安装器注册，本模板省略）；guard 靠白名单防跨项目泄漏（非团队项目静默放行）。与 hindsight 插件的 config 合并时保持事件分组结构。",
+  "_readme": "用户级 hooks 配置模板（~/.zcode/cli/config.json 的 hooks 段；全项目通用一次部署）。部署两步（均人闸，docs/05 §3）：①脚本部署——人工把 templates/hooks/ 三个 .mjs 复制到 ~/.zcode/hooks/harness/（用户域执行位，2026-09-07 起不再指向任何仓库目录；sync-harness.mjs 对此只报告不代写，防 AI 换掉运行中的 guard）；②注册——把三处 __HOME__ 替换为展开后的用户主目录绝对路径（正斜杠，如 C:/Users/you；禁用 ~ 字面量——config 命令串不展开 tilde），并入本文件 hooks 段。hindsight 四条由 hindsight-zcode 安装器注册（本模板省略），合并时保持事件分组结构。guard 白名单防跨项目泄漏（非团队项目静默放行）；guard 自带自防御条款（SHIELD 表）阻断 Agent 写执行位/注册文件。",
   "hooks": {
     "enabled": true,
     "events": {
@@ -9,7 +9,7 @@
           "hooks": [
             {
               "type": "command",
-              "command": "node \"__HARNESS__/.zcode/hooks/guard-worktree.mjs\"",
+              "command": "node \"__HOME__/.zcode/hooks/harness/guard-worktree.mjs\"",
               "timeout": 5,
               "statusMessage": "写入隔离检查"
             }
@@ -21,7 +21,7 @@
           "hooks": [
             {
               "type": "command",
-              "command": "node \"__HARNESS__/.zcode/hooks/inject-memory.mjs\"",
+              "command": "node \"__HOME__/.zcode/hooks/harness/inject-memory.mjs\"",
               "timeout": 10,
               "statusMessage": "团队记忆注入"
             }
@@ -31,7 +31,7 @@
           "hooks": [
             {
               "type": "command",
-              "command": "node \"__HARNESS__/.zcode/hooks/report-worktrees.mjs\"",
+              "command": "node \"__HOME__/.zcode/hooks/harness/report-worktrees.mjs\"",
               "timeout": 10,
               "statusMessage": "分支状态检查（待合并/待归档）"
             }

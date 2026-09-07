@@ -20,7 +20,7 @@
 ## 安装步骤
 
 1. 【agent】`node templates/adapters/build-adapters.mjs` → 复制 `dist/kimi-code/agents/*.md` 到 `~/.kimi-code/agents/`。
-2. 【人闸】把 `hooks-config-toml-snippet.toml` 追加到 `~/.kimi-code/config.toml` 尾部；`__HARNESS__` 替换为 harness 仓库绝对路径（正斜杠）。
+2. 【agent 准备 + 人闸执行】**部署执行位**：人工把 REPO `templates/hooks/` 三个 .mjs 复制到 `~/.kimi-code/hooks/harness/`（用户域，2026-09-07 起不指向任何仓库目录）；**注册**：`hooks-config-toml-snippet.toml` 追加到 `~/.kimi-code/config.toml` 尾部，三处 `__HOME__` 替换为展开后的用户主目录绝对路径（正斜杠，如 `C:/Users/you`；禁用 `~` 字面量——命令串不展开 tilde）。
 3. 【agent】可用 `kimi doctor` 校验 config 合法性；payload 探针同 claude-code 步骤 3（Kimi 路径字段为 `tool_input.path`，guard 已双读）。
 
 ## 装机验证

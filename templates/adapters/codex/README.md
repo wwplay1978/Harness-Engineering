@@ -25,7 +25,7 @@
 ## 安装步骤
 
 1. 【agent】`node templates/adapters/build-adapters.mjs` → 复制 `dist/codex/agents/*.toml` 到 `~/.codex/agents/`（用户级），`dist/codex/prompts/*.md` 到 `~/.codex/prompts/`。
-2. 【人闸】`hooks-user-hooks.json` 写入/合并到 `~/.codex/hooks.json`；`__HARNESS__` 替换为 harness 仓库绝对路径（正斜杠）。
+2. 【agent 准备 + 人闸执行】**部署执行位**：人工把 REPO `templates/hooks/` 三个 .mjs 复制到 `~/.codex/hooks/harness/`（用户域，2026-09-07 起不指向任何仓库目录）；**注册**：`hooks-user-hooks.json` 写入/合并到 `~/.codex/hooks.json`，三处 `__HOME__` 替换为展开后的用户主目录绝对路径（正斜杠，如 `C:/Users/you`；禁用 `~` 字面量——命令串不展开 tilde）。
 3. 【agent】payload 探针（必做）：把 PreToolUse 命令临时换成 `node __HARNESS__/templates/hooks/probe-payload.mjs`，在会话里触发一次 apply_patch 与一次 Bash，回读探针输出确认 `cwd`/路径字段名，再换回 guard 并按需调整字段映射。
 
 ## 装机验证

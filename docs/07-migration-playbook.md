@@ -1,6 +1,7 @@
 # 07 · 项目迁移手册：新项目启用本 Harness 体系
 
 > **⚠️ 架构修订（2026-09-02，P0-3 实测结论 C2）**：hooks 一律部署在**用户级** `~/.zcode/cli/config.json`（同一事件用户级/项目级并存时项目级被覆盖丢弃——实测结论，见 08 文档 C2）。guard 防跨项目泄漏靠脚本白名单设计（非团队项目静默放行）。因此：**第 0 步含用户级 hooks 一次性部署；项目级 `.zcode/config.json` 只承载 MCP**。逐项目重复的只剩：目录结构、AGENTS.md、marker、basic-memory 登记。
+> **⚠️ 执行位修订（2026-09-07，落点修补）**：三正式脚本**执行位同步上收用户域** `~/.zcode/hooks/harness/`（人工自 `templates/hooks/` 复制），不再指向本仓库 clone 目录——仓库锚定执行位会随 clone 切分支/改名/删除波及全机。guard 另带自防御条款：Agent 写执行位/注册文件无论 cwd 一律阻断（05 §3）。
 
 > 作用域设计（沿用 AITrader 验证过的模式）：**软件与全局机制一次安装（用户域），项目机制按项目复制**。
 > 以下命令在 ZCode 终端（Git Bash）执行；每个代码块自带变量声明、可独立执行；块内只有 `NEW=` 一行需要改（占位用「改成新项目目录名」中文写法——**不用尖括号**，`<` 在 bash 是重定向符）。
@@ -36,7 +37,7 @@ C:\Harness-Engineering\templates\installer\install-hindsight-service.cmd --rehea
 | uv + basic-memory | `uv tool install basic-memory`（当前 v0.22.1；项目 config 模板已钉 `basic-memory@0.22.1` 防跨机漂移） | ✅ 已在位 |
 | mattpocock/skills | `~/.agents/skills/`（ZCode 与 Kimi 共扫） | ✅ 已在位 |
 | 六角色子代理（四角色移植 + archiver + red-teamer；3 个 *-rerun 变体由生成器物化） | `node templates/tools/sync-harness.mjs --apply` 一键分发（手动替代：cp `templates/agents/*.md` → `~/.zcode/agents/`） | ✅ 已部署，sync 体检全绿（2026-09-05 起 sync 自动化，N11） |
-| **三正式 hooks 部署用户级**（guard/inject/report → `~/.zcode/cli/config.json`，与 hindsight 四 hook 并列；config 模板见 `templates/user-config-hooks-template.json`） | 写入隔离 + 团队记忆注入 + 分支双态提醒（全项目通用，白名单防泄漏） | ✅ 2026-09-02 已部署（随新会话武装） |
+| **三正式 hooks 部署用户级**（**脚本执行位**：人工 cp `templates/hooks/` 三 .mjs → `~/.zcode/hooks/harness/`；**注册**：guard/inject/report → `~/.zcode/cli/config.json`，与 hindsight 四 hook 并列；config 模板见 `templates/user-config-hooks-template.json`，三处 `__HOME__` 替换为展开后的用户主目录绝对路径） | 写入隔离 + 团队记忆注入 + 分支双态提醒（全项目通用，白名单防泄漏；guard 自防御条款保护执行位/注册文件） | 随本仓新部署 |
 | hindsight 服务 | 按 06 文档 P0-1 结论部署（用户域全局服务） | ✅ OPT-1 收官（NSSM 服务化：崩溃自启/10MB 日志轮转/开机自启全实证） |
 | hindsight-zcode 集成 | `uv tool install hindsight-zcode` + `hindsight-zcode install`（安装器在 Git Bash 下有 MSYS 反斜杠 bug，config 写入需手工兜底——见 08 §P0-2） | ✅ 三 hooks（session_start/recall/retain）已注册用户级 config（安装器崩溃后手工注册，08 实证） |
 | harness-audit skill | 源=`templates/skills/harness-audit/SKILL.md`（sync 分发到 `~/.agents/skills/`） | ✅ 已装并首跑基线 93/A（2026-09-05，web2api） |
@@ -52,8 +53,9 @@ cd "$NEW" && git rev-parse --git-dir >/dev/null 2>&1 || { echo "⚠️ 请先 gi
 git rev-parse --verify main >/dev/null 2>&1 || { echo "⚠️ 默认分支必须为 main（全部 --from main / --merged main 约定依赖它）"; exit 1; }
 mkdir -p .zcode docs/specs docs/tickets docs/reviews docs/changes
 cp "$HARNESS/templates/zcode-config-template.json" .zcode/config.json
-# 注（2026-09-06 C2 对齐）：hooks 不复制到项目——hooks 一律用户级（第 0 步），项目级同事件被覆盖丢弃；
-# 三正式脚本由用户级 config 直接执行 harness 仓库内副本（$HARNESS/.zcode/hooks/，人工自 templates/hooks/ 同步——见第 0 步），项目无需任何 hook 文件
+# 注（2026-09-06 C2 对齐 + 2026-09-07 执行位上收）：hooks 不复制到项目——注册（~/.zcode/cli/config.json）
+# 与脚本执行位（~/.zcode/hooks/harness/）均在用户域（第 0 步一次性部署），项目级同事件被覆盖丢弃；
+# 项目无需任何 hook 文件
 ls .zcode/ docs/ && echo OK
 ```
 
@@ -111,15 +113,14 @@ NEW=C:/Projects/改成新项目目录名   # ← 与前面步骤保持一致
 PROJ=$(basename "$NEW" | tr 'A-Z' 'a-z')   # 本块自足声明（每块可独立执行）
 # ① gtr 自检（必绿）
 cd "$NEW" && git gtr doctor | tail -3
-# ② guard 模拟触发（预期：阻断提示 + exit=2；脚本用用户级注册的 harness 仓库执行位副本；
+# ② guard 模拟触发（预期：阻断提示 + exit=2；脚本用用户域部署位 ~/.zcode/hooks/harness/，
+#    见第 0 步；缺失时先人工 cp templates/hooks/*.mjs 过去）：
 #    cwd 必须用 Windows 形态 cygpath -m）
 HARNESS=C:/Harness-Engineering   # 与第 1 步保持一致
-# 执行位不存在时先创建（人工在终端跑；三正式脚本注册路径指向它，见 user-config-hooks 模板）：
-[ -d "$HARNESS/.zcode/hooks" ] || { mkdir -p "$HARNESS/.zcode/hooks" && cp "$HARNESS"/templates/hooks/*.mjs "$HARNESS/.zcode/hooks/"; }
-echo "{\"cwd\":\"$(cygpath -m "$NEW")\",\"tool_input\":{\"path\":\"src/x.js\"}}" | node "$HARNESS/.zcode/hooks/guard-worktree.mjs"; echo "exit=$?"
+echo "{\"cwd\":\"$(cygpath -m "$NEW")\",\"tool_input\":{\"path\":\"src/x.js\"}}" | node ~/.zcode/hooks/harness/guard-worktree.mjs; echo "exit=$?"
 # ③ 记忆注入验证：先造数据再测——空库输出为空无法区分"正常"与"hook 失效"（防假绿）
 basic-memory tool write-note --title "verify-01" --folder decisions "迁移验证条目" --project "$PROJ" >/dev/null 2>&1
-echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node "$HARNESS/.zcode/hooks/inject-memory.mjs" | grep -q "$PROJ\|verify-01\|团队记忆" && echo "③ 注入 OK" || echo "③ ⚠️ 注入无输出：检查 .zcode/memory-project 与脚本字段（P0-3）"
+echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node ~/.zcode/hooks/harness/inject-memory.mjs | grep -q "$PROJ\|verify-01\|团队记忆" && echo "③ 注入 OK" || echo "③ ⚠️ 注入无输出：检查 .zcode/memory-project 与脚本字段（P0-3）"
 ```
 
 ①②③ 必须全绿（②③ 依赖第 0 步用户级 hooks 已部署——2026-09-02 起即在位）。全部就位后，在项目目录**新开会话**即可使用（角色文件、hooks、MCP 均启动时加载；ZCode 子代理定义改动也需新会话生效）。
@@ -134,7 +135,7 @@ node C:/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # 同步�
 ```
 
 - **自动集**：六角色 base、harness-audit 技能、变体生成器、models.config.json——源=templates/（git 版本化），用户域均为部署副本
-- **hooks 执行位（`<repo>/.zcode/hooks/`）只报告、永不代写**：AI 可改 templates 源（guard 白名单内），若脚本自动传播即等于 AI 可换掉运行中的 guard 自毁防线——该路径人工 cp（脚本打印现成命令）
+- **hooks 执行位（`~/.zcode/hooks/harness/`）只报告、永不代写**：AI 可改 templates 源（guard 白名单内），若脚本自动传播即等于 AI 可换掉运行中的 guard 自毁防线——该路径人工 cp（脚本打印现成命令）
 - 用户级 config.json 三正式注册与项目结构（AGENTS/文档目录/模板基线对照）随跑随报，同样只报告
 - **新项目接入后**：把项目根路径加入脚本 `PROJECTS` 常量（一行），此后该项目的结构盘点随跑随报
 - **--apply 会覆盖部署副本**（无备份）：部署副本手改会被无声覆盖——正确姿势=只改 templates/ 源头；拿不准先跑 `--check` 看 DRIFT 清单
@@ -147,7 +148,7 @@ node C:/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # 同步�
 | 软件/插件/技能/角色文件 | 用户域（`~/.zcode/`、`~/.agents/`、uv tools、npm -g） | 一次 |
 | hindsight 服务 + Obsidian 同步 | 用户域全局服务 | 一次（Phase 2） |
 | AGENTS.md / .zcode/config.json / docs/ 结构 / memory/ | 目标项目 | 每项目（本手册六步） |
-| 规范修订 | 本仓库（REPO，即 Harness-Engineering clone）→ `sync-harness.mjs --apply` 再分发（hooks 执行位人工，见上节） | 变更时 |
+| 规范修订 | 本仓库（REPO，即 Harness-Engineering clone）→ `sync-harness.mjs --apply` 再分发（hooks 执行位人工 cp 到 `~/.zcode/hooks/harness/`，见上节） | 变更时 |
 
 ## 最小可用变体
 

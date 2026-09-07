@@ -1,5 +1,5 @@
 {
-  "_readme": "OPT-2 分级模型路由表（唯一事实来源=REPO/templates/models.config.json，即本文件；用户域 ~/.zcode/models.config.json 是其部署副本，由 templates/tools/sync-harness.mjs --apply 覆盖，勿直接手改）。defaults=inherit 跟随主会话；rerun 变体钉更强模型。模型 ID 形态：builtin:<provider>/<ModelName>（已证实：builtin:zai-coding-plan/GLM-5.3；候选：GLM-5-Turbo）。改源头后 sync --apply，再 node ~/.zcode/tools/generate-role-variants.mjs 重新物化变体，最后新开会话生效（C1）。routing 是 main agent 的派发约定（无自动执行器）；attempt 计数宿主=ticket 文件运行记录。",
+  "_readme": "OPT-2 分级模型路由表（唯一事实来源=harness 规范仓库（REPO）templates/models.config.json；本文件是其部署副本，由 templates/tools/sync-harness.mjs --apply 覆盖，勿直接手改）。defaults=inherit 跟随主会话；rerun 变体钉更强模型。模型 ID 形态：builtin:<provider>/<ModelName>（已证实：builtin:zai-coding-plan/GLM-5.3；候选：GLM-5-Turbo）。改源头后 sync --apply，再 node ~/.zcode/tools/generate-role-variants.mjs 重新物化变体，最后新开会话生效（C1）。routing 是 main agent 的派发约定（无自动执行器）；attempt 计数宿主=ticket 文件运行记录。",
   "defaults": {
     "planner": "inherit",
     "developer": "inherit",

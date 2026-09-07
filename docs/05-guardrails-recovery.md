@@ -27,13 +27,14 @@
 
 guard-worktree.mjs 的逻辑（路径归一化 `\\`→`/` + `.toLowerCase()`、`root + '/'` 前缀比较防兄弟目录误判、零反斜杠写法）**原样保留**，白名单按下表调整后移植：
 
-**白名单差异与威胁模型（2026-09-02 对抗性审查裁决，必须读）：**
+**白名单差异与威胁模型（2026-09-02 对抗性审查裁决；2026-09-07 执行位/注册上收用户域后修订，必须读）：**
 
 | 项 | Kimi 版（AITrader） | ZCode 版（本体系） | 理由 |
 |---|---|---|---|
-| hook 注册文件 | 用户级 `~/.kimi-code/config.toml`（仓库外） | **项目内** `.zcode/config.json` | ZCode 项目级配置随 git 走，但**注册文件落进了 Agent 可写范围** |
-| 白名单 | `['/docs/', '/.kimi-code/', '/context.md']` | **`['/docs/', '/memory/', '/context.md']`——不含 `/.zcode/`** | ① 若放行 `/.zcode/`，任何有 Write 的 Agent 可把 config.json 的 `hooks.enabled` 改 false 或把 guard 脚本改写成 `exit 0`——物理约束体系自毁（注册文件自己把关闭钥匙留在了围栏里）；② Agent 无合法需求改 `.zcode/config.json` 或 hooks 脚本（人负责）；③ `/memory/` 加入白名单：archiver 需要写 basic-memory 项目记忆库；④ `/context.md` 保留——工作区 AGENTS.md 文档地图可引用项目级 CONTEXT.md（planner 的 grill-with-docs 产出），AITrader 已有先例 |
-| 配套后果 | — | 迁移手册第 1/3 步复制的 `.zcode/config.json` 与 hooks 脚本**之后只能人改**；Agent 试图修改会被自家 guard 拦下——这是设计行为，不是 bug | 与 AGENTS.md 同等待遇（流水线宪法类） |
+| hook 注册文件 | 用户级 `~/.kimi-code/config.toml`（仓库外） | **用户级** `~/.zcode/cli/config.json`（仓库外；2026-09-02 C2 实测起——同事件用户级/项目级并存时项目级被覆盖丢弃） | C2 前曾用项目内 `.zcode/config.json`（注册文件落进 Agent 可写范围）；C2 后注册上收用户级 |
+| 白名单 | `['/docs/', '/.kimi-code/', '/context.md']` | **`['/docs/', '/memory/', '/context.md', '/templates/']`**（templates/ 仅 harness 仓库自身需要，2026-09-06 加） | ① Agent 无合法需求改注册文件或 hooks 脚本（人负责）；② `/memory/` 加入白名单：archiver 需要写 basic-memory 项目记忆库；③ `/context.md` 保留——工作区 AGENTS.md 文档地图可引用项目级 CONTEXT.md（planner 的 grill-with-docs 产出），AITrader 已有先例 |
+| **自防御条款（2026-09-07 新增）** | 无（Kimi 注册在仓库外，当时无对等机制） | guard 的 **SHIELD 表**：各宿主 hooks 执行位（`~/.zcode/hooks/harness/` 等）+ 注册文件（`~/.zcode/cli/config.json`、`~/.claude/settings.json`、`~/.kimi-code/config.toml`、`~/.codex/hooks.json` 与 `config.toml`）——无论 cwd，Write/Edit/ApplyPatch 一律 exit 2；路径 `homedir()` 运行时计算（禁硬编码机器路径） | 注册文件与执行位均在仓库外，root 前缀逻辑对它们**不设防**——旧形态下 Agent 可直接改写 config 关闭 hooks（docs/08 回灌的现存漏洞，本条款补上）。检查必须置于 root 前缀判断**之前**，否则被"不在主检出→放行"先吃掉 |
+| 配套后果 | — | 用户级注册与 `~/.zcode/hooks/harness/` 执行位**只能人改**；Agent 试图修改（Write/Edit/ApplyPatch 面）被自防御条款拦下——这是设计行为，不是 bug。Bash 盲区沿用下方补偿 | 与 AGENTS.md 同等待遇（流水线宪法类） |
 
 其余三处适配：
 
@@ -44,7 +45,7 @@ guard-worktree.mjs 的逻辑（路径归一化 `\\`→`/` + `.toLowerCase()`、`
 | Bash 盲区补偿 | 无（Kimi 版同样存在） | ① 合并前检查：本单时间窗内 `git log main --oneline --no-merges` 逐条对照下方"main 直接提交白名单"；② Bash 命令模式 hook（拦 `>`/`sed -i` 等写主检出模式）列为 Phase 2 加固项 | AGENTS 模板第 6 步 + 06 Phase 2 |
 
 **main 直接提交白名单**（①的判定标准）：main 上仅允许三类非 merge 提交——`chore: archive*`（archiver 归档提交）、`docs: spec*`（spec/tickets 首次入库与升版）、`docs: agents*`（**宪法/AGENTS 修订**：人授权后由 main agent 代提交，commit message 须注明人授权依据——2026-09-05 审计回灌：无此通道则每次宪法演进都成技术性越权，稀释检查信号）。**第四类例外（2026-09-06 web2api 宪法 r4 首立，模板已随附）**：人在场明确授权的一次性直提，commit message 须尾注 `committed on user authorization <日期>`——无此留痕即按越权计。出现白名单外直接提交即越权。注意不得用固定 `-5` 窗口——多单归档后越权提交会被挤出窗口恒绿；以本 ticket 时间窗为界。
-| 注册与阻断 | config.toml + exit 2 实测成立 | 项目级 `.zcode/config.json` → `hooks.events.PreToolUse` + `hooks.enabled: true` + exit 2 阻断（官方文档确认语义） | 用模板配置 |
+| 注册与阻断 | config.toml + exit 2 实测成立 | 用户级 `~/.zcode/cli/config.json` → `hooks.events.PreToolUse` + `hooks.enabled: true` + exit 2 阻断（官方文档确认语义；执行位=`~/.zcode/hooks/harness/`，2026-09-07 上收用户域） | 用模板配置 |
 
 配套 hooks 一并移植（输出格式适配 ZCode 的严格 JSON stdout schema，见 02 文档映射表）：
 

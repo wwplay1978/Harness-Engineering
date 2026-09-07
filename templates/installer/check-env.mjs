@@ -1,7 +1,7 @@
 // check-env.mjs — 阶段一环境检测器（只读，不改任何系统状态）
 // 产出（当前目录）：env-config.json（检测+分级+适配建议）、hindsight-params.cmd（安装参数，不含 key）
 // 用法：node check-env.mjs [--vault <vault路径>] [--project <项目根>]
-// 设计：docs/16-host-agnostic-installer.md（三段式：检测→安装→适配）
+// 设计：harness 规范仓库 docs/16-host-agnostic-installer.md（三段式：检测→安装→适配）
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

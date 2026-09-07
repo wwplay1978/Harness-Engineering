@@ -1,21 +1,24 @@
 # ── 六角色 harness 三正式 hooks（N18 适配包，docs/18 §3）────────────────
-# 并入 ~/.kimi-code/config.toml 尾部。__HARNESS__ 替换为 harness 仓库绝对路径
-# （正斜杠，如 C:/Harness-Engineering）。
+# 并入 ~/.kimi-code/config.toml 尾部。部署两步（均人闸，docs/05 §3）：
+# ①人工把 templates/hooks/ 三个 .mjs 复制到 ~/.kimi-code/hooks/harness/（宿主用户域执行位）；
+# ②三处 __HOME__ 替换为展开后的用户主目录绝对路径（正斜杠，如 C:/Users/you；
+#   禁用 ~ 字面量——config 命令串不展开 tilde）。
 # 铁律：hooks 注册由人工粘贴写入（agent 只提供本块，05 §3 人闸）。
 # 事件名/matcher/exit 2 阻断语义 = AITrader 实证形态（docs/02 §2）。
+# __HARNESS__ 仅探针步骤使用（见本目录 README 第 3 步）。
 
 [[hooks]]
 event = "PreToolUse"
 matcher = "Write|Edit|ApplyPatch"
-command = "node __HARNESS__/.zcode/hooks/guard-worktree.mjs"
+command = "node __HOME__/.kimi-code/hooks/harness/guard-worktree.mjs"
 timeout = 5
 
 [[hooks]]
 event = "UserPromptSubmit"
-command = "node __HARNESS__/.zcode/hooks/inject-memory.mjs"
+command = "node __HOME__/.kimi-code/hooks/harness/inject-memory.mjs"
 timeout = 10
 
 [[hooks]]
 event = "UserPromptSubmit"
-command = "node __HARNESS__/.zcode/hooks/report-worktrees.mjs"
+command = "node __HOME__/.kimi-code/hooks/harness/report-worktrees.mjs"
 timeout = 10

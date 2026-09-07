@@ -1,4 +1,4 @@
-// PreToolUse 守卫：禁止直接写主检出（文档与配置目录除外）
+// PreToolUse 守卫：禁止直接写主检出（文档与配置目录除外）；并保护各宿主 hooks 执行位与注册文件
 // ── ZCode 真实 payload schema（2026-09-02 实测，见 docs/08-p0-field-log.md）──
 // 顶层扁平字段：hook_event_name / session_id / cwd / tool_name / tool_input /
 //              permission_mode / transcript_path（另有 camelCase 重复形态，勿依赖）
@@ -9,21 +9,42 @@
 // matcher 必须为 "Write|Edit|ApplyPatch"（实测 Edit 命中；ApplyPatch 冗余防御）
 // 假设：会话从主检出目录启动，p.cwd 即主检出根。
 // 在 worktree 内启动会话时本守卫语义失效——但此时写 worktree 本就合法，无风险。
-import { resolve } from 'node:path';
+// ── 自防御条款（2026-09-07 落点修补，docs/05 §3）──
+// 无论 cwd，一律阻断对 SHIELD 表内路径（各宿主 hooks 执行位 + 注册文件）的 Write/Edit/ApplyPatch。
+// 背景：注册文件在用户域（仓库外），旧版对仓库外一律放行——Agent 可直接改写 config 关闭 hooks
+// （docs/08 补记的现存漏洞，本条款补上）。表内路径必须 homedir() 运行时计算：
+// 本源随公开仓分发任意机器，硬编码机器绝对路径会在异机静默失效。
+import { resolve, join } from 'node:path';
+import { homedir } from 'node:os';
 const BS = String.fromCharCode(92);
 const NL = String.fromCharCode(10);
+const normAbs = s => (s ?? '').split(BS).join('/').toLowerCase();
+// 宿主无关单一源，按宿主部署（ZCode=~/.zcode/hooks/harness/，其余宿主各放各目录，docs/18）
+const SHIELD = [
+  '/.zcode/hooks/harness/', '/.zcode/cli/config.json',
+  '/.claude/hooks/harness/', '/.claude/settings.json',
+  '/.kimi-code/hooks/harness/', '/.kimi-code/config.toml',
+  '/.codex/hooks/harness/', '/.codex/hooks.json', '/.codex/config.toml',
+].map(r => normAbs(join(homedir(), r)));
 let input = '';
 process.stdin.on('data', c => input += c);
 process.stdin.on('end', () => {
   try {
     const p = JSON.parse(input);
-    const norm = s => (s ?? '').split(BS).join('/').toLowerCase();
+    const norm = normAbs;
     const root = norm(p.cwd);
     // ZCode 实测字段为 file_path；path 为 Kimi 兼容兜底
     const raw = p.tool_input?.file_path ?? p.tool_input?.path;
     if (!raw || !root) process.exit(0);
     const abs = raw[0] === '/' || raw[1] === ':' ? raw : resolve(root, raw);
     const file = norm(abs);
+    // 自防御检查必须在 root 前缀判断之前：受保护路径都在仓库外，
+    // 放在后面会被"不在主检出内→放行"先吃掉，条款永不生效
+    if (SHIELD.some(s => file.startsWith(s))) {
+      console.error('[写入隔离] 受保护路径（hooks 执行位/注册文件）——hooks 机制只能人修改' + NL +
+        '（docs/05 §3；如需变更请人直接编辑，Agent 无合法需求）。');
+      process.exit(2);                     // 阻断
+    }
     // 必须 root + '/'：startsWith(root) 会把兄弟目录 <repo>-worktrees 误判为主检出
     if (!file.startsWith(root + '/')) process.exit(0);          // 不在主检出内 → 放行
     const rel = file.slice(root.length);

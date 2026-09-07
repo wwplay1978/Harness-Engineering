@@ -1,5 +1,5 @@
 // OPT-2 变体生成器：路由表 → 物化 rerun 变体角色到 ~/.zcode/agents/
-// 路由表读取 ~/.zcode/models.config.json（部署副本；唯一事实来源=REPO/templates/models.config.json，经 sync-harness.mjs --apply 分发——改配置改源头，勿改部署副本）
+// 路由表读取 ~/.zcode/models.config.json（部署副本；唯一事实来源=harness 规范仓库（REPO）/templates/models.config.json，经 sync-harness.mjs --apply 分发——改配置改源头，勿改部署副本）
 // 约定：变体文件是编译产物勿手改（重跑本脚本覆盖）；defaults 非 inherit 时同步写 base 的 model 字段
 // 自检：每步正向断言（写后回读验证），失败大声退出 —— 绝不无条件成功 echo
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
