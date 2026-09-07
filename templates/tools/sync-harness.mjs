@@ -63,14 +63,14 @@ for (const it of SYNC) {
 // 2) hooks 执行位（config.json 实际执行用户域部署位；仓库内执行位已于 2026-09-07 退役）
 console.log('\n-- hooks 执行位（用户域 ~/.zcode/hooks/harness/；只报告，人工同步）--');
 for (const h of HOOKS) {
-  const src = `templates/hooks/${h}.mjs`;
+  const srcAbs = join(repo, 'templates', 'hooks', `${h}.mjs`);   // 绝对路径——脚本可从任意 cwd 运行
   const dst = join(HOME, '.zcode', 'hooks', 'harness', `${h}.mjs`);
-  if (read(src) === read(dst)) { console.log(`[SAME]  ${h}.mjs`); continue; }
+  if (read(srcAbs) === read(dst)) { console.log(`[SAME]  ${h}.mjs`); continue; }
   drift++;
   console.log(read(dst) === null
     ? `[MISS]  ${h}.mjs 执行位不存在：${dst}`
     : `[DRIFT] ${h}.mjs：templates 源 ≠ 执行位`);
-  console.log(`        人工执行（勿让 AI 代跑）：cp "${src}" "${dst.replace(/\//g, '\\')}"`);
+  console.log(`        人工执行（勿让 AI 代跑）：cp "${srcAbs}" "${dst.replace(/\//g, '\\')}"`);
 }
 
 // 3) 用户级 config.json 三正式注册核对（模板 __HOME__ 按 homedir 展开后精确比对；
