@@ -106,7 +106,15 @@ REM ---- 2) idempotent reinstall ----
 REM RERANKER_MAX_CANDIDATES=30: official default 300 rerank pairs costs ~26s per recall on
 REM CPU-only machines (ARM64/no CUDA) and busts the 10s hook timeout (harness repo docs/08
 REM field log, entry 4). GPU machines may raise it for better ranking quality.
-"!NSSM!" set hindsight AppEnvironmentExtra HF_ENDPOINT=https://hf-mirror.com HINDSIGHT_API_MODEL_INIT_TIMEOUT=900 HINDSIGHT_API_LLM_PROVIDER=openai HINDSIGHT_API_LLM_API_KEY=!ZKEY! HINDSIGHT_API_LLM_BASE_URL=!LLM_BASE_URL! HINDSIGHT_API_LLM_MODEL=!LLM_MODEL! HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL=!MODELS_DIR!\bge-m3 HINDSIGHT_API_RERANKER_LOCAL_MODEL=!MODELS_DIR!\bge-reranker-base HINDSIGHT_API_RERANKER_MAX_CANDIDATES=30 USERPROFILE=%USERPROFILE% HOME=%USERPROFILE% PYTHONUTF8=!PYTHON_UTF8! PYTHONIOENCODING=utf-8 >nul
+REM LLM_TIMEOUT=600 + CONSOLIDATION_LLM_BATCH_SIZE=4: official default read timeout is
+REM 120s, but glm-5.3-flash is a reasoning model whose peak-hour throughput drops to
+REM ~34 tok/s; a non-streaming consolidation call over 8 facts exceeds 120s and dies
+REM deterministically, looping provider retries (harness repo docs/08 field log, entry 5;
+REM batch-of-8 output measured >150s; also note timed-out calls still burn tokens).
+REM 600s covers ~17k output tokens at that speed; batch 4 keeps each call shorter.
+REM LLM_BATCH_SIZE here is "facts per LLM call" - NOT the DB-side
+REM CONSOLIDATION_BATCH_SIZE (50, memory loading), which stays default.
+"!NSSM!" set hindsight AppEnvironmentExtra HF_ENDPOINT=https://hf-mirror.com HINDSIGHT_API_MODEL_INIT_TIMEOUT=900 HINDSIGHT_API_LLM_PROVIDER=openai HINDSIGHT_API_LLM_API_KEY=!ZKEY! HINDSIGHT_API_LLM_BASE_URL=!LLM_BASE_URL! HINDSIGHT_API_LLM_MODEL=!LLM_MODEL! HINDSIGHT_API_LLM_TIMEOUT=600 HINDSIGHT_API_CONSOLIDATION_LLM_BATCH_SIZE=4 HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL=!MODELS_DIR!\bge-m3 HINDSIGHT_API_RERANKER_LOCAL_MODEL=!MODELS_DIR!\bge-reranker-base HINDSIGHT_API_RERANKER_MAX_CANDIDATES=30 USERPROFILE=%USERPROFILE% HOME=%USERPROFILE% PYTHONUTF8=!PYTHON_UTF8! PYTHONIOENCODING=utf-8 >nul
 "!NSSM!" get hindsight AppEnvironmentExtra | findstr /c:"PYTHONUTF8=1" >nul || (echo [FAIL] PYTHONUTF8 not applied to service env - DO NOT START & pause & exit /b 1)
 "!NSSM!" set hindsight AppStdout "!LOGDIR!\service-out.log" >nul
 "!NSSM!" set hindsight AppStderr "!LOGDIR!\service-err.log" >nul
