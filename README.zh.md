@@ -47,7 +47,7 @@ Harness（驾驭）是 LLM 与"可治理的高效编码"之间的工程层，六
 
 [![六角色流水线](docs/diagrams/pipeline-light.png)](https://pages.20081005.xyz/pipeline.html)
 
-**动起来看**：动画版已[部署上线](https://pages.20081005.xyz/pipeline.html)——点击上图即可在浏览器打开交互版，播放 Live trace 动画逐棒点亮一张工单的完整旅程，支持 Light/Dark 主题切换（`?theme=light`）、缩放平移、搜索聚焦与引导章节。相同的零依赖单文件也随仓库发布在 [`docs/diagrams/`](docs/diagrams/)，clone 后本地打开亦可。
+**动起来看**：动画版已[部署上线](https://pages.20081005.xyz/pipeline.html)——点击上图即可在浏览器打开交互版，播放 Live trace 动画逐棒点亮一张工单的完整旅程，支持 Light/Dark 主题切换、缩放平移、搜索聚焦与引导章节。相同的零依赖单文件也随仓库发布在 [`docs/diagrams/`](docs/diagrams/)，clone 后本地打开亦可。
 
 核心纪律：
 

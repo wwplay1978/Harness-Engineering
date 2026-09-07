@@ -47,7 +47,7 @@ The pipeline — six roles, one ticket, from spec to archive (full detail in [`d
 
 [![Six-role pipeline](docs/diagrams/pipeline-light.png)](https://pages.20081005.xyz/pipeline.html)
 
-**See it move**: the animated diagram is [live-hosted here](https://pages.20081005.xyz/pipeline.html) — click the image above to open the interactive version in your browser: it plays a Live trace of one ticket's journey through all six roles, with Light/Dark toggle (`?theme=light`), pan/zoom, search, and guided chapters. The same self-contained files also ship in this repo under [`docs/diagrams/`](docs/diagrams/) — clone and open locally if you prefer.
+**See it move**: the animated diagram is [live-hosted here](https://pages.20081005.xyz/pipeline.html) — click the image above to open the interactive version in your browser: it plays a Live trace of one ticket's journey through all six roles, with Light/Dark toggle, pan/zoom, search, and guided chapters. The same self-contained files also ship in this repo under [`docs/diagrams/`](docs/diagrams/) — clone and open locally if you prefer.
 
 Core disciplines:
 

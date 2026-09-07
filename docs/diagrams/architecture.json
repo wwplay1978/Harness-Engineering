@@ -59,7 +59,7 @@
     { "id": "worktree-gates", "from": "worktree", "to": "gates", "label": "diff 快照" },
     { "id": "gates-human", "from": "gates", "to": "human", "label": "合并决策（人）", "variant": "emphasis", "fromSide": "top", "toSide": "top", "via": [[1142, 48], [120, 48]] },
     { "id": "roles-obsidian", "from": "roles", "to": "obsidian", "label": "知识草稿沉淀", "variant": "dashed" },
-    { "id": "gates-spec", "from": "gates", "to": "spec", "label": "度量反馈 · 修订", "variant": "dashed", "fromSide": "bottom", "toSide": "right", "via": [[1142, 700], [252, 700], [252, 574]] },
+    { "id": "gates-spec", "from": "gates", "to": "spec", "label": "度量反馈 · 修订", "variant": "dashed", "fromSide": "bottom", "toSide": "right", "via": [[1142, 684], [252, 684], [252, 574]] },
     { "id": "spec-skills", "from": "spec", "to": "skills", "label": "sync 分发", "variant": "dashed", "fromSide": "bottom", "toSide": "bottom", "via": [[132, 660], [616, 660]] },
     { "id": "memory-host", "from": "memory", "to": "host", "label": "上下文注入", "labelAt": [360, 463] },
     { "id": "roles-skills", "from": "roles", "to": "skills", "label": "按需加载", "labelAt": [616, 463] }
