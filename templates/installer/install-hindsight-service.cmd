@@ -103,7 +103,10 @@ REM ---- 2) idempotent reinstall ----
 "!NSSM!" remove hindsight confirm >nul 2>&1
 "!NSSM!" install hindsight "!HINDSIGHT_EXE!"
 "!NSSM!" set hindsight AppDirectory "!HSDIR!"
-"!NSSM!" set hindsight AppEnvironmentExtra HF_ENDPOINT=https://hf-mirror.com HINDSIGHT_API_MODEL_INIT_TIMEOUT=900 HINDSIGHT_API_LLM_PROVIDER=openai HINDSIGHT_API_LLM_API_KEY=!ZKEY! HINDSIGHT_API_LLM_BASE_URL=!LLM_BASE_URL! HINDSIGHT_API_LLM_MODEL=!LLM_MODEL! HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL=!MODELS_DIR!\bge-m3 HINDSIGHT_API_RERANKER_LOCAL_MODEL=!MODELS_DIR!\bge-reranker-base USERPROFILE=%USERPROFILE% HOME=%USERPROFILE% PYTHONUTF8=!PYTHON_UTF8! PYTHONIOENCODING=utf-8 >nul
+REM RERANKER_MAX_CANDIDATES=30: official default 300 rerank pairs costs ~26s per recall on
+REM CPU-only machines (ARM64/no CUDA) and busts the 10s hook timeout (harness repo docs/08
+REM field log, entry 4). GPU machines may raise it for better ranking quality.
+"!NSSM!" set hindsight AppEnvironmentExtra HF_ENDPOINT=https://hf-mirror.com HINDSIGHT_API_MODEL_INIT_TIMEOUT=900 HINDSIGHT_API_LLM_PROVIDER=openai HINDSIGHT_API_LLM_API_KEY=!ZKEY! HINDSIGHT_API_LLM_BASE_URL=!LLM_BASE_URL! HINDSIGHT_API_LLM_MODEL=!LLM_MODEL! HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL=!MODELS_DIR!\bge-m3 HINDSIGHT_API_RERANKER_LOCAL_MODEL=!MODELS_DIR!\bge-reranker-base HINDSIGHT_API_RERANKER_MAX_CANDIDATES=30 USERPROFILE=%USERPROFILE% HOME=%USERPROFILE% PYTHONUTF8=!PYTHON_UTF8! PYTHONIOENCODING=utf-8 >nul
 "!NSSM!" get hindsight AppEnvironmentExtra | findstr /c:"PYTHONUTF8=1" >nul || (echo [FAIL] PYTHONUTF8 not applied to service env - DO NOT START & pause & exit /b 1)
 "!NSSM!" set hindsight AppStdout "!LOGDIR!\service-out.log" >nul
 "!NSSM!" set hindsight AppStderr "!LOGDIR!\service-err.log" >nul
