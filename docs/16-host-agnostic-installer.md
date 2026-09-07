@@ -19,9 +19,9 @@
 | **ZCode** | ✅ 六角色实证 | ✅ exit 2 实测；注册优先级 C2 实测 | ✅ | ✅ ~/.agents/skills 共扫 | **已适配**（六票实证） |
 | **Claude Code** | ✅ subagents 同族（~/.claude/agents/） | ✅ 同族 schema（settings.json hooks；注册/优先级待装机） | ✅ | ✅ | 适配包已产出（adapters/claude-code，装机四步待 N19） |
 | **Kimi Code** | ✅ AITrader v1.2 实证 + 官方文档（~/.kimi-code/agents/ 与 ~/.agents/agents/；model 键不支持） | ✅ guard 机制源头；本机 config.toml [[hooks]] 实证；payload=`path`（guard 已双读） | ✅ | ✅ ~/.agents/skills 共扫（文档实证） | 适配包已产出（adapters/kimi-code，装机四步待 N19） |
-| **Codex (OpenAI)** | ✅ multi_agent stable（特性开关本机实证）+ ~/.codex/agents/*.toml（⚠️ 形态=第三方指南口径，官方页未证实，见 18 §4；项目级定义有上游 bug——用用户级） | ✅ hooks.json 体系官方实证：PreToolUse 阻断 apply_patch/Edit/Write（官方自注：护栏非完全强制边界） | ✅ config.toml | ✅ AGENTS.md + prompts | 适配包已产出（adapters/codex，装机四步待 N19） |
-| **OpenCode** | ✅ agents/ 目录 + mode: subagent + @mention 派发（本机 GSD 样本 + 官方文档） | ✅ 插件 tool.execute.before throw 即阻断（官方文档；本机插件样本印证加载形态） | ✅ | ✅ AGENTS.md | 适配包已产出（adapters/opencode，装机四步待 N19） |
-| **Pi Agent** | ❌ 无原生子代理（官方 README 明示）——单代理角色卡降级 | ✅ 扩展 tool_call → {block:true}（官方文档；写入隔离等价物理防线） | 未证实（N18 未核验） | ✅ Agent Skills 标准 + ~/.agents/skills 共扫 | 适配包已产出（adapters/pi-agent，降级形态，装机四步待 N19） |
+| **Codex (OpenAI)** | ✅ 官方 subagents 页终判：~/.codex/agents/*.toml（name/description/developer_instructions + sandbox_mode 角色级沙箱；见 18 §4） | ✅ hooks.json 体系官方实证：PreToolUse 阻断 apply_patch/Edit/Write（官方自注：护栏非完全强制边界） | ✅ config.toml | ✅✅ AGENTS.md + prompts + 官方 skills 层（[[skills.config]] 可挂任意目录） | 适配包已产出（adapters/codex，装机四步待 N19） |
+| **OpenCode** | ✅ agents/ 目录 + mode: subagent + @mention 派发（本机 GSD 样本 + 官方文档 + CLI 实测） | ✅ 插件 tool.execute.before throw 即阻断（官方文档；本机插件样本印证加载形态） | ✅ | ✅ AGENTS.md + skills 层实测在位（空载，目录配置待装机） | 适配包已产出（adapters/opencode，装机四步待 N19） |
+| **Pi Agent** | ❌ 无原生子代理（官方 README 明示）——单代理角色卡降级 | ✅✅ 扩展 tool_call → {block:true}；input.path 字段名经官方示例 protected-paths.ts 实证 | ❌ 官方明示无内置 MCP——记忆面=开工必检条款 + Obsidian 直读（定论） | ✅ Agent Skills 标准 + ~/.agents/skills 共扫 | 适配包已产出（adapters/pi-agent，降级形态，装机四步待 N19） |
 | **DeepSeek Harness** | ✅ 框架宣称"一切皆插件"（plugin.json 可声明 agents） | ⚠️ 声明支持 hooks，阻断语义待实测 | ✅ 可声明 mcpServers | ✅ 可声明 skills/commands | 未适配（框架型宿主：适配=把六角色+guard 打包为其插件） |
 
 新宿主一律先查此矩阵——**标 ⚠️/未证实的项就是四步中②③的验证重点**；矩阵未列的宿主（新兴工具）按同一五机制自查后补行入表。

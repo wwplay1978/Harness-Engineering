@@ -12,6 +12,7 @@
 ## 已证实（本机 + 官方文档）
 
 - ✅ 本机 config.toml 已有 `[[hooks]]` 实例（PreToolUse + matcher "Write|Edit"，AITrader guard）——事件名/matcher/阻断在位实证。**合并时注意去重**：本机 AITrader 期遗留的 `[[hooks]]`（相对路径命令，仅 AITrader 项目内可用）与新粘贴块并存会双重触发——按事件比对，旧条目若与本三件职责重叠则删除或注释。
+- ✅✅ hooks 官方页全证（2026-09-07）：[[hooks]] 仅许 event/matcher/command/timeout 四字段（多余字段整份拒载——本粘贴块恰合规）；可阻断事件集=PreToolUse/Stop/UserPromptSubmit（恰为三正式所需）；exit 2=阻断且 stderr 即理由、其余非零/超时=fail-open；UserPromptSubmit stdout 注入上下文——inject/report 机制官方级确认。
 - ✅ 官方文档：agent 目录 = `~/.kimi-code/agents/`、`~/.agents/agents/`（跨工具共享）+ 项目级；frontmatter = name/description(必填)/whenToUse/tools/disallowedTools/subagents；**model 键不支持（同未知键一并忽略）**。
 - ✅ 技能：扫 `~/.agents/skills/`（与 ZCode 共享，零成本）。
 - ⚠️ 装机验证项：C1/C2 类行为（会话快照、注册优先级）按四步④重验。

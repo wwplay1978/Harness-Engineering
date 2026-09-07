@@ -48,16 +48,20 @@ function parseRole(file) {
 
 const yamlList = (k, arr) => k + ':\n' + arr.map(t => '  - ' + t).join('\n') + '\n';
 const q = s => { if (s.includes('"')) die('description 含双引号，YAML 再引出需转义（当前模板约定不含）'); return '"' + s + '"'; };
+// Anchors 软绑定解析（description 尾部 "Anchors: a, b" → 技能名数组）
+const anchorsOf = desc => (desc.match(/Anchors:\s*([^"]*)$/) || [])[1]?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
 
 // ── 各宿主物化规则（判级依据见 docs/18 §2–§6）─────────────────────────
 const yamlAgentHosts = {
-  // 同族 schema：name/description/tools/disallowedTools 全保留（disallowedTools 生效性为装机验证项）
+  // 同族 schema：name/description/tools/disallowedTools 全保留（disallowedTools 生效性为装机验证项）。
+  // skills 字段（官方文档：subagent 声明后全文预载）由 Anchors 生成——技能未复制到 ~/.claude/skills 前会告警，先复制再派发。
   'claude-code': {
     dir: 'agents',
-    note: '> 适配说明（claude-code，docs/18 §2）：放置 ~/.claude/agents/，新会话生效；写入隔离由 PreToolUse guard 粘贴块（templates/adapters/claude-code/）承担；disallowedTools 的物理生效性是装机验证项；正文内 ZCode 专有措辞为模板原文，物理强制形态以本说明为准。\n\n',
+    note: '> 适配说明（claude-code，docs/18 §2）：放置 ~/.claude/agents/，新会话生效；写入隔离由 PreToolUse guard 粘贴块（templates/adapters/claude-code/）承担；disallowedTools 的物理生效性是装机验证项；skills 字段为全文预载（官方文档），技能本体需先落 ~/.claude/skills/（见本包 README）；正文内 ZCode 专有措辞为模板原文，物理强制形态以本说明为准。\n\n',
     emit: fm => `---\nname: ${fm.name}\ndescription: ${q(fm.description)}\n` +
       (fm.tools.length ? yamlList('tools', fm.tools) : '') +
-      (fm.disallowedTools.length ? yamlList('disallowedTools', fm.disallowedTools) : '') + '---\n\n',
+      (fm.disallowedTools.length ? yamlList('disallowedTools', fm.disallowedTools) : '') +
+      (anchorsOf(fm.description).length ? yamlList('skills', anchorsOf(fm.description)) : '') + '---\n\n',
   },
   // Kimi 契约官方文档实证：name/description/whenToUse/tools/disallowedTools；model 键不支持（忽略）
   'kimi-code': {
@@ -79,12 +83,16 @@ const yamlAgentHosts = {
 };
 
 function buildCodex(a) {
-  // 主形态：~/.codex/agents/<name>.toml（multi_agent spawn_agent；项目级定义有已知 bug——用用户级）
+  // 主形态（官方 subagents 文档终判）：~/.codex/agents/<name>.toml——
+  // 必填 name/description/developer_instructions；可选 model/sandbox_mode/mcp_servers/skills.config；
+  // 文件名=约定，name 字段=真相。只读角色加 sandbox_mode="read-only"（官方角色级物理沙箱）。
   if (a.body.includes("'''")) die(a.file + ': 正文含 \'\'\'，TOML 字面量串无法承载');
-  const toml = `# 由六角色模板物化（docs/18 §4）。放置 ~/.codex/agents/（用户级）。\n` +
-    `# 前提：features.multi_agent 开启（本机 0.153.4 实测 stable=true）；spawn_agent 暴露一致性为装机验证项（上游 #26828）。\n` +
+  const readonlyRole = ['code-reviewer', 'red-teamer'].includes(a.fm.name);
+  const toml = `# 由六角色模板物化（docs/18 §4）。放置 ~/.codex/agents/（用户级；项目级 .codex/agents/ 亦可）。\n` +
+    `# 前提：features.multi_agent 开启（本机 0.153.4 实测 stable=true）。文件名=约定，name 字段=真相。\n` +
     `name = "${a.fm.name}"\ndescription = ${JSON.stringify(a.fm.description)}\n` +
-    `instructions = '''\n> 适配说明（codex）：以 spawn_agent(role="${a.fm.name}") 派发；写入隔离由 ~/.codex/hooks.json 的 PreToolUse（matcher 含 apply_patch）承担；本机实测未见工具禁用键——只读纪律为软约束+guard 兜底；正文内 ZCode 专有措辞为模板原文，以本说明为准。\n\n${a.body}'''\n`;
+    (readonlyRole ? `sandbox_mode = "read-only"   # 官方角色级沙箱：只读角色物理禁写\n` : '') +
+    `developer_instructions = '''\n> 适配说明（codex）：以 spawn_agent(role="${a.fm.name}") 派发；写入隔离由 ~/.codex/hooks.json 的 PreToolUse（matcher 含 apply_patch）承担${readonlyRole ? '，本角色另有 sandbox_mode=read-only 物理沙箱' : ''}；正文内 ZCode 专有措辞为模板原文，以本说明为准。\n\n${a.body}'''\n`;
   // 降级备选：~/.codex/prompts/<name>.md（单会话角色卡，/name 调用——agents.toml 暴露异常时的兜底）
   const prompt = `---\ndescription: ${q(a.fm.description)}\n---\n\n` +
     `> 适配说明（codex prompts 形态，docs/18 §4）：单会话角色卡——本轮全程以「${a.fm.name}」角色纪律执行；写入隔离由 ~/.codex/hooks.json guard 承担。\n\n${a.body}`;

@@ -1,7 +1,7 @@
 # Codex 适配包（docs/18 §4）
 
 把六角色 harness 装到 OpenAI Codex CLI（本机修复后实证 0.153.4，ARM64 原生包）。
-2026-09-06 判级改写：Codex 已有完整 hooks 体系（官方文档实证），不再是"仅 sandbox/approval 降级"形态。
+2026-09-06 判级改写：Codex 已有完整 hooks 体系（官方文档实证），不再是"仅 sandbox/approval 降级"形态。2026-09-07 双确认：角色文件形态经**官方 subagents 页终判**（必填 developer_instructions 键 + 可选 sandbox_mode 角色级物理沙箱），且 skills 官方层可挂任意目录（含 ~/.agents/skills）。
 
 ## 本包内容
 
@@ -15,6 +15,8 @@
 
 - ✅ 官方 hooks 文档：`~/.codex/hooks.json`（用户级）+ `<repo>/.codex/hooks.json`（项目级）双层加载；PreToolUse 可阻断，**apply_patch 会触发**（matcher 按 `apply_patch`/`Edit`/`Write` 匹配，输入里 tool_name 报 `apply_patch`）；阻断输出三形态：`permissionDecision:"deny"` / 旧式 `{"decision":"block"}` / exit 2+stderr。
 - ✅ 本机 `[features] hooks = true`、`multi_agent = true`（stable，0.153.4 features list 实测）。
+- ✅✅ 角色文件形态官方终判（2026-09-07 subagents 页）：`~/.codex/agents/*.toml` 一角色一文件，必填 name/description/**developer_instructions**，可选 model/**sandbox_mode**/mcp_servers/skills.config；文件名=约定、name 字段=真相。生成器已按此物化（code-reviewer/red-teamer 配 `sandbox_mode="read-only"`——hooks 之外的第二道官方物理防线）。
+- ✅✅ skills 官方层（config-reference）：`[[skills.config]]` path+enabled 可挂任意目录——装机时把 `~/.agents/skills` 挂进 config.toml 即五棒锚点全效（挂载冒烟为装机验证项）。
 - ⚠️ 官方自注边界："部分专用工具路径可退出默认 hook 路径——hooks 属护栏（guardrail）而非完全强制边界"。写入隔离第一道物理防线仍成立，验收话术按护栏口径。
 - ⚠️ 装机验证项：guard 的 payload 字段映射（apply_patch 的 `tool_input` 是否含逐文件路径——**先跑探针**；若只有整块 patch 文本，需给 guard 加 codex 分支后才能绿，属预期装机工作）。
 - ⚠️ **探针完成前，guard 对 apply_patch 等价零防护**：guard 对无路径可判的 payload 是 fail-open（与 .mjs 同语义）——注册了 hooks.json 不等于防线已生效，完成探针/字段适配前不得按"已部署物理防线"对待。

@@ -12,7 +12,8 @@
 ## 已证实 / 待验证
 
 - ✅ 官方文档 agents 页：全局目录 `~/.config/opencode/agents/`（复数）、项目 `.opencode/agents/`；frontmatter = description(必填)/mode(`primary`|`subagent`|`all`)/model/temperature/permission；文件名即 agent 名；派发=主代理按 description 自动派发或 `@name` 显式派发。
-- ✅ 官方文档 plugins 页：阻断=在 `tool.execute.before` 中 `throw new Error(...)`；插件目录 `~/.config/opencode/plugins/`（全局，启动自动加载）——本机现有 GSD 框架的 agents/hooks/plugins 三目录样本与此一致（2026-04 安装实证）。
+- ✅ 官方文档 plugins 页：阻断=在 `tool.execute.before` 中 `throw new Error(...)`；插件目录 `~/.config/opencode/plugins/`（全局，启动自动加载）——本机现有 GSD 框架的 agents/hooks/plugins 三目录样本与此一致（2026-04 安装实证）。CLI 实测 `opencode agent list/create` 在位。
+- ✅ skills 层实测在位（2026-09-07 CLI：`opencode debug skill` 子命令；本机空载未配技能）——目录配置方式待装机；配通后五棒技能锚点可不再降级。
 - ⚠️ `tools` 键官方标注 deprecated（倾向 `permission` 键）；本包仍物化 `tools` 正向清单（只读角色），`permission` 键替代方案为装机验证项。
 - ⚠️ `disallowedTools` 不存在——code-reviewer/red-teamer 的"禁写"纵深降级为 guard + 纪律（guard 是物理主防线，语义不变）。
 - ⚠️ 装机验证项：write/edit/patch 工具名与 args 路径字段名（`filePath` vs `path`——guard 已三读兜底，仍需探针确认）。
