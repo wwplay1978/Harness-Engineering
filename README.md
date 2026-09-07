@@ -68,7 +68,17 @@ Core disciplines:
 
 ### Getting started
 
-Preferred: let an AI agent drive the whole installation (it runs every executable step; you handle elevation / GUI / credentials / decisions only) — the kickoff prompt and human-prep checklist are in [`docs/17`](docs/17-agent-assisted-install.md). Manual path: environment probe → parameterized installers → adaptation, per [`docs/16`](docs/16-host-agnostic-installer.md) and [`docs/07`](docs/07-migration-playbook.md).
+**One sentence, full install.** Open an AI coding agent session (ZCode, Claude Code, Kimi Code — any host with file and terminal access) in the directory where you want the repository, and paste:
+
+```text
+Install Harness Engineering for me: clone https://github.com/wwplay1978/Harness-Engineering.git into the current directory (if git is missing, install git first, or download and extract the ZIP via the GitHub page's Code → Download ZIP button instead), then ask me for the target project path (I will answer with the project's absolute path, or "none yet — install global components only"), and formally start the installation from S0, strictly following the kickoff prompt in docs/17-agent-assisted-install.md inside the cloned repo (§3; REPO = the cloned repo's absolute path, target project = my answer). Division of labor and safety rules are governed by that document.
+```
+
+The agent clones this repo into `./Harness-Engineering` under the current directory, asks for your target project, then drives the whole install ([`docs/17`](docs/17-agent-assisted-install.md)); you only handle elevation / GUI / credentials / decisions.
+
+**Agent-driven install, step by step**: do the 10–20 min human prep ([`docs/17 §2.5`](docs/17-agent-assisted-install.md) — place the repo, optionally pre-install basics, get credentials), then paste the full kickoff prompt ([`docs/17 §3`](docs/17-agent-assisted-install.md)) in a session opened at the repo root.
+
+**Manual path**: environment probe → parameterized installers → adaptation, per [`docs/16`](docs/16-host-agnostic-installer.md) and [`docs/07`](docs/07-migration-playbook.md):
 
 ```bash
 git clone https://github.com/wwplay1978/Harness-Engineering.git

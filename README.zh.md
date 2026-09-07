@@ -68,7 +68,17 @@ planner ─▶ developer ─▶ code-reviewer ─▶ qa-tester ─▶ reviewer�
 
 ### 快速开始
 
-推荐路径：让 AI 智能体代跑整个安装（一切可执行项由它做，人只处理提权/GUI/凭据/决策）——kickoff 提示词与人工准备清单在 [`docs/17`](docs/17-agent-assisted-install.md)。手动路径：环境探测 → 参数化安装 → 适配，见 [`docs/16`](docs/16-host-agnostic-installer.md) 与 [`docs/07`](docs/07-migration-playbook.md)。
+**一句话启动完整安装。** 在想放置仓库的目录下打开任意 AI coding 智能体会话（ZCode、Claude Code、Kimi Code——凡具备文件读写与终端执行能力的宿主均可），粘贴：
+
+```text
+请帮我安装 Harness Engineering：把 https://github.com/wwplay1978/Harness-Engineering.git clone 到当前目录（本机无 git 时先装 git，或改用 GitHub 页面 Code → Download ZIP 下载解压到当前目录），完成后向我询问目标项目路径（我回答项目根目录绝对路径，或"暂无，先装全局件"），然后严格按 clone 下来的仓库中 docs/17-agent-assisted-install.md 的 kickoff 提示词（§3；REPO=刚 clone 出的仓库绝对路径，目标项目=我的回答）从 S0 正式启动安装；人机分工与安全铁律一律以该文档为准。
+```
+
+智能体会把本仓库 clone 到当前目录下的 `./Harness-Engineering`，向你询问目标项目路径，然后按 [`docs/17`](docs/17-agent-assisted-install.md) 代跑整个安装；你只处理提权/GUI/凭据/决策。
+
+**智能体代跑（自行逐条对照）**：先完成 10–20 分钟人工准备（[`docs/17 §2.5`](docs/17-agent-assisted-install.md)：仓库上机、可选预装、备凭据），再在仓库根目录打开会话、粘贴 §3 kickoff 提示词全文。
+
+**手动路径**：环境探测 → 参数化安装 → 适配，见 [`docs/16`](docs/16-host-agnostic-installer.md) 与 [`docs/07`](docs/07-migration-playbook.md)：
 
 ```bash
 git clone https://github.com/wwplay1978/Harness-Engineering.git
