@@ -257,7 +257,16 @@
       "from": "developer",
       "to": "reviewer",
       "label": "diff 快照",
-      "role": "main"
+      "role": "main",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "via": [
+        [
+          360.9,
+          367
+        ]
+      ],
+      "labelSegment": 0
     },
     {
       "id": "reviewer-qa",
@@ -290,8 +299,9 @@
       "id": "human-archiver",
       "from": "human",
       "to": "archiver",
-      "label": "merge commit",
-      "role": "main"
+      "role": "main",
+      "fromSide": "bottom",
+      "toSide": "top"
     },
     {
       "id": "reviewer-fix",
