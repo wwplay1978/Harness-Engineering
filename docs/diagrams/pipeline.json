@@ -1,0 +1,367 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "六角色流水线全貌",
+    "locale": "zh-CN",
+    "output": "pipeline.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "main-path",
+        "label": "主路径八棒",
+        "focus": [
+          "planner",
+          "developer",
+          "reviewer",
+          "qa",
+          "quick",
+          "redteam",
+          "human",
+          "archiver"
+        ],
+        "note": "从 spec 立项到归档沉淀的完整正向路径。"
+      },
+      {
+        "id": "repair-loop",
+        "label": "修复回路",
+        "focus": [
+          "reviewer",
+          "qa",
+          "fix",
+          "escalate"
+        ],
+        "note": "返工退回、rerun 变体与人工升级。"
+      },
+      {
+        "id": "spec-loop",
+        "label": "规范回灌",
+        "focus": [
+          "changes",
+          "planner"
+        ],
+        "note": "审查发现的规范缺口经 changes/ 链（r1→rN）回灌 spec。"
+      },
+      {
+        "id": "knowledge-flywheel",
+        "label": "知识飞轮",
+        "focus": [
+          "archiver",
+          "planner"
+        ],
+        "note": "上一票的沉淀成为下一票的 recall。"
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "plan",
+      "label": "Plan · 规划"
+    },
+    {
+      "id": "build",
+      "label": "Code · 实现与修复"
+    },
+    {
+      "id": "gates",
+      "label": "Deliver · 门禁"
+    },
+    {
+      "id": "land",
+      "label": "Adversarial · 对抗与合并"
+    },
+    {
+      "id": "archive",
+      "label": "Archive · 沉淀"
+    }
+  ],
+  "phases": [
+    {
+      "id": "ph-plan",
+      "label": "Plan",
+      "fromCol": 0,
+      "toCol": 0
+    },
+    {
+      "id": "ph-code",
+      "label": "Code",
+      "fromCol": 1,
+      "toCol": 1
+    },
+    {
+      "id": "ph-deliver",
+      "label": "Deliver · 门禁与对抗",
+      "fromCol": 2,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "ph-land",
+      "label": "Merge + Archive",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g-gates",
+      "label": "双门禁",
+      "lane": "gates",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "g-rerun",
+      "label": "rerun 变体",
+      "lane": "build",
+      "fromCol": 3,
+      "toCol": 3,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "planner",
+    "developer",
+    "reviewer",
+    "qa",
+    "quick",
+    "redteam",
+    "human",
+    "archiver"
+  ],
+  "nodes": [
+    {
+      "id": "planner",
+      "lane": "plan",
+      "col": 0,
+      "type": "backend",
+      "label": "planner",
+      "sublabel": "spec + tickets · 定级",
+      "width": 155,
+      "height": 42
+    },
+    {
+      "id": "changes",
+      "lane": "plan",
+      "col": 1,
+      "type": "database",
+      "label": "changes/ 缺口链",
+      "sublabel": "审查缺口 · r1→rN",
+      "width": 155,
+      "height": 42
+    },
+    {
+      "id": "developer",
+      "lane": "build",
+      "col": 1,
+      "type": "backend",
+      "label": "developer",
+      "sublabel": "worktree · TDD 自测",
+      "height": 42,
+      "width": 155
+    },
+    {
+      "id": "fix",
+      "lane": "build",
+      "col": 3,
+      "type": "backend",
+      "label": "developer-rerun",
+      "sublabel": "≥2 次 · 钉强模型",
+      "width": 155,
+      "height": 42
+    },
+    {
+      "id": "escalate",
+      "lane": "build",
+      "col": 5,
+      "type": "external",
+      "label": "escalate",
+      "sublabel": ">4 次 · 人工接管",
+      "height": 42,
+      "width": 155
+    },
+    {
+      "id": "reviewer",
+      "lane": "gates",
+      "col": 2,
+      "type": "security",
+      "label": "code-reviewer",
+      "sublabel": "对照 spec · 门禁1",
+      "height": 42,
+      "width": 155
+    },
+    {
+      "id": "qa",
+      "lane": "gates",
+      "col": 3,
+      "type": "security",
+      "label": "qa-tester",
+      "sublabel": "边界回归 · 门禁2",
+      "width": 155,
+      "height": 42
+    },
+    {
+      "id": "quick",
+      "lane": "gates",
+      "col": 4,
+      "type": "security",
+      "label": "reviewer 快审",
+      "sublabel": "tests-only 增量",
+      "height": 42,
+      "width": 155
+    },
+    {
+      "id": "redteam",
+      "lane": "land",
+      "col": 4,
+      "type": "security",
+      "label": "red-teamer",
+      "sublabel": "七攻击面 · full/fast/skip",
+      "height": 42,
+      "width": 155
+    },
+    {
+      "id": "human",
+      "lane": "land",
+      "col": 5,
+      "type": "external",
+      "label": "人 · 合并决策",
+      "height": 42,
+      "width": 155
+    },
+    {
+      "id": "archiver",
+      "lane": "archive",
+      "col": 5,
+      "type": "backend",
+      "label": "archiver",
+      "sublabel": "归档七步 SOP",
+      "height": 42,
+      "width": 155
+    }
+  ],
+  "edges": [
+    {
+      "id": "planner-developer",
+      "from": "planner",
+      "to": "developer",
+      "label": "spec + tickets",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "developer-reviewer",
+      "from": "developer",
+      "to": "reviewer",
+      "label": "diff 快照",
+      "role": "main"
+    },
+    {
+      "id": "reviewer-qa",
+      "from": "reviewer",
+      "to": "qa",
+      "label": "pass",
+      "role": "main"
+    },
+    {
+      "id": "qa-quick",
+      "from": "qa",
+      "to": "quick",
+      "label": "测试增量",
+      "role": "main"
+    },
+    {
+      "id": "quick-redteam",
+      "from": "quick",
+      "to": "redteam",
+      "role": "main"
+    },
+    {
+      "id": "redteam-human",
+      "from": "redteam",
+      "to": "human",
+      "label": "攻击结论",
+      "role": "main"
+    },
+    {
+      "id": "human-archiver",
+      "from": "human",
+      "to": "archiver",
+      "label": "merge commit",
+      "role": "main"
+    },
+    {
+      "id": "reviewer-fix",
+      "from": "reviewer",
+      "to": "fix",
+      "label": "request changes",
+      "role": "error"
+    },
+    {
+      "id": "qa-fix",
+      "from": "qa",
+      "to": "fix",
+      "label": "缺陷退回",
+      "role": "error"
+    },
+    {
+      "id": "fix-reviewer",
+      "from": "fix",
+      "to": "reviewer",
+      "label": "复审",
+      "role": "branch"
+    },
+    {
+      "id": "fix-escalate",
+      "from": "fix",
+      "to": "escalate",
+      "label": ">4 次",
+      "role": "error"
+    },
+    {
+      "id": "changes-planner",
+      "from": "changes",
+      "to": "planner",
+      "label": "spec 修订回灌",
+      "variant": "dashed",
+      "role": "return"
+    },
+    {
+      "id": "escalate-human",
+      "from": "escalate",
+      "to": "human",
+      "label": "人工接管",
+      "variant": "dashed",
+      "role": "branch"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "先 Spec 后码",
+      "items": [
+        "无票不开工：一 spec 一 worktree 一分支",
+        "≥2 次换 rerun 变体；>4 次升级人工"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "双门禁 + 对抗审查",
+      "items": [
+        "reviewer 对照 spec；qa 攻边界回归",
+        "red-teamer 七攻击面，零重叠盲区"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "唯一合并点 + 知识飞轮",
+      "items": [
+        "合并决策永远是人；archiver 归档七步",
+        "沉淀记忆/Obsidian/metrics 回灌下票"
+      ]
+    }
+  ]
+}

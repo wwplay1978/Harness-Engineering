@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Harness Engineering 体系总体架构",
+    "locale": "zh-CN",
+    "output": "architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "main-flow",
+        "label": "一票主路径",
+        "focus": ["human", "host", "roles", "worktree", "gates"],
+        "note": "从人的需求出发，到人的合并决策收口。"
+      },
+      {
+        "id": "physical-guard",
+        "label": "物理防护",
+        "focus": ["constitution", "guard", "worktree", "human"],
+        "note": "宪法与 guard hooks 让约束成为物理事实，而非提示词约定。"
+      },
+      {
+        "id": "knowledge-loop",
+        "label": "记忆与知识闭环",
+        "focus": ["roles", "memory", "obsidian", "host"],
+        "note": "注入上下文、沉淀结论、回灌知识。"
+      },
+      {
+        "id": "spec-feedback",
+        "label": "规范反馈环",
+        "focus": ["gates", "spec", "skills"],
+        "note": "度量驱动规范修订，经 sync 分发回用户域。"
+      }
+    ]
+  },
+  "components": [
+    { "id": "human", "type": "external", "label": "人 · 掌舵", "sublabel": "需求 · 合并 · 宪法维护", "tag": "humans steer", "pos": [44, 310], "size": [152, 76] },
+    { "id": "host", "type": "frontend", "label": "Agent 宿主层", "sublabel": "ZCode 首个全验证宿主", "tag": "5-host adapters", "pos": [272, 310], "size": [176, 76] },
+    { "id": "roles", "type": "backend", "label": "六角色流水线", "sublabel": "planner → archiver（+3 rerun）", "pos": [524, 310], "size": [184, 76] },
+    { "id": "worktree", "type": "backend", "label": "Worktree 隔离", "sublabel": "一票一分支 feat/<slug>", "pos": [784, 310], "size": [184, 76] },
+    { "id": "gates", "type": "security", "label": "L1–L4 门禁 + 度量", "sublabel": "审查 · QA · 红队 · metrics", "pos": [1044, 310], "size": [196, 76] },
+    { "id": "constitution", "type": "security", "label": "宪法与红线", "sublabel": "AGENTS.md ≤100 行", "tag": "人写", "pos": [272, 100], "size": [176, 64] },
+    { "id": "obsidian", "type": "database", "label": "Obsidian 知识库", "sublabel": "工作区草稿 → 人定稿", "tag": "人写定稿", "pos": [524, 100], "size": [184, 64] },
+    { "id": "spec", "type": "database", "label": "规范仓库", "sublabel": "docs + templates 唯一来源", "tag": "git 版本化", "pos": [44, 540], "size": [176, 68] },
+    { "id": "memory", "type": "database", "label": "四层记忆", "sublabel": "会话 · hindsight · 工件 · basic-memory", "tag": "via MCP", "pos": [255, 540], "size": [210, 68] },
+    { "id": "skills", "type": "backend", "label": "Skills 技能层", "sublabel": "规划纪律 · harness-audit", "pos": [524, 540], "size": [184, 64] },
+    { "id": "guard", "type": "security", "label": "Guard Hooks", "sublabel": "PreToolUse · exit 2 阻断", "pos": [784, 540], "size": [184, 64] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "物理写入隔离 · PreToolUse", "wraps": ["worktree", "guard"], "pad": 14 },
+    { "kind": "region", "label": "用户域安装（一次装好）", "wraps": ["memory", "skills"], "pad": 16 }
+  ],
+  "connections": [
+    { "id": "human-host", "from": "human", "to": "host", "label": "需求", "variant": "emphasis" },
+    { "id": "host-roles", "from": "host", "to": "roles", "label": "派发工单" },
+    { "id": "constitution-host", "from": "constitution", "to": "host", "label": "红线注入", "variant": "security", "labelAt": [360, 238] },
+    { "id": "roles-worktree", "from": "roles", "to": "worktree", "label": "隔离实现" },
+    { "id": "guard-worktree", "from": "guard", "to": "worktree", "label": "阻断主检出写入", "variant": "security" },
+    { "id": "worktree-gates", "from": "worktree", "to": "gates", "label": "diff 快照" },
+    { "id": "gates-human", "from": "gates", "to": "human", "label": "合并决策（人）", "variant": "emphasis", "fromSide": "top", "toSide": "top", "via": [[1142, 48], [120, 48]] },
+    { "id": "roles-obsidian", "from": "roles", "to": "obsidian", "label": "知识草稿沉淀", "variant": "dashed" },
+    { "id": "gates-spec", "from": "gates", "to": "spec", "label": "度量反馈 · 修订", "variant": "dashed", "fromSide": "bottom", "toSide": "right", "via": [[1142, 700], [252, 700], [252, 574]] },
+    { "id": "spec-skills", "from": "spec", "to": "skills", "label": "sync 分发", "variant": "dashed", "fromSide": "bottom", "toSide": "bottom", "via": [[132, 660], [616, 660]] },
+    { "id": "memory-host", "from": "memory", "to": "host", "label": "上下文注入", "labelAt": [360, 463] },
+    { "id": "roles-skills", "from": "roles", "to": "skills", "label": "按需加载", "labelAt": [616, 463] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "单一人机契约",
+      "items": [
+        "人只做三件事：提需求、做合并决策、维护宪法",
+        "其余全流程由六角色子代理执行，证据落盘可审查",
+        "合并决策永远是人——没有自动合并"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "物理约束，不止约定",
+      "items": [
+        "guard hook 以 exit 2 物理阻断主检出写入",
+        "宪法 AGENTS.md 永远人手维护，Agent 不可改写",
+        "sync 分发绝不写运行中的 hook 副本"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "知识飞轮",
+      "items": [
+        "每票终局：结论入记忆 · Obsidian 草稿 · metrics 代录",
+        "度量反馈规范修订，规范经 sync 分发回用户域",
+        "下一票带着上一票的经验开工"
+      ]
+    }
+  ]
+}

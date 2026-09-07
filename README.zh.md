@@ -43,20 +43,11 @@ Harness（驾驭）是 LLM 与"可治理的高效编码"之间的工程层，六
 
 ## 如何做 Harness Engineering？
 
-流水线全貌（详见 [`docs/02`](docs/02-team-core.md)）：
+流水线全貌——六角色、一张工单、从 spec 到归档（详见 [`docs/02`](docs/02-team-core.md)）：
 
-```
-planner ─▶ developer ─▶ code-reviewer ─▶ qa-tester ─▶ reviewer（增量快审）
-   │           ▲             │ pass             │
-   │           └─ 修复轮 ────┘                  ▼
-   │                                          red-teamer（full/fast/skip 定级）
-   │                                           │
-   └── spec 升版环 ◀── changes/ ◀── 【人：合并决策】
-                                               │
-                                          archiver（七步 SOP：记忆、ticket 状态、
-                                          Obsidian 草稿+reconcile、度量含±行数、
-                                          worktree 清理）
-```
+[![六角色流水线](docs/diagrams/pipeline-light.png)](docs/diagrams/pipeline.html)
+
+**动起来看**：[`docs/diagrams/pipeline.html`](docs/diagrams/pipeline.html) 是交互式动画版——零依赖单文件 HTML，可播放 Live trace 动画逐棒点亮一票的完整旅程，支持 Light/Dark 主题切换（`?theme=light`）、缩放平移、搜索聚焦与引导章节。GitHub 页面显示的是源码，clone 或下载后本地打开即为完整效果。[全部图表 →](docs/diagrams/)
 
 核心纪律：
 
@@ -88,6 +79,10 @@ templates/installer/install-hindsight-service.cmd --rehearse   # 正式安装前
 
 ## 架构规划与优势设计
 
+[![体系总体架构](docs/diagrams/architecture-light.png)](docs/diagrams/architecture.html)
+
+交互版：[`docs/diagrams/architecture.html`](docs/diagrams/architecture.html)——人机契约、宿主层、六角色流水线、物理写入隔离、四层记忆与规范反馈环，支持主题切换、聚焦搜索与引导章节。
+
 ```
 Harness-Engineering/
 ├── docs/        可复用规范层（理念、六角色、记忆、评估、约束、迁移手册、
@@ -112,6 +107,31 @@ Harness-Engineering/
 - **优雅降级**。每个组件都可选，缺失即按文档化矩阵降级：full / core-plus / minimal 三档 profile；探测脚本自动分级并产出 `adaptation-plan.md`。
 - **安全护栏内建**。API key 永不落盘、不进智能体会话；提权脚本必须先 `--rehearse` 干跑；hooks 注册与宪法永久人手；安装器产物自动重定向出 git 工作树。
 - **Windows 运维淬炼**。批处理 ASCII-only（ANSI 代码页怪癖）、`chcp 65001` 兜非 ASCII 用户名、服务环境 UTF-8（GBK 崩溃教训）、进程名白名单杀进程、模型目录 `config.json` 哨兵。
+
+## 与同类框架对比
+
+「智能体 Harness / spec 驱动开发」领域已有多个优秀框架。下表事实取自各项目官方 README/文档与 GitHub API，核对时间 2026-09；star 数为约数；「—」表示截至核对时该项目文档未提及该能力。
+
+| | 本仓库 | [spec-kit](https://github.com/github/spec-kit) | [BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) | [GSD](https://github.com/open-gsd/gsd-core) | [SuperClaude](https://github.com/SuperClaude-Org/SuperClaude_Framework) | [Task Master](https://github.com/eyaltoledano/claude-task-master) |
+|---|---|---|---|---|---|---|
+| 定位 | Harness 规范 + 安装器工具包 | spec 驱动开发工具包 | 智能体敏捷框架 | 轻量 spec 驱动系统 | Claude Code 增强 | AI 任务管理 |
+| 宿主范围 | 宿主无关；五宿主适配包；ZCode 全验证 | 30+ 智能体 | 技能制、多宿主 | 多运行时（9+ 宿主） | 仅 Claude Code（+ 姊妹移植） | MCP + CLI、多 IDE |
+| 约束执行 | **物理级**：阻断式 hooks（`exit 2`）、宪法只能人改 | 仅提示词 | 仅提示词 | 仅提示词 | 仅提示词 | — |
+| 对抗门禁 | **red-teamer**，七攻击面、按票 full/fast/skip | — | — | — | — | — |
+| 归档阶段 | **archiver 角色**、七步 SOP、知识飞轮 | — | 复盘（独立模块） | 部分（ship 阶段） | — | — |
+| 记忆 | 三层：basic-memory · hindsight · Obsidian | — | 工件式持久上下文 | STATE.md / CONTEXT.md 文件 | 内建多层 | — |
+| 审计与度量 | 百分制可执行审计 + 逐票度量台账 | — | — | — | — | 仅复杂度报告 |
+| ≈ star | 初生 | ~134k | ~53k | ~9k（旧仓 ~65k） | ~24k | ~28k（2026-04 起放缓） |
+
+别人确实更好的地方——直说：
+
+- **社区与采用规模**。spec-kit、BMAD 的用户量与跨团队实战检验高几个数量级。本仓库的实证是一个真实试点（6 票、QA 实现缺陷 0）加一次独立 93/100 审计基线。
+- **上手体验**。`npx` 式安装器和打磨过的 CLI 优于一个假定安装纪律的「规范 + 模板」仓库。一句话智能体代跑安装能缓解，但门槛确实存在。
+- **宿主验证**。目前仅 ZCode 完成装机实测；其余四宿主适配包已就绪，装机实测刻意留作首装步骤。
+- **平台广度**。运维淬炼以 Windows 为主（NSSM、代码页、服务化教训）；Unix 侧等价验证较少。
+- **语言**。完整文档是中文；英文 README 是精选镜像而非全量翻译。
+
+按需选择：要大社区的规划纪律 → spec-kit；要完整敏捷流程 → BMAD；要 Claude Code 超能力 → SuperClaude；要任务图 → Task Master。本仓库在其上补齐的是：**物理级（非口头）的约束执行**、合并前的**对抗门禁**、一等公民的归档**知识飞轮**、可度量的**审计闭环**——且契约级宿主无关。
 
 ## 度量与持续优化
 

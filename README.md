@@ -43,20 +43,11 @@ Work flows through **Plan → Code → Deliver → Archive (+ knowledge retentio
 
 ## How to do it
 
-The pipeline (full detail in [`docs/02`](docs/02-team-core.md)):
+The pipeline — six roles, one ticket, from spec to archive (full detail in [`docs/02`](docs/02-team-core.md)):
 
-```
-planner ─▶ developer ─▶ code-reviewer ─▶ qa-tester ─▶ reviewer (tests-only)
-   │           ▲             │ pass             │
-   │           └─ fix rounds ┘                  ▼
-   │                                          red-teamer (full/fast/skip)
-   │                                           │
-   └── spec upgrade loop ◀── changes/ ◀── 【HUMAN: merge decision】
-                                               │
-                                          archiver (7-step SOP: memory, ticket
-                                          status, Obsidian draft + reconcile,
-                                          metrics incl. ±lines, worktree cleanup)
-```
+[![Six-role pipeline](docs/diagrams/pipeline-light.png)](docs/diagrams/pipeline.html)
+
+**See it move**: [`docs/diagrams/pipeline.html`](docs/diagrams/pipeline.html) is the interactive, animated version — a self-contained HTML that plays a Live trace of one ticket's journey through all six roles, with Light/Dark toggle (`?theme=light`), pan/zoom, search, and guided chapters. GitHub shows it as source; open it locally after cloning. [All diagrams →](docs/diagrams/)
 
 Core disciplines:
 
@@ -88,6 +79,10 @@ templates/installer/install-hindsight-service.cmd --rehearse   # dry-run before 
 
 ## Architecture & design highlights
 
+[![System architecture](docs/diagrams/architecture-light.png)](docs/diagrams/architecture.html)
+
+Interactive version: [`docs/diagrams/architecture.html`](docs/diagrams/architecture.html) — the human contract, host layer, six-role pipeline, physical write isolation, four-layer memory, and the spec feedback loop, with theme toggle, focus/search, and guided chapters.
+
 ```
 Harness-Engineering/
 ├── docs/        reusable spec layer (concepts, six roles, memory, eval, guardrails,
@@ -113,6 +108,31 @@ Design decisions worth stealing:
 - **Graceful degradation.** Every component is optional with a documented workflow adaptation: full / core-plus / minimal profiles; the probe classifies your machine and emits an `adaptation-plan.md`.
 - **Security rails baked in.** API keys never touch disk or agent transcripts; elevated scripts require a `--rehearse` dry-run first; hooks registration and the constitution are permanently human-hands; installer outputs auto-redirect out of git work trees.
 - **Ops-hardened on Windows.** ASCII-only batch files (ANSI codepage quirk), `chcp 65001` for non-ASCII usernames, UTF-8 service env (GBK crash lesson), process-name-whitelist kills, model `config.json` sentinels.
+
+## How this compares
+
+Several strong frameworks already live in the "agent harness / spec-driven development" space. Facts below come from each project's official README/docs and the GitHub API, checked 2026-09; star counts are approximate. "—" means "not documented in that project's README/docs as of the check".
+
+| | This repo | [spec-kit](https://github.com/github/spec-kit) | [BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) | [GSD](https://github.com/open-gsd/gsd-core) | [SuperClaude](https://github.com/SuperClaude-Org/SuperClaude_Framework) | [Task Master](https://github.com/eyaltoledano/claude-task-master) |
+|---|---|---|---|---|---|---|
+| Positioning | harness spec + installer toolkit | spec-driven development toolkit | agentic agile framework | lightweight spec-driven system | Claude Code enhancement | AI task management |
+| Host scope | host-agnostic; 5 adapter packages; ZCode fully validated | 30+ agents | skills-based, multi-host | multi-runtime (9+ hosts) | Claude Code only (+ sibling ports) | MCP + CLI, many IDEs |
+| Enforcement | **physical**: blocking hooks (`exit 2`), human-only constitution | prompt-only | prompt-only | prompt-only | prompt-only | — |
+| Adversarial gate | **red-teamer**, 7 attack surfaces, full/fast/skip per ticket | — | — | — | — | — |
+| Archive phase | **archiver role**, 7-step SOP, knowledge flywheel | — | retros (separate module) | partial (ship phase) | — | — |
+| Memory | 3 layers: basic-memory · hindsight · Obsidian | — | artifact-based durable context | STATE.md / CONTEXT.md files | built-in multi-layer | — |
+| Audit & metrics | 100-point executable audit + per-ticket metrics ledger | — | — | — | — | complexity report only |
+| ≈ stars | young | ~134k | ~53k | ~9k (legacy repo ~65k) | ~24k | ~28k (slowing since 2026-04) |
+
+Where others genuinely win — stated plainly:
+
+- **Community & adoption.** spec-kit and BMAD have orders of magnitude more users and cross-team battle-testing. This repo's evidence is one real pilot (6 tickets, 0 implementation defects in QA) plus an independent 93/100 audit baseline.
+- **Onboarding ergonomics.** An `npx`-style installer and polished CLI beat a spec + templates repo that assumes install discipline. Our one-sentence agent-assisted install helps, but the entry cost is real.
+- **Host verification.** Only ZCode is fully on-machine verified today; the other four adapters ship as ready packages with on-machine checks deliberately left as the first install step.
+- **Platform breadth.** Ops hardening is Windows-first (NSSM, codepage, service lessons); Unix equivalents are less exercised.
+- **Language.** Full docs are Chinese; this English README is a curated mirror, not a complete translation.
+
+Choose by need: planning discipline with a huge community → spec-kit; a full agile process → BMAD; Claude Code superpowers → SuperClaude; task graphs → Task Master. What this repo adds on top: **physical (not advisory) enforcement**, an **adversarial gate before merge**, archive as a first-class **knowledge flywheel**, and a **measurable audit loop** — host-agnostic by contract.
 
 ## Measurement & continuous improvement
 
