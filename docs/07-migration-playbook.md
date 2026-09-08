@@ -122,8 +122,11 @@ cd "$NEW" && git gtr doctor | tail -3
 HARNESS=~/.agents/Harness-Engineering   # 与第 1 步保持一致
 echo "{\"cwd\":\"$(cygpath -m "$NEW")\",\"tool_input\":{\"path\":\"src/x.js\"}}" | node ~/.zcode/hooks/harness/guard-worktree.mjs; echo "exit=$?"
 # ③ 记忆注入验证：先造数据再测——空库输出为空无法区分"正常"与"hook 失效"（防假绿）
-basic-memory tool write-note --title "verify-01" --folder decisions "迁移验证条目" --project "$PROJ" >/dev/null 2>&1
-echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node ~/.zcode/hooks/harness/inject-memory.mjs | grep -q "$PROJ\|verify-01\|团队记忆" && echo "③ 注入 OK" || echo "③ ⚠️ 注入无输出：检查 .zcode/memory-project 与脚本字段（P0-3）"
+#    注（AITrader2 首装实测 2026-09-08）：内容必须走 --content（v0.22.1 拒绝位置参数）；勿加重定向
+#    吞错——写入失败会伪装成"注入无输出"；inject-memory 按 session_id 每会话仅注入一次
+#    （%TEMP%\zcode-memo-injected-<sid> 标记），复测须换 session_id 或先清该标记
+basic-memory tool write-note --title "verify-01" --folder decisions --content "迁移验证条目" --project "$PROJ"
+echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node ~/.zcode/hooks/harness/inject-memory.mjs | grep -q "$PROJ\|verify-01\|团队记忆" && echo "③ 注入 OK" || echo "③ ⚠️ 注入无输出：检查 write-note 是否成功（上一行应见 created）、.zcode/memory-project 与脚本字段（P0-3）"
 ```
 
 ①②③ 必须全绿（②③ 依赖第 0 步用户级 hooks 已部署——2026-09-02 起即在位）。全部就位后，在项目目录**新开会话**即可使用（角色文件、hooks、MCP 均启动时加载；ZCode 子代理定义改动也需新会话生效）。

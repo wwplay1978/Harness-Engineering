@@ -1,5 +1,5 @@
 {
-  "_readme": "项目级 config：只承载本项目专属 MCP（hooks 一律在用户级 ~/.zcode/cli/config.json——同事件项目级被覆盖丢弃，实测结论 C2，见 docs/08）。使用前把 basic-memory 的 --project 占位符 PROJECTNAME 改成新项目名（迁移手册第 3 步 sed+grep 验证）。hindsight knowledge bank MCP（Phase 2）按 docs/03 §2.4 追加。",
+  "_readme": "项目级 config：只承载本项目专属 MCP（hooks 一律在用户级 ~/.zcode/cli/config.json——同事件项目级被覆盖丢弃，实测结论 C2，见 docs/08）。使用前把 basic-memory 的 --project 占位符改成新项目名（迁移手册第 3 步 sed+grep 验证；sed 为全局替换，故本说明不写字面占位符——AITrader2 首装实测 2026-09-08）。hindsight knowledge bank MCP（Phase 2）按 docs/03 §2.4 追加。",
   "mcp": {
     "servers": {
       "basic-memory": {
