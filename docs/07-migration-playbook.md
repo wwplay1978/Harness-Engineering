@@ -4,26 +4,26 @@
 > **⚠️ 执行位修订（2026-09-07，落点修补）**：三正式脚本**执行位同步上收用户域** `~/.zcode/hooks/harness/`（人工自 `templates/hooks/` 复制），不再指向本仓库 clone 目录——仓库锚定执行位会随 clone 切分支/改名/删除波及全机。guard 另带自防御条款：Agent 写执行位/注册文件无论 cwd 一律阻断（05 §3）。
 
 > 作用域设计（沿用 AITrader 验证过的模式）：**软件与全局机制一次安装（用户域），项目机制按项目复制**。
-> 以下命令在 ZCode 终端（Git Bash）执行；每个代码块自带变量声明、可独立执行；块内只有 `NEW=` 一行需要改（占位用「改成新项目目录名」中文写法——**不用尖括号**，`<` 在 bash 是重定向符）。
+> 以下命令在 ZCode 终端（Git Bash）执行；每个代码块自带变量声明、可独立执行；块内只有 `NEW=` 一行需要改（`HARNESS=` 已是用户域标准位默认，非标准落位才改；占位用「改成新项目目录名」中文写法——**不用尖括号**，`<` 在 bash 是重定向符）。
 
 ## 第 -1 步：环境检测（新电脑 / 新宿主必跑；已就绪机器可跳过）
 
 ```bash
-# 首次：把本仓库 clone 到本机（下文所有 HARNESS= 均指向它；已 clone 过可跳过）
-git clone https://github.com/wwplay1978/Harness-Engineering.git C:/Harness-Engineering
+# 首次：把本仓库 clone 到用户域标准位（全机 AI agent 共用一份；已 clone 过可跳过；下文所有 HARNESS= 均指向它）
+git clone https://github.com/wwplay1978/Harness-Engineering.git ~/.agents/Harness-Engineering
 
-cd C:/Harness-Engineering
+cd ~/.agents/Harness-Engineering
 node templates/installer/check-env.mjs    # 可选参数：--project <目标项目根> --vault <vault路径>
 ```
 
 > 未装 Node 时改用零依赖引导（在 cmd 或 PowerShell 里直接运行，**不要**放进 bash）：
-> `C:\Harness-Engineering\templates\installer\check-env.cmd`（参数照加在后面）
+> `%USERPROFILE%\.agents\Harness-Engineering\templates\installer\check-env.cmd`（参数照加在后面）
 
 零依赖引导（缺 node 会停在第一步并给安装指引）→ 深探运行时/宿主/hindsight/记忆组件/vault/项目结构 → 产出 `env-config.json`（profile 分级 full/core-plus/minimal + 按 docs/16 §4 适配矩阵生成的适配建议）与 `hindsight-params.cmd`（安装参数，不含 key）。**hindsight 安装一律用参数化脚本 v5，先 `--rehearse` 只读预演**（.cmd 安装器在 cmd/PowerShell 原生运行，勿在 bash 里跑）：
 
 ```
-C:\Harness-Engineering\templates\installer\install-hindsight-service.cmd --rehearse "%TEMP%\harness-install\hindsight-params.cmd"
-（PowerShell 写法：& "C:\Harness-Engineering\templates\installer\install-hindsight-service.cmd" --rehearse "$env:TEMP\harness-install\hindsight-params.cmd"）
+%USERPROFILE%\.agents\Harness-Engineering\templates\installer\install-hindsight-service.cmd --rehearse "%TEMP%\harness-install\hindsight-params.cmd"
+（PowerShell 写法：& "$env:USERPROFILE\.agents\Harness-Engineering\templates\installer\install-hindsight-service.cmd" --rehearse "$env:TEMP\harness-install\hindsight-params.cmd"）
 ```
 确认预演输出无误后，在**管理员**终端去掉 `--rehearse` 正式安装。
 
@@ -46,7 +46,7 @@ C:\Harness-Engineering\templates\installer\install-hindsight-service.cmd --rehea
 ## 第 1 步：复制团队机制目录到新项目
 
 ```bash
-HARNESS=C:/Harness-Engineering   # 本仓库 clone 位（下同；克隆到别处则全部同步替换）
+HARNESS=~/.agents/Harness-Engineering   # 本仓库用户域标准位（2026-09-08 起，下同；克隆到别处则全部同步替换）
 NEW=C:/Projects/改成新项目目录名   # ← 本块唯一需要改的行（改完再整段粘贴）
 if [ ! -d "$NEW" ]; then echo "⚠️ 目录不存在：$NEW（全新项目先：mkdir -p \"$NEW\" && cd \"$NEW\" && git init -b main）"; exit 1; fi
 cd "$NEW" && git rev-parse --git-dir >/dev/null 2>&1 || { echo "⚠️ 请先 git init（全新项目：git init -b main）"; exit 1; }
@@ -62,10 +62,13 @@ ls .zcode/ docs/ && echo OK
 ## 第 2 步：生成工作区 AGENTS.md（索引式，≤100 行）
 
 ```bash
-HARNESS=C:/Harness-Engineering   # 与第 1 步保持一致
+HARNESS=~/.agents/Harness-Engineering   # 与第 1 步保持一致
 NEW=C:/Projects/改成新项目目录名   # ← 与第 1 步保持一致
+# 优先路径：目标机装有 AI 宿主时走 docs/17 §3 S5「问答渲染」——agent 探测候选+逐项问答+落盘，零手工编辑；
+# 以下 cp+人工编辑为纯人工 fallback（无宿主/宿主不可用时）
 cp "$HARNESS/templates/AGENTS-template.md" "$NEW/AGENTS.md"
-# 然后人工编辑：填项目名、技术栈、构建/测试命令、目录约定（10 分钟）
+# 然后人工编辑：填项目名、技术栈、构建/测试命令、目录约定；文档地图默认指向标准位 ~/.agents/Harness-Engineering/docs，
+# 非标准落位机改该行为实际路径（10 分钟）
 grep -c "团队流水线" "$NEW/AGENTS.md"   # 预期输出 1
 grep -c "committed on user authorization" "$NEW/AGENTS.md"   # 预期输出 1（r4 人授权直提留痕条款随模板落地，2026-09-06 起）
 ```
@@ -116,7 +119,7 @@ cd "$NEW" && git gtr doctor | tail -3
 # ② guard 模拟触发（预期：阻断提示 + exit=2；脚本用用户域部署位 ~/.zcode/hooks/harness/，
 #    见第 0 步；缺失时先人工 cp templates/hooks/*.mjs 过去）：
 #    cwd 必须用 Windows 形态 cygpath -m）
-HARNESS=C:/Harness-Engineering   # 与第 1 步保持一致
+HARNESS=~/.agents/Harness-Engineering   # 与第 1 步保持一致
 echo "{\"cwd\":\"$(cygpath -m "$NEW")\",\"tool_input\":{\"path\":\"src/x.js\"}}" | node ~/.zcode/hooks/harness/guard-worktree.mjs; echo "exit=$?"
 # ③ 记忆注入验证：先造数据再测——空库输出为空无法区分"正常"与"hook 失效"（防假绿）
 basic-memory tool write-note --title "verify-01" --folder decisions "迁移验证条目" --project "$PROJ" >/dev/null 2>&1
@@ -130,8 +133,8 @@ echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node ~/
 角色/技能/生成器/路由表修订合入本仓库后，一条命令分发到用户域（新项目接入前也建议先跑 `--check` 体检）：
 
 ```bash
-node C:/Harness-Engineering/templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1）
-node C:/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
+node ~/.agents/Harness-Engineering/templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1）
+node ~/.agents/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
 ```
 
 - **自动集**：六角色 base、harness-audit 技能、变体生成器、models.config.json——源=templates/（git 版本化），用户域均为部署副本

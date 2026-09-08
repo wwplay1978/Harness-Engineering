@@ -1,15 +1,15 @@
 # AGENTS.md ·「改成项目名」工作区约定（索引层，≤100 行）
 
-> 使用说明（用完删除本段）：复制到目标项目根目录后，人工填写「」占位项；本文件是流水线宪法，**只能由人修改**（guard hook 会阻断 Agent 改写）。保持索引式——事实本体放 docs/ 与知识库，这里只放"去哪找"。
+> 生成说明（安装助手渲染后删除本段）：本模板由安装助手在安装 S5 按**问答渲染**生成为项目根 AGENTS.md（docs/17 §3 S5）——逐项采集「」字段（未提供按各字段括号内默认）、文档地图写入规范仓实际绝对路径。首次落位属**安装窗口一次性豁免**（"AGENTS.md 只能人改"红线网开一面，人复核渲染全文即视为人授权）；落位后红线恢复——此后只能人修改（guard hook 会阻断 Agent 改写）。保持索引式——事实本体放 docs/ 与知识库，这里只放"去哪找"。
 > **维护点（2026-09-05 审计回灌）**：角色数变化时须同步本文件标题计数与流水线行（web2api 曾发生"五角色"滞留）；项目快照的测试命令等时效性字段随里程碑更新。
 
 ## 项目快照
 
-- 项目：「改成项目名与一句话定位」
-- 技术栈：「改成语言/框架/包管理器，如 Python 3.12 + uv + pytest」
-- 构建命令：「改成如 uv run build」
-- 测试命令：「改成如 uv run pytest -q」
-- 目录速览：「改成核心目录一行图，如 src/（业务） tests/（测试） docs/（工件）」
+- 项目：「改成项目名与一句话定位」（默认=目录名；定位可填"待补"）
+- 技术栈：「改成语言/框架/包管理器，如 Python 3.12 + uv + pytest」（默认=安装助手探测结果，探测不出填"待补（planner 首个 spec 校正）"）
+- 构建命令：「改成如 uv run build」（默认=按技术栈惯例候选，无则"待补（developer 首票确认）"）
+- 测试命令：「改成如 uv run pytest -q」（同上）
+- 目录速览：「改成核心目录一行图，如 src/（业务） tests/（测试） docs/（工件）」（默认=安装助手按仓库实际结构生成，人确认）
 
 ## 团队流水线（六角色，ZCode 版）
 
@@ -71,6 +71,6 @@ planner → developer → code-reviewer → qa-tester → code-reviewer（增量
 
 ## 文档地图（渐进披露，按需读取）
 
-- 规范总纲与记忆/评估/约束设计：harness 规范仓库 `docs/`（本机实际路径由人落位时填写，如 `C:\Harness-Engineering\docs\`）
+- 规范总纲与记忆/评估/约束设计：harness 规范仓库 `docs/`——标准落位 `~/.agents/Harness-Engineering/docs`（Windows 展开 `%USERPROFILE%\.agents\Harness-Engineering\docs`；2026-09-08 起，全机 AI agent 共用一份。渲染时安装助手写入本机实际绝对路径，非标准落位机以渲染结果为准）
 - 本项目工件：`docs/specs/`（规格） `docs/tickets/`（票据） `docs/reviews/`（diff 快照与审查） `docs/changes/`（变更隔离） `docs/audits/`（harness-audit 报告） `docs/metrics.md`（度量）
 - `CONTEXT.md`（项目根，planner 的 grill-with-docs 产出，存在时；guard 白名单放行该文件）

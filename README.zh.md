@@ -59,20 +59,20 @@ Harness（驾驭）是 LLM 与"可治理的高效编码"之间的工程层，六
 
 ### 快速开始
 
-**一句话启动完整安装。** 在想放置仓库的目录下打开任意 AI coding 智能体会话（ZCode、Claude Code、Kimi Code——凡具备文件读写与终端执行能力的宿主均可），粘贴：
+**一句话启动完整安装。** 在任意目录下打开 AI coding 智能体会话（ZCode、Claude Code、Kimi Code——凡具备文件读写与终端执行能力的宿主均可），粘贴：
 
 ```text
-请帮我安装 Harness Engineering：把 https://github.com/wwplay1978/Harness-Engineering.git clone 到当前目录（本机无 git 时先装 git，或改用 GitHub 页面 Code → Download ZIP 下载解压到当前目录），完成后向我询问目标项目路径（我回答项目根目录绝对路径，或"暂无，先装全局件"），然后严格按 clone 下来的仓库中 docs/17-agent-assisted-install.md 的 kickoff 提示词（§3；REPO=刚 clone 出的仓库绝对路径，目标项目=我的回答）从 S0 正式启动安装；人机分工与安全铁律一律以该文档为准。
+请帮我安装 Harness Engineering：把 https://github.com/wwplay1978/Harness-Engineering.git clone 到用户域标准位 ~/.agents/Harness-Engineering（目录不存在则先创建；Windows 展开为 %USERPROFILE%\.agents\Harness-Engineering——该规范仓本机全部 AI agent 共用一份、单点维护；本机无 git 时先装 git，或改用 GitHub 页面 Code → Download ZIP 下载解压到该位置），完成后向我询问目标项目路径（我回答项目根目录绝对路径，或"暂无，先装全局件"），然后严格按 clone 下来的仓库中 docs/17-agent-assisted-install.md 的 kickoff 提示词（§3；REPO=~/.agents/Harness-Engineering，目标项目=我的回答）从 S0 正式启动安装；人机分工与安全铁律一律以该文档为准。
 ```
 
-智能体会把本仓库 clone 到当前目录下的 `./Harness-Engineering`，向你询问目标项目路径，然后按 [`docs/17`](docs/17-agent-assisted-install.md) 代跑整个安装；你只处理提权/GUI/凭据/决策。
+智能体会把本仓库 clone 到用户域标准位 `~/.agents/Harness-Engineering`（本机全部 AI agent 共用一份，与 `~/.agents/skills` 同域），向你询问目标项目路径，然后按 [`docs/17`](docs/17-agent-assisted-install.md) 代跑整个安装——含按问答渲染项目宪法 AGENTS.md（未答项走默认值）；你只处理提权/GUI/凭据/决策。
 
-**智能体代跑（自行逐条对照）**：先完成 10–20 分钟人工准备（[`docs/17 §2.5`](docs/17-agent-assisted-install.md)：仓库上机、可选预装、备凭据），再在仓库根目录打开会话、粘贴 §3 kickoff 提示词全文。
+**智能体代跑（自行逐条对照）**：先完成 10–20 分钟人工准备（[`docs/17 §2.5`](docs/17-agent-assisted-install.md)：可选预装、备凭据——仓库 clone 本身可由智能体代办到标准位），再在任意目录粘贴 §3 kickoff 提示词全文（2026-09-08 起零占位符：REPO 固定标准位，目标项目开场询问）。
 
 **手动路径**：环境探测 → 参数化安装 → 适配，见 [`docs/16`](docs/16-host-agnostic-installer.md) 与 [`docs/07`](docs/07-migration-playbook.md)：
 
 ```bash
-git clone https://github.com/wwplay1978/Harness-Engineering.git
+git clone https://github.com/wwplay1978/Harness-Engineering.git ~/.agents/Harness-Engineering
 node templates/installer/check-env.mjs          # 只读探测：profile + 适配清单
 templates/installer/install-hindsight-service.cmd --rehearse   # 正式安装前先预演
 ```
@@ -105,7 +105,7 @@ Harness-Engineering/
 - **契约级宿主无关**。治理内核是"约定 + 工件"（宪法、角色纪律、文档树、git 流程）——任何具备派发/子代理/可阻断 hooks/MCP/技能五项机制的宿主都能承载。ZCode 是首个完整实证的适配；主流宿主——Claude Code、Kimi Code、Codex、OpenCode、Pi Agent——按文档化的四步适配纪律接入（[`docs/16 §2`](docs/16-host-agnostic-installer.md)）；五宿主的适配包已就绪，见 [`templates/adapters/`](templates/adapters/)（[`docs/18`](docs/18-host-adapters.md)），装机实测为首装步骤。
 - **单一事实来源 + 一条命令分发**。`templates/` 为权威源；`sync-harness.mjs --apply` 分发到用户域并体检漂移（它**刻意不写** hooks 执行位——AI 不能换掉正在运行的 guard）。
 - **优雅降级**。每个组件都可选，缺失即按文档化矩阵降级：full / core-plus / minimal 三档 profile；探测脚本自动分级并产出 `adaptation-plan.md`。
-- **安全护栏内建**。API key 永不落盘、不进智能体会话；提权脚本必须先 `--rehearse` 干跑；hooks 注册与宪法永久人手；安装器产物自动重定向出 git 工作树。
+- **安全护栏内建**。API key 永不落盘、不进智能体会话；提权脚本必须先 `--rehearse` 干跑；hooks 注册永久人手；宪法（AGENTS.md）仅在安装窗口由智能体按问答渲染一次（带默认值，人复核渲染全文后才提交），落位后只能人改；安装器产物自动重定向出 git 工作树。
 - **Windows 运维淬炼**。批处理 ASCII-only（ANSI 代码页怪癖）、`chcp 65001` 兜非 ASCII 用户名、服务环境 UTF-8（GBK 崩溃教训）、进程名白名单杀进程、模型目录 `config.json` 哨兵。
 
 ## 与同类框架对比

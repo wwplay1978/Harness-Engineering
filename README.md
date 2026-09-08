@@ -59,20 +59,20 @@ Core disciplines:
 
 ### Getting started
 
-**One sentence, full install.** Open an AI coding agent session (ZCode, Claude Code, Kimi Code — any host with file and terminal access) in the directory where you want the repository, and paste:
+**One sentence, full install.** Open an AI coding agent session (ZCode, Claude Code, Kimi Code — any host with file and terminal access) in any directory, and paste:
 
 ```text
-Install Harness Engineering for me: clone https://github.com/wwplay1978/Harness-Engineering.git into the current directory (if git is missing, install git first, or download and extract the ZIP via the GitHub page's Code → Download ZIP button instead), then ask me for the target project path (I will answer with the project's absolute path, or "none yet — install global components only"), and formally start the installation from S0, strictly following the kickoff prompt in docs/17-agent-assisted-install.md inside the cloned repo (§3; REPO = the cloned repo's absolute path, target project = my answer). Division of labor and safety rules are governed by that document.
+Install Harness Engineering for me: clone https://github.com/wwplay1978/Harness-Engineering.git into the standard user-domain location ~/.agents/Harness-Engineering (create the directory if needed; on Windows expand to %USERPROFILE%\.agents\Harness-Engineering — the spec repo is maintained as a single copy shared by all AI agents on this machine; if git is missing, install git first, or download and extract the ZIP via the GitHub page's Code → Download ZIP button into that location instead), then ask me for the target project path (I will answer with the project's absolute path, or "none yet — install global components only"), and formally start the installation from S0, strictly following the kickoff prompt in docs/17-agent-assisted-install.md inside the cloned repo (§3; REPO = ~/.agents/Harness-Engineering, target project = my answer). Division of labor and safety rules are governed by that document.
 ```
 
-The agent clones this repo into `./Harness-Engineering` under the current directory, asks for your target project, then drives the whole install ([`docs/17`](docs/17-agent-assisted-install.md)); you only handle elevation / GUI / credentials / decisions.
+The agent clones this repo into the standard user-domain location `~/.agents/Harness-Engineering` (one copy shared by all AI agents on the machine, alongside `~/.agents/skills`), asks for your target project, then drives the whole install ([`docs/17`](docs/17-agent-assisted-install.md)) — including rendering the project constitution AGENTS.md from a short Q&A with sensible defaults; you only handle elevation / GUI / credentials / decisions.
 
-**Agent-driven install, step by step**: do the 10–20 min human prep ([`docs/17 §2.5`](docs/17-agent-assisted-install.md) — place the repo, optionally pre-install basics, get credentials), then paste the full kickoff prompt ([`docs/17 §3`](docs/17-agent-assisted-install.md)) in a session opened at the repo root.
+**Agent-driven install, step by step**: do the 10–20 min human prep ([`docs/17 §2.5`](docs/17-agent-assisted-install.md) — optionally pre-install basics, get credentials; the repo clone itself is agent-runnable into the standard location), then paste the full kickoff prompt ([`docs/17 §3`](docs/17-agent-assisted-install.md)) in any directory — zero placeholders since 2026-09-08 (REPO defaults to the standard location; the target project is asked at kickoff).
 
 **Manual path**: environment probe → parameterized installers → adaptation, per [`docs/16`](docs/16-host-agnostic-installer.md) and [`docs/07`](docs/07-migration-playbook.md):
 
 ```bash
-git clone https://github.com/wwplay1978/Harness-Engineering.git
+git clone https://github.com/wwplay1978/Harness-Engineering.git ~/.agents/Harness-Engineering
 node templates/installer/check-env.mjs          # read-only probe: profile + adaptation plan
 templates/installer/install-hindsight-service.cmd --rehearse   # dry-run before any real install
 ```
@@ -106,7 +106,7 @@ Design decisions worth stealing:
 - **Host-agnostic by contract.** The governance core is conventions + artifacts (constitution, role discipline, docs tree, git flow) — any agent host providing dispatch, subagents, blocking hooks, MCP and skills can carry it. ZCode is the first fully validated adapter; mainstream hosts — Claude Code, Kimi Code, Codex, OpenCode, Pi Agent — follow a documented 4-step adaptation discipline ([`docs/16 §2`](docs/16-host-agnostic-installer.md)). Ready-to-use adapter packages for all five ship in [`templates/adapters/`](templates/adapters/) ([`docs/18`](docs/18-host-adapters.md)); on-machine installation checks remain the first-install step.
 - **Single source of truth + one-command distribution.** `templates/` is canonical; `sync-harness.mjs --apply` deploys to the user domain and reports drift (it deliberately *never* writes the executed hook copies — an AI must not be able to swap the running guard).
 - **Graceful degradation.** Every component is optional with a documented workflow adaptation: full / core-plus / minimal profiles; the probe classifies your machine and emits an `adaptation-plan.md`.
-- **Security rails baked in.** API keys never touch disk or agent transcripts; elevated scripts require a `--rehearse` dry-run first; hooks registration and the constitution are permanently human-hands; installer outputs auto-redirect out of git work trees.
+- **Security rails baked in.** API keys never touch disk or agent transcripts; elevated scripts require a `--rehearse` dry-run first; hooks registration stays permanently human-hands; the constitution (AGENTS.md) is agent-rendered exactly once at install via a Q&A with defaults (human reviews the rendered file before it is committed) and human-only afterwards; installer outputs auto-redirect out of git work trees.
 - **Ops-hardened on Windows.** ASCII-only batch files (ANSI codepage quirk), `chcp 65001` for non-ASCII usernames, UTF-8 service env (GBK crash lesson), process-name-whitelist kills, model `config.json` sentinels.
 
 ## How this compares
