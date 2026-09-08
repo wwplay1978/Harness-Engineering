@@ -59,7 +59,7 @@
 | 层 | 内容 | 文件位置 | 谁能改 |
 |---|---|---|---|
 | User Rules | 九项工程原则（宪法） | `~/.zcode/AGENTS.md` | 人 |
-| Team Rules | 本仓库全部规范 + 模板 | `<REPO>\`（harness 规范仓库 clone 根，默认建议 `C:\Harness-Engineering`） | 人（经本仓库） |
+| Team Rules | 本仓库全部规范 + 模板 | `<REPO>\`（harness 规范仓库 clone 根，标准落位 `~/.agents/Harness-Engineering`） | 人（经本仓库） |
 | Project Rules | 工作区流水线约定 | 目标项目 `AGENTS.md`（模板生成） | 人（guard 阻断 Agent 改写） |
 
 文章的 team-harness 仓库模式：规范唯一来源 + 同步分发。本仓库即扮演该角色——**任何规范修改先改这里，再按迁移手册分发**，禁止直接在业务项目里改规范再回传。

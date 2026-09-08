@@ -1,6 +1,6 @@
 # 07 · 项目迁移手册：新项目启用本 Harness 体系
 
-> **⚠️ 架构修订（2026-09-02，P0-3 实测结论 C2）**：hooks 一律部署在**用户级** `~/.zcode/cli/config.json`（同一事件用户级/项目级并存时项目级被覆盖丢弃——实测结论，见 08 文档 C2）。guard 防跨项目泄漏靠脚本白名单设计（非团队项目静默放行）。因此：**第 0 步含用户级 hooks 一次性部署；项目级 `.zcode/config.json` 只承载 MCP**。逐项目重复的只剩：目录结构、AGENTS.md、marker、basic-memory 登记。
+> **⚠️ 架构修订（2026-09-02，P0-3 实测结论 C2）**：hooks 一律部署在**用户级** `~/.zcode/cli/config.json`（同一事件用户级/项目级并存时项目级被覆盖丢弃——实测结论 C2，内部档案锚点：06/08–14 不随公开版发布，见 00 公开版说明）。guard 防跨项目泄漏靠脚本白名单设计（非团队项目静默放行）。因此：**第 0 步含用户级 hooks 一次性部署；项目级 `.zcode/config.json` 只承载 MCP**。逐项目重复的只剩：目录结构、AGENTS.md、marker、basic-memory 登记。
 > **⚠️ 执行位修订（2026-09-07，落点修补）**：三正式脚本**执行位同步上收用户域** `~/.zcode/hooks/harness/`（人工自 `templates/hooks/` 复制），不再指向本仓库 clone 目录——仓库锚定执行位会随 clone 切分支/改名/删除波及全机。guard 另带自防御条款：Agent 写执行位/注册文件无论 cwd 一律阻断（05 §3）。
 
 > 作用域设计（沿用 AITrader 验证过的模式）：**软件与全局机制一次安装（用户域），项目机制按项目复制**。
@@ -50,8 +50,8 @@ HARNESS=~/.agents/Harness-Engineering   # 本仓库用户域标准位（2026-09-
 NEW=C:/Projects/改成新项目目录名   # ← 本块唯一需要改的行（改完再整段粘贴）
 if [ ! -d "$NEW" ]; then echo "⚠️ 目录不存在：$NEW（全新项目先：mkdir -p \"$NEW\" && cd \"$NEW\" && git init -b main）"; exit 1; fi
 cd "$NEW" && git rev-parse --git-dir >/dev/null 2>&1 || { echo "⚠️ 请先 git init（全新项目：git init -b main）"; exit 1; }
-git rev-parse --verify main >/dev/null 2>&1 || { echo "⚠️ 默认分支必须为 main（全部 --from main / --merged main 约定依赖它）"; exit 1; }
-mkdir -p .zcode docs/specs docs/tickets docs/reviews docs/changes
+git symbolic-ref --short HEAD 2>/dev/null | grep -qx main || { echo "⚠️ 默认分支必须为 main（全部 --from main / --merged main 约定依赖它）"; exit 1; }   # symbolic-ref 在 unborn 分支（init -b main 后零提交）也成立；rev-parse --verify main 会误报"Needed a single revision"（Test05 首装实测）
+mkdir -p .zcode docs/specs docs/tickets docs/reviews docs/changes memory && touch docs/specs/.gitkeep docs/tickets/.gitkeep docs/reviews/.gitkeep docs/changes/.gitkeep memory/.gitkeep   # .gitkeep：git 不追踪空目录，缺它跨机 clone 后五个目录全丢（Test05 首装实测）
 cp "$HARNESS/templates/zcode-config-template.json" .zcode/config.json
 # 注（2026-09-06 C2 对齐 + 2026-09-07 执行位上收）：hooks 不复制到项目——注册（~/.zcode/cli/config.json）
 # 与脚本执行位（~/.zcode/hooks/harness/）均在用户域（第 0 步一次性部署），项目级同事件被覆盖丢弃；
@@ -140,7 +140,7 @@ node ~/.agents/Harness-Engineering/templates/tools/sync-harness.mjs --apply  # �
 - **自动集**：六角色 base、harness-audit 技能、变体生成器、models.config.json——源=templates/（git 版本化），用户域均为部署副本
 - **hooks 执行位（`~/.zcode/hooks/harness/`）只报告、永不代写**：AI 可改 templates 源（guard 白名单内），若脚本自动传播即等于 AI 可换掉运行中的 guard 自毁防线——该路径人工 cp（脚本打印现成命令）
 - 用户级 config.json 三正式注册与项目结构（AGENTS/文档目录/模板基线对照）随跑随报，同样只报告
-- **新项目接入后**：把项目根路径加入脚本 `PROJECTS` 常量（一行），此后该项目的结构盘点随跑随报
+- **新项目接入后**：把项目根路径加入 `~/.zcode/harness-projects.json`（JSON 数组；机器本地数据不进模板，清单文件缺失时首跑自动建空清单），此后该项目的结构盘点随跑随报
 - **--apply 会覆盖部署副本**（无备份）：部署副本手改会被无声覆盖——正确姿势=只改 templates/ 源头；拿不准先跑 `--check` 看 DRIFT 清单
 - 角色/路由表变更后按提示重跑 `generate-role-variants.mjs` 重铸 rerun 变体，并**新开会话**生效（C1 快照）
 
