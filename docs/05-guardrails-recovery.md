@@ -16,7 +16,7 @@
 
 1. **先 Spec 后 Code**——无 spec 不派 developer（小修至少有 ticket 验收标准）。
 2. **合并决策永远是人**——任何 Agent 不得 merge 到 main；只合 `feat/<slug>` 一个分支。
-3. **AGENTS.md 只能人改**——guard 白名单不含 AGENTS.md；流水线宪法同规（本仓库规范亦然）。
+3. **AGENTS.md 只能人改**——guard 白名单不含 AGENTS.md；流水线宪法同规（本仓库规范亦然）。唯一豁免=**安装窗口首次落位**（2026-09-08 起：安装助手按问答渲染、人复核即人授权，见 17 §3 S5 与 §4 安装窗口说明；落位后本条即刻恢复，无其他例外）。
 4. **一 ticket 一 worktree**——写代码必须在 `git gtr` 隔离工作区，主检出写入被 hook 阻断。
 5. **命名锚定 slug**——分支 `feat/<slug>`、快照 `<slug>-r<n>.diff`、bank、记忆条目，全链路可对账。
 6. **spec/tickets 防篡改**——worktree 内不得改 `docs/specs/`、`docs/tickets/`；合并前 diff 检查为空（reviewer 一票 blocking）。

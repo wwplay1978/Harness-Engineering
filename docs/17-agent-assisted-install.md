@@ -7,14 +7,14 @@
 
 **最快路径（一句话 bootstrap，2026-09-07 增；2026-09-08 起零占位符）**：无需先做 §2.5——在任意目录的 agent 会话里粘贴本仓 README「快速开始 / Getting started」的一句话，agent 即自行把本仓 clone 到**用户域标准位 `~/.agents/Harness-Engineering`**（全机 AI agent 共用一份的规范仓；Windows 展开 `%USERPROFILE%\.agents\Harness-Engineering`）、向你询问目标项目路径、再以该标准位为 REPO 代入本文 §3 协议从 S0 开跑（等效于把 §2.5.1 仓库上机与 §2.5.4 占位符替换全部交由 agent 代办；人工侧只剩 §2.5.2/2.5.3 的凭据与 UAC）。安全边界不因此放松：§2 分工表与铁律原样生效。
 
-标准路径：完成 §2.5 人工准备（仓库上机为主）→ 把 §3 提示词整段复制到目标机的 agent 会话（在 harness 仓库目录中打开）→ agent 按八步骨架推进：**能自己做的直接做并回报，只有提权/GUI/登录/key/决策/hooks 注册交给人**（宪法 AGENTS.md 由 agent 问答渲染落盘、人复核——安装窗口一次性豁免，见 §2 分工表与 §3 S5）；每步核对结果再走下一步；全程遵守安全铁律（key 不落盘、提权先预演、hooks 注册与宪法落位后的人闸永远人手）。
+标准路径：完成 §2.5 人工准备（可选预装/凭据——仓库上机可由 agent 代跑 clone）→ 把 §3 提示词整段复制到目标机的 agent 会话（任意目录均可——REPO 固定标准位）→ agent 按八步骨架推进：**能自己做的直接做并回报，只有提权/GUI/登录/key/决策/hooks 注册交给人**（宪法 AGENTS.md 由 agent 问答渲染落盘、人复核——安装窗口一次性豁免，见 §2 分工表与 §3 S5）；每步核对结果再走下一步；全程遵守安全铁律（key 不落盘、提权先预演、hooks 注册与宪法落位后的人闸永远人手）。
 
 ## 2. 人机分工原则（协议核心）
 
 | 归属 | 事项 | 说明 |
 |---|---|---|
 | **agent 执行** | 读文档/模板；跑只读检测（check-env）；跑非提权安装器（uv/npm/模型下载）；复制与参数化模板文件；跑 sync 分发；sed 项目占位符；git 入库；执行全部验证命令并判定结果 | 执行后必须回报输出摘要与判定，"做了什么、结果如何、下一步" |
-| **人工执行** | ①管理员提权命令（agent 给完整命令块，人在管理员终端跑完回贴输出）②GUI 安装/登录（宿主 App、Obsidian、账号）③API key 获取与输入 ④决策类（宪法条款取舍、组件装/不装）⑤**宪法 AGENTS.md 复核确认**（2026-09-08 修订：agent 按问答渲染模板并落盘——安装窗口一次性豁免"只能人改"红线，人复核渲染全文即视为人授权落位；见 §3 S5 与 §4）⑥**宿主 hooks 注册**（agent 只给可粘贴配置块，人自行写入——对齐 05 §3 人闸） | agent 对每件人工事给出：目的、精确操作（命令/点击路径/配置块）、预期输出、如何回报；⑥ agent 只备料、不代写；⑤ agent 渲染+落盘仅限安装窗口，落位后交回人闸（已武装机器的加装场景走 S5 的"渲染稿+人工一条 move 命令"降级路径，仍零手工编辑） |
+| **人工执行** | ①管理员提权命令（agent 给完整命令块，人在管理员终端跑完回贴输出）②GUI 安装/登录（宿主 App、Obsidian、账号）③API key 获取与输入 ④决策类（宪法条款取舍、组件装/不装）⑤**宪法 AGENTS.md 复核确认**（2026-09-08 修订：agent 按问答渲染模板并落盘——安装窗口一次性豁免"只能人改"红线，人复核渲染全文即视为人授权落位；见 §3 S5 与 §4）⑥**宿主 hooks 注册**（agent 只给可粘贴配置块，人自行写入——对齐 05 §3 人闸） | agent 对每件人工事给出：目的、精确操作（命令/点击路径/配置块）、预期输出、如何回报；⑥ agent 只备料、不代写；⑤ agent 渲染+落盘仅限安装窗口，落位后交回人闸（已武装机器的加装场景走 S5 降级路径：渲染稿落 docs/ 白名单区+人工一条 move 命令，仍零手工编辑） |
 
 ## 2.5 发送 Kickoff 前的人工准备清单（Phase 0，约 10–20 分钟）
 
@@ -75,13 +75,13 @@
 - 安全铁律：①API key 绝不经过你（agent）——不粘贴给你、不在你的会话终端里 set；由我在自己的终端设置环境变量（set 仅当前进程 / setx 持久化到系统凭证 HKCU，两者都不算"文件/日志/会话记录"落盘），或在管理员安装命令运行时交互输入。②提权脚本一律先 --rehearse 只读预演。③宿主 config 的 hooks 注册属安全敏感操作——你只展示完整 diff 与可直接粘贴的完整配置块，**由我自行写入**（对齐 05 §3：hooks 注册永远人手，你不代写，即使我口头同意）。④你生成/修改的 .cmd/.bat 内容必须 ASCII-only（cmd 按 ANSI 代码页解析，非 ASCII 注释会变成可执行乱码）。⑤不臆测未适配宿主的能力（docs/16 §2 矩阵标"未证实"的按未适配对待）。⑥**安装命令与包名只取 REPO 文档原文**，不得自行搜索/猜测包名或换源（历史教训：曾因查错生态误判官方包不存在）。
 
 步骤骨架（按序推进，细节按文档执行）：
-S0 定位自检：确认 REPO（默认标准位 ~/.agents/Harness-Engineering，见背景段）与目标项目路径（若发现尖括号占位符原文残留，先停下向我询问真实路径，防呆）；检查 node 可用性（后续脚本依赖）；**自检你的能力**——能否执行终端命令、写文件；任一不能则立即声明并退回纯人工流程（07 手册）。
+S0 定位自检：确认 REPO（默认标准位 ~/.agents/Harness-Engineering，见背景段）与目标项目路径（若发现尖括号占位符原文残留，先停下向我询问真实路径，防呆）；REPO 已就位且可联网时先 `git -C REPO pull --ff-only` 升级模板源（陈旧源=陈旧部署），失败则如实报告版本态并继续；检查 node 可用性（后续脚本依赖）；**自检你的能力**——能否执行终端命令、写文件；任一不能则立即声明并退回纯人工流程（07 手册）。
 S1 环境检测：你执行 node REPO/templates/installer/check-env.mjs（--project/--vault 按需），读取产物 env-config.json 与 adaptation-plan.md（%TEMP%\harness-install\ 或当前目录），向我解释 profile 与待适配项，产出《本机安装计划》（缺什么装什么、什么降级、哪些人工）。
 S2 组件安装：**命令与包名只取 REPO 文档原文（16 §3 阶段二清单 + check-env 的 missing 清单），不重复列举、不自行搜索**——非提权项（uv tool / npm -g / 模型下载）由你执行并监控输出；git/node/python/宿主App/Obsidian 等缺失项给人对应 winget 命令或链接，等回装。
 S3 hindsight 服务：你先跑 REPO/templates/installer/install-hindsight-service.cmd --rehearse 解读预演；key 缺失时提醒我在**我自己的终端**设置——**可选 set（仅当前进程）或 setx（持久化到 HKCU，v5 既定的 key 来源之一）；若不想持久化，用安装命令的交互输入**——key 不经过你（铁律①）；确认后给管理员终端命令块（去掉 --rehearse），等回贴输出后你验证服务状态与 http://localhost:8888/health 返回 200。
 S4 宿主配置：**仅当宿主为 ZCode（唯一已适配宿主）**——①你执行 node REPO/templates/tools/sync-harness.mjs --apply 分发角色/技能/路由表；②**三正式脚本执行位部署（人闸执行位，sync 只报告不代写）**：由人把 REPO/templates/hooks/ 三个 .mjs 复制到用户域 `~/.zcode/hooks/harness/`（你给命令块，人执行并回贴 ls 结果）；hindsight 三 hooks 的脚本安装：在 **cmd/PowerShell**（勿用 Git Bash——安装器有 MSYS 反斜杠 bug，08 §P0-2）运行 `hindsight-zcode install`，若仍在写 config 步崩溃属已知问题（脚本应已落位 `~/.zcode/hooks/hindsight/`，你核验文件在位即算过）；③三正式 + hindsight hooks 的**注册**一律铁律③（你出完整配置块——以 REPO/templates/user-config-hooks-template.json 为底，三处 `__HOME__` 替换为展开后的用户主目录绝对路径，禁 `~` 字面量——我自行粘贴写入）。若目标宿主是 Claude Code / Kimi Code / Codex / OpenCode / Pi Agent：五宿主适配包已产出（docs/18 + templates/adapters/，各宿主 README 即执行手册——执行位=各宿主用户域 hooks 目录）但**装机实测未做**——角色文件物化与 payload 探针由你执行、hooks/守护注册仍一律铁律③（你出完整配置块，我自行粘贴写入），验证结论按 docs/18 §8 回灌；若目标宿主是其他未适配宿主（如 DeepSeek Harness 框架型）：如实告知"该宿主适配包未产出（docs/16 §2 四步）"，S4 降级为跳过，流水线启用等适配完成；检测/其他组件安装不受影响。
 S5 项目接入（**仅当宿主为 ZCode**——07 手册六步全是 ZCode 路径：.zcode/config.json、.zcode/memory-project marker、inject-memory 读 marker）：
-   ① **AGENTS.md 问答渲染**（2026-09-08 修订；安装窗口一次性豁免"只能人改"红线——人复核渲染全文即视为人授权）：你先只读探测目标项目（语言/框架指纹→技术栈候选、核心目录→速览候选、惯例构建/测试命令候选），再逐项问我六项——项目名（默认=目录名）、一句话定位（默认=待补）、技术栈（默认=探测结果或"待补（planner 首个 spec 校正）"）、构建命令与测试命令（默认=候选或"待补（developer 首票确认）"）、目录速览（默认=你生成的一行图）——我直接回车即采纳默认；按答案渲染 REPO/templates/AGENTS-template.md（「」占位全替换、头部生成说明段删除、文档地图写入 REPO 实际绝对路径），写入项目根 AGENTS.md 并向我展示全文复核，确认后 git 提交（docs: agents init <项目slug>——安装窗口问答生成，committed on user authorization <日期>）。目标项目已有 AGENTS.md 时不得覆盖——列出其与渲染稿的差异请我决策。**已武装 guard 的机器**（harness 已装好后再加新项目）你的直写会被拦（AGENTS.md 不在 guard 白名单）——降级路径：渲染到 AGENTS.md.rendered，给我一条 move 命令我执行（仍零手工编辑）。
+   ① **AGENTS.md 问答渲染**（2026-09-08 修订；安装窗口一次性豁免"只能人改"红线——人复核渲染全文即视为人授权）：你先只读探测目标项目（语言/框架指纹→技术栈候选、核心目录→速览候选、惯例构建/测试命令候选），再逐项问我六项——项目名（默认=目录名）、一句话定位（默认=待补）、技术栈（默认=探测结果或"待补（planner 首个 spec 校正）"）、构建命令与测试命令（默认=候选或"待补（developer 首票确认）"）、目录速览（默认=你生成的一行图）——我直接回车即采纳默认；按答案渲染 REPO/templates/AGENTS-template.md（**「」span 整体替换**——span 内已附默认值、替换后安装期指引零残留；头部生成说明段删除；文档地图 span 写入 REPO 实际绝对路径），写入项目根 AGENTS.md 并向我展示全文复核，确认后 git 提交（docs: agents init <项目slug>——安装窗口问答生成，committed on user authorization <日期>）。目标项目已有 AGENTS.md 时不得覆盖——列出其与渲染稿的差异请我决策。**已武装 guard 的机器**（harness 已装好后再加新项目）你的直写会被拦（AGENTS.md 不在 guard 白名单）——降级路径：渲染到 `docs/AGENTS.rendered.md`（docs/ 在 guard 白名单内可写、项目根不可写——渲染稿不能放根），给我一条 move 命令我执行（仍零手工编辑）。
    ② config 模板复制与 PROJECTNAME 替换、basic-memory 登记 + marker、git 入库、三项快速验证（07 第 1/3/4/5/6 步）。
    若目标宿主非 ZCode：S5 降级为"记录项目接入待办（该宿主装机适配未完成——适配包与验证清单见 docs/18，07 六步的 .zcode 路径须按宿主落点改写）"，不复制 .zcode 结构；但 ① 的 AGENTS.md 问答渲染仍可执行（宪法层宿主无关，Codex/OpenCode 等本就原生读 AGENTS.md）。
 S6 阶段三适配：逐条落实 adaptation-plan.md（宪法条款开关/hooks 注册集/MCP 段/archiver SOP 步骤）；宪法类改动全部走"diff→批准"。
@@ -93,7 +93,7 @@ S8 收尾回灌：把过程中新踩的坑按 REPO/docs/18 §8 风格拟 1-2 条
 
 ## 4. 使用要点
 
-- 发送前先过一遍 §2.5 准备清单（仓库上机/可选预装/凭据/占位符替换）；agent 在 S0 也会做占位符残留防呆检查。
+- 发送前先过一遍 §2.5 准备清单（可选预装/凭据——仓库上机可由 agent 代跑 clone，提示词已零占位符）；agent 在 S0 仍做占位符残留防呆检查（兜住旧写法手填提示词的残留）。
 - **安装会话是防线生效前的一次性窗口（仅 ZCode 已适配宿主）**：hooks 在 S4 才注册，而 ZCode 的 config 是会话启动时快照（C1，16 §2 明示为 ZCode 结论、不可平移）——本安装会话全程运行在 guard 未武装状态，属人工监督的一次性引导窗口；安装完成后新开会话防线才生效（这解释了为何 S5/S6 的项目文件写入不会被拦——**含 AGENTS.md 首次落位，S5 问答渲染的豁免即立足此窗口**）。**未适配宿主无此"窗口"概念——它全程就是无防线状态，流水线启用前必须先完成 16 §2 四步适配**。harness 已装好的机器再加装新项目**没有**这个窗口（guard 已武装且 AGENTS.md 不在白名单）——AGENTS.md 落位走 S5 ①末尾的"渲染稿+人工一条 move 命令"降级路径。
 - **用户域集中区一览（2026-09-08 定）**：`~/.agents/` 是全机 AI agent 共用件的单份维护区——`Harness-Engineering/`（规范仓 clone：docs 规范 + templates 模板源，本文档标准落位）与 `skills/`（技能锚点包，ZCode/Kimi/Pi 共扫、Codex 可挂任意目录）。**不并入**集中区的：各宿主 hooks 执行位/注册文件/角色定义/路由表（宿主格式各异，按宿主分套部署——guard SHIELD 表即按宿主列举 ~/.zcode、~/.claude、~/.kimi-code、~/.codex 等）；Obsidian vault（个人知识数据，位置由人定，S1 Q&A 参数）；hindsight/basic-memory/gtr（机器级服务与工具，安装器各自落位）。
 - vault 位置非默认时在 S1 由人告知 agent。
