@@ -62,7 +62,7 @@ Harness（驾驭）是 LLM 与"可治理的高效编码"之间的工程层，六
 **一句话启动完整安装。** 在任意目录下打开 AI coding 智能体会话（ZCode、Claude Code、Kimi Code——凡具备文件读写与终端执行能力的宿主均可），粘贴：
 
 ```text
-请帮我安装 Harness Engineering：把 https://github.com/wwplay1978/Harness-Engineering.git clone 到用户域标准位 ~/.agents/Harness-Engineering（目录不存在则先创建；Windows 展开为 %USERPROFILE%\.agents\Harness-Engineering——该规范仓本机全部 AI agent 共用一份、单点维护；本机无 git 时先装 git，或改用 GitHub 页面 Code → Download ZIP 下载解压到该位置），完成后向我询问目标项目路径（我回答项目根目录绝对路径，或"暂无，先装全局件"），然后严格按 clone 下来的仓库中 docs/17-agent-assisted-install.md 的 kickoff 提示词（§3；REPO=~/.agents/Harness-Engineering，目标项目=我的回答）从 S0 正式启动安装；人机分工与安全铁律一律以该文档为准。
+请帮我安装 Harness Engineering：把 https://github.com/wwplay1978/Harness-Engineering.git clone 到用户域标准位 ~/.agents/Harness-Engineering（目录不存在则先创建；若该位置已有旧 clone 则先 git -C ~/.agents/Harness-Engineering pull --ff-only 更新；Windows 展开为 %USERPROFILE%\.agents\Harness-Engineering——该规范仓本机全部 AI agent 共用一份、单点维护；本机无 git 时先装 git，或改用 GitHub 页面 Code → Download ZIP 下载解压到该位置），完成后向我询问目标项目路径（我回答项目根目录绝对路径，或"暂无，先装全局件"），然后严格按 clone 下来的仓库中 docs/17-agent-assisted-install.md 的 kickoff 提示词（§3；REPO=~/.agents/Harness-Engineering，目标项目=我的回答）从 S0 正式启动安装；人机分工与安全铁律一律以该文档为准。
 ```
 
 智能体会把本仓库 clone 到用户域标准位 `~/.agents/Harness-Engineering`（本机全部 AI agent 共用一份，与 `~/.agents/skills` 同域），向你询问目标项目路径，然后按 [`docs/17`](docs/17-agent-assisted-install.md) 代跑整个安装——含按问答渲染项目宪法 AGENTS.md（未答项走默认值）；你只处理提权/GUI/凭据/决策。
