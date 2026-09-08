@@ -85,7 +85,7 @@ S5 项目接入（**仅当宿主为 ZCode**——07 手册六步全是 ZCode 路
    ② config 模板复制与 PROJECTNAME 替换、basic-memory 登记 + marker、git 入库、三项快速验证（07 第 1/3/4/5/6 步）。
    若目标宿主非 ZCode：S5 降级为"记录项目接入待办（该宿主装机适配未完成——适配包与验证清单见 docs/18，07 六步的 .zcode 路径须按宿主落点改写）"，不复制 .zcode 结构；但 ① 的 AGENTS.md 问答渲染仍可执行（宪法层宿主无关，Codex/OpenCode 等本就原生读 AGENTS.md）。
 S6 阶段三适配：逐条落实 adaptation-plan.md（宪法条款开关/hooks 注册集/MCP 段/archiver SOP 步骤）；宪法类改动全部走"diff→批准"。
-S7 最终验证与验收单：07 第 6 步三项（gtr doctor / guard 模拟 exit=2 / 记忆注入）+ hindsight /health +（若装了 sync CLI）首次 reconcile 冒烟——**量大时注意 LLM 429 限流（03 §4.2 注 5：按目录分批 --include 或接受后台异步抽取）**；全部由你执行并逐项判定；**先重跑 check-env 得到最终 profile（S1 时 hooks 未注册会偏低，S4 注册后重测才准）**；通过后输出《安装验收单》：最终 profile、组件与防线注册态清单、每项验证的证据、遗留项与建议。
+S7 最终验证与验收单：07 第 6 步三项（gtr doctor / guard 模拟 exit=2 / 记忆注入）+ hindsight /health +（若装了 sync CLI）首次 reconcile 冒烟——**量大时注意 LLM 429 限流（03 §4.2 注 5：按目录分批 --include 或接受后台异步抽取）**；全部由你执行并逐项判定；**先重跑 check-env 得到最终 profile（S1 时 hooks 未注册会偏低，S4 注册后重测才准）**；通过后输出《安装验收单》：最终 profile、组件与防线注册态清单、每项验证的证据、遗留项与建议——**遗留项分两栏：「本次安装范围」与「机队巡检（既有）」**：sync 项目盘点遍历 ~/.zcode/harness-projects.json 全部在册项目，非目标项目的发现属机队既有事项，归各自项目维护环处理，不计入也不阻塞本次安装（AITrader2 首装实证 2026-09-08：web2api 的 [REVIEW] 曾误列入 AITrader2 验收单遗留项，安装全程并不涉及该项目）。
 S8 收尾回灌：把过程中新踩的坑按 REPO/docs/18 §8 风格拟 1-2 条候选回灌条目（我不一定采纳），并提醒我把变更提交回 REPO 的远端仓库（自己的 fork 直接 push；无写权限则整理成 issue 或 PR 给原仓 wwplay1978/Harness-Engineering）。
 
 现在从 S0 开始。

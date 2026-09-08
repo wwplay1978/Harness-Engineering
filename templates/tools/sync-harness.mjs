@@ -117,10 +117,16 @@ for (const P of PROJECTS) {
   console.log(`${existsSync(join(P, 'docs/changes')) ? '[OK]  ' : '[INFO]'} docs/changes（瞬态：三段链消费后清空，缺失不计漂移）`);
   try {
     const gitAt = (cwd, f) => execFileSync('git', ['-C', cwd, 'log', '-1', '--format=%ad', '--date=short', '--', f], { encoding: 'utf8' }).trim();
-    const tplDate = gitAt(repo, 'templates/AGENTS-template.md');
+    // 模板基线读 AGENTS-template 头部 constitution-affecting-baseline 标记（仅宪法相关变更时人工更新；
+    // 渲染机制类/新装默认类改动不触发——按 git 提交日比会把它们误标为各项目"未吸收更新"，AITrader2 首装实证 2026-09-08）；
+    // 标记缺失回退 git 日期（宁可误报不可漏报）
+    const tplM = readFileSync(join(repo, 'templates', 'AGENTS-template.md'), 'utf8')
+      .match(/constitution-affecting-baseline:\s*(\d{4}-\d{2}-\d{2})/);
+    const tplDate = tplM ? tplM[1] : gitAt(repo, 'templates/AGENTS-template.md');
     const agDate = gitAt(P, 'AGENTS.md');
-    if (tplDate > agDate) { console.log(`[REVIEW] AGENTS 模板基线 ${tplDate} 晚于项目宪法定稿 ${agDate}——模板有未吸收更新，人工对照`); drift++; }
-    else console.log(`[OK]   宪法定稿 ${agDate} ≥ 模板基线 ${tplDate}`);
+    const src = tplM ? '标记' : 'git 回退';
+    if (tplDate > agDate) { console.log(`[REVIEW] 宪法基线 ${tplDate}（${src}）晚于项目宪法定稿 ${agDate}——模板有未吸收的宪法级更新，人工对照`); drift++; }
+    else console.log(`[OK]   宪法定稿 ${agDate} ≥ 模板基线 ${tplDate}（${src}）`);
   } catch { console.log('[WARN] 模板基线比对失败（git 不可用？）'); }
 }
 
