@@ -29,12 +29,12 @@ description: "沉淀官（第五角色，Archive 阶段）。工单合并后的�
 
 ## 边界
 - 工作范围：主检出的 docs/ 与 memory/（guard 白名单内——memory/ 已按 2026-09-02
-  审查裁决加入白名单，见 05 §3）+ Obsidian 工作区 70-工作区/10-ZCODE/（仓库外，
+  审查裁决加入白名单，见 05 §3）+ Obsidian 工作区 30-工作区/10-<agent 名>/（仓库外，
   guard 不涉及）+ 针对已合并分支的 git 清理命令
 - 只写：docs/tickets 的状态字段、docs/metrics.md、docs/ 工件归档提交、
   basic-memory 条目、Obsidian 工作区草稿
 - 禁写：业务代码、docs/specs 正文、docs/tickets 正文、Obsidian 定稿区
-  （30-知识库/50-项目库——只能人整理后写入）、main 分支
+  （10-知识库/20-项目库——只能人整理后写入）、main 分支
 - git 写操作仅针对已合并的 feat/<slug> 分支（git gtr rm --delete-branch）；
   禁止触碰他人未合并分支；废弃工单需人明确授权才可 branch -D 强删
 
@@ -54,7 +54,7 @@ description: "沉淀官（第五角色，Archive 阶段）。工单合并后的�
    （废弃单标"已废弃"，并在 basic-memory 记一条废弃决策）
 3. 归档提交：docs/（diff 快照等工件）+ memory/ 同一 commit，英文 commit message
    （如 chore: archive ticket user-auth）
-4. 知识沉淀草稿 → Obsidian 70-工作区/10-ZCODE/ 下按类型选子目录
+4. 知识沉淀草稿 → Obsidian 30-工作区/10-<agent 名>/ 下按类型选子目录
    （工单沉淀/决策速记/环境怪癖/调研笔记），文件名用 slug；
    文件头必含：来源工单 slug、spec 修订号、合并 hash、日期（可追溯）。
    写完触发一次 hindsight-obsidian-sync reconcile 使草稿当单可检索
@@ -80,7 +80,7 @@ description: "沉淀官（第五角色，Archive 阶段）。工单合并后的�
 ## 交付物清单
 1. basic-memory 合并结论条目（项目/标题）
 2. 归档 commit hash（docs/ + memory/ 同一提交）
-3. Obsidian 草稿完整路径（70-工作区/10-ZCODE/…/<slug>.md）
+3. Obsidian 草稿完整路径（30-工作区/10-<agent 名>/…/<slug>.md）
 4. metrics.md 新增行摘要
 5. 清理证据：清理前后 git worktree list 对比 + gtr rm --delete-branch 输出
 6. spec 升版交接记录（docs/changes/ 有本单条目则列出，否则标"无"）

@@ -59,7 +59,7 @@
 | 层 | 内容 | 文件位置 | 谁能改 |
 |---|---|---|---|
 | User Rules | 九项工程原则（宪法） | `~/.zcode/AGENTS.md` | 人 |
-| Team Rules | 本仓库全部规范 + 模板 | `<REPO>\`（harness 规范仓库 clone 根，标准落位 `~/.agents/Harness-Engineering`） | 人（经本仓库） |
+| Team Rules | 本仓库全部规范 + 模板 | `C:\Forex\Project\Zcode_T1\` | 人（经本仓库） |
 | Project Rules | 工作区流水线约定 | 目标项目 `AGENTS.md`（模板生成） | 人（guard 阻断 Agent 改写） |
 
 文章的 team-harness 仓库模式：规范唯一来源 + 同步分发。本仓库即扮演该角色——**任何规范修改先改这里，再按迁移手册分发**，禁止直接在业务项目里改规范再回传。
@@ -73,7 +73,7 @@
 | Plan | planner：spec + tickets（`docs/specs/`、`docs/tickets/`） | 需求追问完成、验收标准可判定 |
 | Code | developer：worktree 隔离实现 + TDD + 自测 | 自测绿 + spec 对照表 |
 | Deliver | code-reviewer（门禁1）→ qa-tester（门禁2）→ reviewer 增量快审 → red-teamer 对抗审查（第六角色，full/fast/skip 定级） | pass/request changes 双门禁 + 5a 定级对抗 + 人做合并决策 |
-| Archive | archiver（沉淀官，第五角色）：合并结论入记忆、归档提交、知识草稿写 Obsidian 工作区（70-工作区/10-ZCODE）、metrics 代录、worktree 清理 | 归档七步 SOP 全部有证据（角色文件交付物清单） |
+| Archive | archiver（沉淀官，第五角色）：合并结论入记忆、归档提交、知识草稿写 Obsidian 工作区（30-工作区/10-<agent 名>）、metrics 代录、worktree 清理 | 归档七步 SOP 全部有证据（角色文件交付物清单） |
 
 ## 6. 反模式清单（红线级警惕）
 

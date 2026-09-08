@@ -140,7 +140,7 @@ console.log(`[组件]   skills ${out.components.skills.ok ? '✓ 6 锚点齐' : 
 // ── 5) Obsidian vault（三区语义）────────────────────────
 const vaultArg = argOf('--vault');
 const vaultPath = vaultArg || join(HOME, 'Documents', 'MyObsidian');
-const zones = ['30-知识库/50-ZCODE', '50-项目库/30-ZCODE', '70-工作区/10-ZCODE'].map(z => ({ zone: z, exists: existsSync(join(vaultPath, ...z.split('/'))) }));
+const zones = ['10-知识库', '20-项目库', '30-工作区'].map(z => ({ zone: z, exists: existsSync(join(vaultPath, ...z.split('/'))) }));
 out.components.obsidian = { vaultPath, exists: existsSync(vaultPath), zones };
 console.log(`[组件]   Obsidian vault ${out.components.obsidian.exists ? '✓ ' + vaultPath : '✗ ' + vaultPath + '（可用 --vault 指定）'}`);
 out.hooks = { formalRegistered: formalHooks, hindsightRegistered: hindsightHooks };
