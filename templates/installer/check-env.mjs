@@ -137,11 +137,25 @@ if (existsSync(rolesDir)) {
 console.log(`[组件]   basic-memory ${out.components.basicMemory.ok ? '✓ v' + out.components.basicMemory.version : '✗'} | gtr ${out.components.gtr.ok ? '✓' : '✗'} | sync CLI ${out.components.obsidianSync.ok ? '✓' : '✗'}`);
 console.log(`[组件]   skills ${out.components.skills.ok ? '✓ 6 锚点齐' : '✗ 缺锚点'} | 角色 base ${out.components.roles.base}/6 rerun ${out.components.roles.rerun}/3`);
 
-// ── 5) Obsidian vault（三区语义）────────────────────────
+// ── 5) Obsidian vault（三区语义；v3：读机器配置，配置缺失回退内置默认 50/60/70 并 WARN）──────
+const MC_COMMON = join(HOME, '.agents', 'Harness-Configuration', 'common.config.md');
+const parseCfg = f => {
+  const txt = existsSync(f) ? readFileSync(f, 'utf8') : null; if (txt === null) return null;
+  const out = {}; let inTable = false;
+  for (const ln of txt.split(/\r?\n/)) {
+    if (/^\|\s*键\s*\|\s*值\s*\|\s*说明\s*\|/.test(ln)) { inTable = true; continue; }
+    if (!inTable || !/^\|/.test(ln)) continue;
+    const m = ln.match(/^\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|/); if (m) out[m[1].trim()] = m[2].trim();
+  }
+  return out;
+};
+const mcCfg = parseCfg(MC_COMMON);
 const vaultArg = argOf('--vault');
-const vaultPath = vaultArg || join(HOME, 'Documents', 'MyObsidian');
-const zones = ['10-知识库', '20-项目库', '30-工作区'].map(z => ({ zone: z, exists: existsSync(join(vaultPath, ...z.split('/'))) }));
-out.components.obsidian = { vaultPath, exists: existsSync(vaultPath), zones };
+const vaultPath = vaultArg || (mcCfg?.vault_root ? mcCfg.vault_root.replace(/^~(?=\/|\\|$)/, HOME) : join(HOME, 'Documents', 'MyObsidian'));
+const ZONE_DEFAULTS = { zone_final_project: '50-项目库', zone_final_common: '60-知识库', zone_workspace: '70-工作区' };
+const zones = Object.entries(ZONE_DEFAULTS).map(([k, d]) => { const z = mcCfg?.[k] || d; return { zone: z, src: mcCfg?.[k] ? 'config' : 'default', exists: existsSync(join(vaultPath, z)) }; });
+if (!mcCfg) console.log('[WARN]   机器配置 common.config.md 缺失——三区用内置默认 50/60/70；安装 S5 / 升级手册阶段 1 生成配置后以配置为准（spec 19）');
+out.components.obsidian = { vaultPath, exists: existsSync(vaultPath), zones, configDriven: !!mcCfg };
 console.log(`[组件]   Obsidian vault ${out.components.obsidian.exists ? '✓ ' + vaultPath : '✗ ' + vaultPath + '（可用 --vault 指定）'}`);
 out.hooks = { formalRegistered: formalHooks, hindsightRegistered: hindsightHooks };
 

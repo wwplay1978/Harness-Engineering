@@ -73,7 +73,7 @@
 | Plan | planner：spec + tickets（`docs/specs/`、`docs/tickets/`） | 需求追问完成、验收标准可判定 |
 | Code | developer：worktree 隔离实现 + TDD + 自测 | 自测绿 + spec 对照表 |
 | Deliver | code-reviewer（门禁1）→ qa-tester（门禁2）→ reviewer 增量快审 → red-teamer 对抗审查（第六角色，full/fast/skip 定级） | pass/request changes 双门禁 + 5a 定级对抗 + 人做合并决策 |
-| Archive | archiver（沉淀官，第五角色）：合并结论入记忆、归档提交、知识草稿写 Obsidian 工作区（30-工作区/10-<agent 名>）、metrics 代录、worktree 清理 | 归档七步 SOP 全部有证据（角色文件交付物清单） |
+| Archive | archiver（沉淀官，第五角色）：合并结论入记忆、归档提交、知识草稿写 Obsidian 工作区（<zone_workspace>/<agent_segment>，路径以 harness 配置为准）、metrics 代录、worktree 清理 | 归档七步 SOP 全部有证据（角色文件交付物清单） |
 
 ## 6. 反模式清单（红线级警惕）
 

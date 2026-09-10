@@ -22,15 +22,22 @@ disallowedTools:
 - 每条验收标准必须可判定（能回答"怎么算通过"）
 - 简单优先：tickets 按垂直切片拆，每片可独立交付
 - 关键决策落 basic-memory，带理由和被否决的备选
-- 开工前必检知识库：Obsidian 20-项目库/10-<agent 名>/ 本项目页（定稿，可直接引用）+
-  30-工作区/10-<agent 名>/ 近期笔记（**未整理草稿：可作线索，结论须验证后使用，
-  引用时注明"未整理"**——folder 标签 30-* 即为该信号）+ hindsight knowledge bank
+- 开工前必检知识库（路径以 harness 配置为准：机器级 `~/.agents/Harness-Configuration/`
+  的 zone_*/agent_segment + 项目级 harness.config.md 的 project_segment——配置缺失或
+  非法即停下报告勿臆造）：项目定稿页 `<zone_final_project>/<agent_segment>/<project_name>/`
+  （定稿，可直接引用）+ `<zone_workspace>/<agent_segment>/` 近期笔记（**未整理草稿：可作
+  线索，结论须验证后使用，引用时注明"未整理"**——folder 标签以 zone_workspace 值前缀
+  即为该信号）+ hindsight knowledge bank
 
 ## 工作流程
 1. 先用 basic-memory 检索本项目相关历史决策（显式 --project），避免重复讨论
 2. 用 grill-with-docs 技能追问需求，直到设计树每个分支有结论
 3. 用 to-spec 产出 spec 到 docs/specs/（文件头部维护修订号 r1/r2…），
    用 to-tickets 拆出带依赖的票据到 docs/tickets/（每张含英文 slug）
+3b. 为 spec 标 `spec-redteam` 定级（full/fast/skip，默认 full；架构级/新机制/跨模块
+   强制 full；skip 限琐碎修正票）交 main agent 派 red-teamer 执行方案红队（20 §2.5）；
+   红队报告的 P0/P1 由你吸收修订升版（r1→r2，修订说明逐条列吸收项与未吸收理由），
+   **人终确认（spec+报告+修订对照）后方允许拆 tickets 动工**
 4. 关键架构决策写入 basic-memory 的 decisions/ 目录
 5. 工单归档后的 spec 升版（产出物模式——你被禁 Bash/Edit：git 提交物理上不可能；
    文件写入受 guard 白名单限定在 docs/ 等）：
@@ -47,7 +54,9 @@ disallowedTools:
    （slug 与 ticket 文件名一致），worktree 创建命令统一写作
    git gtr new feat/<slug> --from main
 3. 架构决策摘要（decisions/ 要点）
-4. 未决问题与风险（明确标注哪些留给实现期决策）
+4. spec-redteam 定级与吸收记录（定级值 + docs/reviews/<slug>-spec-redteam.md 路径 +
+   P0/P1 吸收清单与未吸收理由——fast/skip 定级须给理由）
+5. 未决问题与风险（明确标注哪些留给实现期决策）
 
 ## 调用示例
 - "帮我理清这个需求，拆成可以排期的任务"

@@ -1,6 +1,6 @@
 # 00 · 文档索引（本仓库导航唯一来源）
 
-> 本文件是本仓库的**导航唯一事实来源**。**公开版说明**：本仓库为能力迁移精选发布版——docs/06/08–14（历史路线图/P0 实测日志/优化与审计过程记录/memory 笔记）属内部工程档案未随发布；文中引用这些编号处（C1–C3、08 §P0-2 等）为内部档案锚点，不影响使用。另含固定泛化差异：内部仓库名与机器路径统一写作 REPO/本仓库（REPO 标准落位 `~/.agents/Harness-Engineering`，2026-09-08 起，Windows 展开 %USERPROFILE%\.agents\Harness-Engineering），安装类命令一律给可直接运行形态（07 第 0 步表的"✅ 已在位/已部署"状态列为首发机器历史快照，读者机器以实际执行结果为准）。（2026-09-03 起从根 README 迁入——README 仅保留入口指针，从而新增文档不再需要人工改根级宪法文件；本文件在 guard 白名单 `/docs/` 内）。
+> 本文件是 Zcode_T1 harness 仓库的**导航唯一事实来源**（2026-09-03 起从根 README 迁入——README 仅保留入口指针，从而新增文档不再需要人工改根级宪法文件；本文件在 guard 白名单 `/docs/` 内）。
 > 建立日期：2026-09-02 ｜ 索引迁移：2026-09-03
 
 ## 一句话体系
@@ -30,12 +30,17 @@
 | [16-host-agnostic-installer.md](16-host-agnostic-installer.md) | 宿主无关化与三段式安装器（检测→安装→适配；installer/ 工具） | 迁移必读 |
 | [17-agent-assisted-install.md](17-agent-assisted-install.md) | Agent 辅助安装方案（目标机 agent 提示词：人机分工协议+八步骨架） | 迁移必读 |
 | [18-host-adapters.md](18-host-adapters.md) | 五宿主适配包（claude-code/kimi-code/codex/opencode/pi-agent 判级证据+适配产物+装机验证清单） | 迁移必读 |
+| [19-constitution-config-split.md](19-constitution-config-split.md) | 宪法与配置分离 v3（零参数宪法+三级配置中心+四阶段在装项目升级手册——已裁决 D1/通用默认合一 50/60/70） | v3 实施 |
+| [20-autonomous-merge.md](20-autonomous-merge.md) | 自治流水线（两端人闸+gates 全绿 auto-merge+方案红队前置门 §2.5——红线修订已获确认） | v3 实施 |
 
 ## 模板（迁移时复制）
 
 | 模板 | 用途 | 目标位置 |
 |---|---|---|
-| [../templates/AGENTS-template.md](../templates/AGENTS-template.md) | 工作区 AGENTS.md（≈100 行索引式） | 目标项目根 `AGENTS.md` |
+| [../templates/AGENTS-template.md](../templates/AGENTS-template.md) | 工作区宪法（v3 零参数、全项目全宿主恒等——原样 cp 零渲染） | 目标项目根 `AGENTS.md` |
+| [../templates/harness-common-template.md](../templates/harness-common-template.md) | 机器级共享配置（vault 根/三区名/规范仓路径；末尾修订记录表） | `~/.agents/Harness-Configuration/common.config.md`（每机一次） |
+| [../templates/harness-host-template.md](../templates/harness-host-template.md) | 机器级宿主配置（agent_segment 完整段名） | `~/.agents/Harness-Configuration/<host>.config.md`（每宿主一份） |
+| [../templates/harness-project-template.md](../templates/harness-project-template.md) | 项目级配置（快照/项目段/checkpoint_every/auto_push_remote） | 目标项目根 `harness.config.md` |
 | [../templates/zcode-config-template.json](../templates/zcode-config-template.json) | 工作区 .zcode/config.json（纯 MCP；hooks 已上收用户级，C2 结论） | 目标项目 `.zcode/config.json` |
 | [../templates/user-config-hooks-template.json](../templates/user-config-hooks-template.json) | 用户级 hooks 注册形态（guard/inject/report 三正式脚本） | `~/.zcode/cli/config.json`（参考） |
 | [../templates/agents/](../templates/agents/) | 六个角色子代理文件（ZCode 格式：四角色移植 + archiver + red-teamer；另 3 个 *-rerun 变体由生成器物化） | `~/.zcode/agents/`（用户域，全局一次；sync-harness.mjs --apply 分发） |
@@ -50,7 +55,7 @@
 
 ## 与既有资产的关系
 
-- **AITrader 四角色团队（Kimi Code）**：AITrader 是另一个独立项目目录，跑在 Kimi Code CLI 上。本仓库把它的机制（角色文件、guard hooks、流水线约定）**提炼成 ZCode 模板**，但**不迁移、不改造 AITrader 本身**——该项目继续在 Kimi Code 上运行。两边是"同一套规范的两个运行现场"：规范修订以本仓库为准；AITrader 是否跟进由人决定、人工同步，两边互不自动覆盖。
+- **AITrader 四角色团队（Kimi Code）**：AITrader 是独立项目目录（`C:\Forex\Project\AITrader`），跑在另一款工具 Kimi Code CLI 上。本仓库把它的机制（角色文件、guard hooks、流水线约定）**提炼成 ZCode 模板**，但**不迁移、不改造 AITrader 本身**——该项目继续在 Kimi Code 上运行。两边是"同一套规范的两个运行现场"：规范修订以本仓库为准；AITrader 是否跟进由人决定、人工同步，两边互不自动覆盖。
 - **用户域 AGENTS.md（九项原则）**：体系的"宪法层"（User Rules），本仓库所有规范不得与之冲突。
 
 ## 维护约定

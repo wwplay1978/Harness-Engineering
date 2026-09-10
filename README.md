@@ -77,6 +77,12 @@ node templates/installer/check-env.mjs          # read-only probe: profile + ada
 templates/installer/install-hindsight-service.cmd --rehearse   # dry-run before any real install
 ```
 
+## v3 upgrade note (2026-09-10): config center + zero-parameter constitution + autonomous merge
+
+**What changed** — all per-project/per-machine parameters moved out of the AGENTS.md constitution into a cascading config center (machine-level `~/.agents/Harness-Configuration/` = `common.config.md` shared + `<host>.config.md` per host; project-level `harness.config.md` at project root). The constitution is now zero-parameter and byte-identical across all projects/hosts — installed by plain copy, drift-checked byte-for-byte by `sync-harness`. Zone defaults are unified to `50-Projects / 60-Knowledge / 70-Workspace` with agent segment `10-<AGENT>`. Merge gate revised (user-ratified): quality gates green = auto-merge with trace (`pre-merge-check.mjs` assertions + `auto-merge: gates green` footnote); any red = human. A spec-level red-team gate now runs between planner and development.
+
+**Upgrading an existing clone** — `git pull`, then per installed project: freeze in-flight tickets → create machine config + vault zones (pure additions) → per project: extract params from the old rendered AGENTS.md into `harness.config.md`, replace AGENTS.md with the zero-parameter template → finally `sync-harness.mjs --apply` to recast role files (order matters: the constitution is the first reader of config, the roles are the last).
+
 ## Architecture & design highlights
 
 [![System architecture](docs/diagrams/architecture-light.png)](https://pages.20081005.xyz/architecture.html)

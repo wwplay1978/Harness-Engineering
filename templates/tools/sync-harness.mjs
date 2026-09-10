@@ -10,15 +10,18 @@
 //     运行中的执行位另受 guard 自防御条款物理保护）
 //   - rerun 变体（*-rerun.md）是 generate-role-variants.mjs 的编译产物：不入清单、不删除
 //   - 用户级 config.json / 项目 AGENTS.md 同为只报告（前者混有 hindsight 等非本仓库内容，
-//     后者是人工宪法）
+//     后者是人工宪法）——v3 起项目宪法与零参数模板做逐字节恒等比对（normalize=LF+strip BOM），
+//     日期基线（constitution-affecting-baseline）退役
 //   - 项目盘点清单外置 ~/.zcode/harness-projects.json（机器本地数据不进模板）：缺失自动
 //     建空清单并告警；损坏降级跳过并提示——均不计静默绿
+//   - v3 机器配置检测（spec 19 §3.4）：在册项目非空而 ~/.agents/Harness-Configuration/
+//     配置缺失=[FAIL]；hash 快照（~/.zcode/harness-config-state.json，含全文 base64 兼误删
+//     恢复）检测"改而未补修订记录"=[WARN]；项目级 harness.config.md 做 schema 必填键校验
 //   - 尾段机器锚点扫描 = 投产消费面 tripwire（templates/ + docs/07/16/17/18；历史记录类
 //     文档不入扫描面），命中即计入漂移由人判定
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { homedir } from 'node:os';
-import { execFileSync } from 'node:child_process';
 
 const repo = join(import.meta.dirname, '..', '..');   // templates/tools/ → 仓库根
 const HOME = homedir();
@@ -93,7 +96,8 @@ try {
     }
 } catch (e) { console.log(`[WARN] config 比对失败：${e.message}`); drift++; }
 
-// 4) 项目盘点（结构在位 + AGENTS 模板基线对照；只报告；清单外置见文件头说明）
+// 4) 项目盘点（v3：宪法恒等 + 两级配置校验；constitution-affecting-baseline 日期基线退役——
+//    零参数制下模板与项目宪法应逐字节恒等，内容比对零歧义；清单外置见文件头说明）
 const projFile = join(HOME, '.zcode', 'harness-projects.json');
 let PROJECTS = [];
 if (!existsSync(projFile)) {
@@ -107,27 +111,77 @@ if (!existsSync(projFile)) {
     drift++; PROJECTS = [];
   }
 }
+const norm = s => (s ?? '').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+const tplAgents = norm(readFileSync(join(repo, 'templates', 'AGENTS-template.md'), 'utf8'));
+const MC_DIR = join(HOME, '.agents', 'Harness-Configuration');
+const parseCfg = f => {  // 配置表格解析（spec 19 §3.1 解析约定：表头识别、仅表格内行、三列取二）
+  const txt = read(f); if (txt === null) return null;
+  const out = {}; let inTable = false;
+  for (const ln of txt.split('\n')) {
+    if (/^\|\s*键\s*\|\s*值\s*\|\s*说明\s*\|/.test(ln)) { inTable = true; continue; }
+    if (!/^\|/.test(ln)) { inTable = false; continue; }
+    if (!inTable) continue;
+    const m = ln.match(/^\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|/); if (m) out[m[1].trim()] = m[2].trim();
+  }
+  return out;
+};
+// 4a) 机器配置：在册丢失 FAIL + hash 快照"改而未记"WARN（快照含全文 base64，兼误删恢复副本；spec 19 §3.4）
+const stateFile = join(HOME, '.zcode', 'harness-config-state.json');
+let state = {}; try { state = JSON.parse(readFileSync(stateFile, 'utf8')); } catch {}
+const { createHash } = await import('node:crypto');
+const hashOf = t => createHash('sha256').update(t).digest('hex').slice(0, 16);
+const lastRev = t => {  // 修订记录表（| 日期 | 变更 | 动机 |）末行首列
+  const rows = t.split('\n').filter(l => /^\|\s*\d{4}-\d{2}-\d{2}/.test(l));
+  return rows.length ? rows[rows.length - 1].slice(0, 40).trim() : '';
+};
+console.log('\n-- 机器配置（~/.agents/Harness-Configuration/）--');
+const commonPath = join(MC_DIR, 'common.config.md');
+const mcFiles = existsSync(MC_DIR) ? readdirSync(MC_DIR).filter(e => e.endsWith('.config.md')).map(e => join(MC_DIR, e)) : [];
+const fleetActive = PROJECTS.length > 0;
+if (fleetActive && !mcFiles.length) {
+  console.log('[FAIL] 在册项目非空而机器配置全缺（common/host 均无）——按安装 S5 或升级手册阶段 1 生成；快照可恢复：见 ~/.zcode/harness-config-state.json');
+  drift++;
+}
+for (const f of Object.keys(state)) if (state[f]?.tracked && !existsSync(f)) {
+  console.log(`[FAIL] 曾在册机器配置缺失：${f}（快照含全文，人工解码恢复——工具只提示不自动写回）`); drift++;
+}
+if (!mcFiles.length && !fleetActive) console.log('[INFO] 机器配置目录为空（未装机/首装前——正常）');
+for (const f of mcFiles) {
+  const t = read(f) ?? ''; const h = hashOf(t); const rev = lastRev(t); const prev = state[f];
+  const snap = { hash: h, rev, tracked: true, content: Buffer.from(t, 'utf8').toString('base64') };
+  if (!prev) console.log(`[INIT]   ${relative(MC_DIR, f)} 首入快照`);
+  else if (prev.hash !== h && prev.rev === rev) { console.log(`[WARN]   ${relative(MC_DIR, f)} 内容已改而修订记录末行未变——补记一行（| 日期 | 变更 | 动机 |）`); drift++; }
+  state[f] = snap;
+}
+writeFileSync(stateFile, JSON.stringify(state, null, 2) + '\n');
 for (const P of PROJECTS) {
   console.log(`\n-- 项目盘点：${P}（只报告）--`);
-  for (const rel of ['AGENTS.md', '.zcode/config.json', '.zcode/memory-project', 'docs/specs', 'docs/tickets', 'docs/reviews']) {
+  for (const rel of ['AGENTS.md', '.zcode/config.json', '.zcode/memory-project', 'harness.config.md', 'docs/specs', 'docs/tickets', 'docs/reviews']) {
     const ok = existsSync(join(P, rel));
     console.log(`${ok ? '[OK]  ' : '[MISS]'} ${rel}`);
-    if (!ok) drift++;
+    if (!ok && rel !== 'harness.config.md') drift++;          // harness.config.md 缺失单独判定（旧制项目预期中）
+    if (!ok && rel === 'harness.config.md') drift++;          // v3 起必备——计漂移，判级见下
   }
   console.log(`${existsSync(join(P, 'docs/changes')) ? '[OK]  ' : '[INFO]'} docs/changes（瞬态：三段链消费后清空，缺失不计漂移）`);
-  try {
-    const gitAt = (cwd, f) => execFileSync('git', ['-C', cwd, 'log', '-1', '--format=%ad', '--date=short', '--', f], { encoding: 'utf8' }).trim();
-    // 模板基线读 AGENTS-template 头部 constitution-affecting-baseline 标记（仅宪法相关变更时人工更新；
-    // 渲染机制类/新装默认类改动不触发——按 git 提交日比会把它们误标为各项目"未吸收更新"，AITrader2 首装实证 2026-09-08）；
-    // 标记缺失回退 git 日期（宁可误报不可漏报）
-    const tplM = readFileSync(join(repo, 'templates', 'AGENTS-template.md'), 'utf8')
-      .match(/constitution-affecting-baseline:\s*(\d{4}-\d{2}-\d{2})/);
-    const tplDate = tplM ? tplM[1] : gitAt(repo, 'templates/AGENTS-template.md');
-    const agDate = gitAt(P, 'AGENTS.md');
-    const src = tplM ? '标记' : 'git 回退';
-    if (tplDate > agDate) { console.log(`[REVIEW] 宪法基线 ${tplDate}（${src}）晚于项目宪法定稿 ${agDate}——模板有未吸收的宪法级更新，人工对照`); drift++; }
-    else console.log(`[OK]   宪法定稿 ${agDate} ≥ 模板基线 ${tplDate}（${src}）`);
-  } catch { console.log('[WARN] 模板基线比对失败（git 不可用？）'); }
+  const ag = read(join(P, 'AGENTS.md'));
+  if (ag !== null) {
+    if (norm(ag) === tplAgents) console.log('[OK]   宪法与零参数模板逐字节恒等（LF+BOM 归一后）');
+    else if (norm(ag).split('\n')[0] === tplAgents.split('\n')[0]) { console.log('[DRIFT] 宪法首行同源但正文与模板不一致——零参数制下任何差异=宪法漂移，人工对照'); drift++; }
+    else { console.log('[MIGRATE] 宪法仍为旧制（span 渲染版）——按 spec 19 §6 阶段 2 升级（先建 harness.config.md 再 cp 新模板）'); }
+  }
+  const pc = parseCfg(join(P, 'harness.config.md'));
+  if (pc === null) console.log('[MISS] harness.config.md 缺失或不可解析（v3 必备，schema 见 spec 19 §3.1——人工生成，agent 勿臆造）');
+  else {
+    const miss = ['schema', 'project_name'].filter(k => !(k in pc));
+    if (miss.length) { console.log(`[FAIL] harness.config.md 缺必填键：${miss.join(', ')}（fail-loud，人工补齐）`); drift++; }
+    else console.log(`[OK]   项目配置 schema 在位（project_name=${pc.project_name}）`);
+    const mc = parseCfg(commonPath); const vr = mc?.vault_root;
+    if (vr) {
+      const vp = vr.replace(/^~(?=\/|\\|$)/, HOME);
+      if (existsSync(vp)) console.log(`[OK]   vault_root 可达：${vp}`);
+      else { console.log(`[WARN] vault_root 不存在：${vp}（三区尚未建立属允许态，报告提示）`); drift++; }
+    }
+  }
 }
 
 // 5) 机器锚点扫描（投产消费面 tripwire；本文件自排除；命中计入漂移由人判定）
@@ -168,6 +222,6 @@ if (apply && rolesOrModelsChanged)
   console.log('\n⚠️ 角色/路由表已更新：node ~/.zcode/tools/generate-role-variants.mjs 重铸变体，然后新开会话生效（C1 快照）。');
 if (apply && applied) console.log(`已同步 ${applied} 项。`);
 console.log(drift === 0
-  ? '\n✔ 全部一致（自动集 + hooks 执行位 + 注册 + 项目结构 + 锚点扫描）'
-  : `\n✘ 待处理 ${drift} 项${apply ? '（剩余均为人工项：hooks 执行位 / 注册 / 项目结构 / 锚点）' : '（--apply 可同步自动集部分）'}`);
+  ? '\n✔ 全部一致（自动集 + hooks 执行位 + 注册 + 宪法恒等 + 配置校验 + 锚点扫描）'
+  : `\n✘ 待处理 ${drift} 项${apply ? '（剩余均为人工项：hooks 执行位 / 注册 / 项目结构 / 配置 / 锚点）' : '（--apply 可同步自动集部分）'}`);
 process.exit(drift === 0 ? 0 : 1);

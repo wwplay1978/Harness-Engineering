@@ -15,8 +15,8 @@
 ## 2. 红线清单（不可越过）
 
 1. **先 Spec 后 Code**——无 spec 不派 developer（小修至少有 ticket 验收标准）。
-2. **合并决策永远是人**——任何 Agent 不得 merge 到 main；只合 `feat/<slug>` 一个分支。
-3. **AGENTS.md 只能人改**——guard 白名单不含 AGENTS.md；流水线宪法同规（本仓库规范亦然）。唯一豁免=**安装窗口首次落位**（2026-09-08 起：安装助手按问答渲染、人复核即人授权，见 17 §3 S5 与 §4 安装窗口说明；落位后本条即刻恢复，无其他例外）。
+2. **合并须质量门全绿**（2026-09-10 宪法修订，spec 20 §2——人已确认授权）——门全绿可自动执行（留 `auto-merge: gates green` 痕迹，前置断言 `pre-merge-check.mjs` 全绿、工件落盘 `docs/reviews/<slug>-premerge.log`）；门不全绿必须人；任何情况下只合 `feat/<slug>` 一个分支（--no-ff）。宪法修订/hooks/发布类票永不入自治链（强制人工链）。**Bash 写主检出非白名单路径/两级配置/宪法与 Write/Edit 面同罪**（盲区补偿见下表，spec 20 §2）。
+3. **AGENTS.md 与 harness.config.md（两级）只能人改**（v3 扩容，spec 19）——guard 白名单不含二者（项目根路径默认即拦）；机器级配置（`~/.agents/Harness-Configuration/`，项目检出外）由条文 + sync 检测约束（在册丢失 [FAIL]、改而未补修订记录 [WARN]）。唯一豁免=**安装窗口首次落位**（v3 起=红线两阶段：安装期 agent 可写两级配置以完成安装、S7 验收通过即入红线，见 17 §3 S5 与 spec 19 §3.4；落位后本条即刻恢复，无其他例外）。
 4. **一 ticket 一 worktree**——写代码必须在 `git gtr` 隔离工作区，主检出写入被 hook 阻断。
 5. **命名锚定 slug**——分支 `feat/<slug>`、快照 `<slug>-r<n>.diff`、bank、记忆条目，全链路可对账。
 6. **spec/tickets 防篡改**——worktree 内不得改 `docs/specs/`、`docs/tickets/`；合并前 diff 检查为空（reviewer 一票 blocking）。
@@ -42,7 +42,7 @@ guard-worktree.mjs 的逻辑（路径归一化 `\\`→`/` + `.toLowerCase()`、`
 |---|---|---|---|
 | payload 字段 | `tool_input.path`（可能是相对路径） | **待 P0-3 探测**（ZCode 为 Claude 系，可能是 `file_path`；脚本按 `path ?? file_path` 双字段兼容即可） | 探测后校准 |
 | matcher | `Write\|Edit` | `Write\|Edit\|ApplyPatch`（官方别名方向为 `Write/Edit ← ApplyPatch`，理论上前两个已覆盖；加写 ApplyPatch 为防御冗余，以 P0-3 实测为准） | 改 matcher |
-| Bash 盲区补偿 | 无（Kimi 版同样存在） | ① 合并前检查：本单时间窗内 `git log main --oneline --no-merges` 逐条对照下方"main 直接提交白名单"；② Bash 命令模式 hook（拦 `>`/`sed -i` 等写主检出模式）列为 Phase 2 加固项 | AGENTS 模板第 6 步 + 06 Phase 2 |
+| Bash 盲区补偿 | 无（Kimi 版同样存在） | ① 合并前检查：本单时间窗内 `git log main --oneline --no-merges` 逐条对照下方"main 直接提交白名单"（**v3 机器化=pre-merge-check.mjs 门 B**——auto-merge 与人合并均必跑、工件落盘 docs/reviews/<slug>-premerge.log，spec 20 §3；机器配置的 Bash 篡改由 sync hash 快照检测）；② Bash 命令模式 hook（拦 `>`/`sed -i` 等写主检出模式）列为 Phase 2 加固项（auto-merge 落地后提升优先级，但不阻塞其落地） | AGENTS 模板第 6 步 + 06 Phase 2 + 20 §2 |
 
 **main 直接提交白名单**（①的判定标准）：main 上仅允许三类非 merge 提交——`chore: archive*`（archiver 归档提交）、`docs: spec*`（spec/tickets 首次入库与升版）、`docs: agents*`（**宪法/AGENTS 修订**：人授权后由 main agent 代提交，commit message 须注明人授权依据——2026-09-05 审计回灌：无此通道则每次宪法演进都成技术性越权，稀释检查信号）。**第四类例外（2026-09-06 web2api 宪法 r4 首立，模板已随附）**：人在场明确授权的一次性直提，commit message 须尾注 `committed on user authorization <日期>`——无此留痕即按越权计。出现白名单外直接提交即越权。注意不得用固定 `-5` 窗口——多单归档后越权提交会被挤出窗口恒绿；以本 ticket 时间窗为界。
 | 注册与阻断 | config.toml + exit 2 实测成立 | 用户级 `~/.zcode/cli/config.json` → `hooks.events.PreToolUse` + `hooks.enabled: true` + exit 2 阻断（官方文档确认语义；执行位=`~/.zcode/hooks/harness/`，2026-09-07 上收用户域） | 用模板配置 |

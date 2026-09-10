@@ -77,6 +77,12 @@ node templates/installer/check-env.mjs          # 只读探测：profile + 适�
 templates/installer/install-hindsight-service.cmd --rehearse   # 正式安装前先预演
 ```
 
+## v3 升级说明（2026-09-10）：配置中心 + 零参数宪法 + 自治合并
+
+**变更内容**——一切项目/机器可变参数从 AGENTS.md 宪法迁入级联配置中心（机器级 `~/.agents/Harness-Configuration/`：common.config.md 共享 + `<host>.config.md` 每宿主一份；项目级=项目根 `harness.config.md`）。宪法零参数、全项目全宿主逐字节恒等——安装即原样复制，sync 按字节做漂移比对。三区默认统一为 `50-项目库 / 60-知识库 / 70-工作区`，agent 段=`10-<agent 名>`。合并门修订（经人确认）：质量门全绿=自动执行并留痕（pre-merge-check.mjs 断言 + `auto-merge: gates green` 尾注）；有红=必须人。planner 与开发之间新增方案层红队门。
+
+**在装项目升级**——`git pull` 后逐项目执行：冻结在飞工单 → 建机器配置与 vault 三区（纯新增）→ 每项目：从旧渲染版 AGENTS.md 抽参数生成 `harness.config.md`、AGENTS.md 换零参数模板 → 最后 `sync-harness.mjs --apply` 重铸角色文件（顺序有讲究：宪法是配置的第一个读者、角色是最后一个读者）。
+
 ## 架构规划与优势设计
 
 [![体系总体架构](docs/diagrams/architecture-light.png)](https://pages.20081005.xyz/architecture.html)
