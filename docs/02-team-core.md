@@ -1,7 +1,7 @@
 # 02 · 团队核心：六角色流水线的 ZCode 移植方案（四角色移植 + archiver 与 red-teamer 新增）
 
 > 资产来源：AITrader 四角色团队（Kimi Code，v1.2，2026-08-30 真实工单验证通过）
-> 原方案：AITrader 项目内 `docs/team/kimi-code-agent-team-plan.md`（内部存档，未随公开版发布）
+> 原方案：`C:\Forex\Project\AITrader\docs\team\kimi-code-agent-team-plan.md`
 > 本文只讲**移植到 ZCode 的差异与动作**；角色行为规范、流水线逻辑、验证制度全部原样继承，不重述。
 
 ## 1. 为什么四角色是团队核心
@@ -20,7 +20,7 @@
 | 工具禁用 | frontmatter `disallowedTools`（实测物理生效） | 同名键 `disallowedTools`（camelCase，字段存在） | **P0-4 实测**：planner 禁 Edit/Bash、reviewer 禁 Write/Edit/Bash 是否物理生效 |
 | 写入隔离 hook | `guard-worktree.mjs` 挂 PreToolUse（Kimi config.toml 注册） | 同脚本挂 ZCode `PreToolUse`，注册进**用户级** `~/.zcode/cli/config.json` → `hooks.events`（2026-09-02 C2 起；执行位 `~/.zcode/hooks/harness/` 2026-09-07 上收用户域），且必须 `hooks.enabled: true` | ① payload schema（Kimi 实测 `tool_input.path`，ZCode 实测 `tool_input.file_path`，脚本双读）；② matcher 必须覆盖 ApplyPatch 调用——`Write\|Edit` 已覆盖，**加写 `\|ApplyPatch` 为防御冗余**（P0-3 实测 Edit 命中）；③ exit 2 阻断语义 ZCode 官方文档确认支持 |
 | 记忆注入 hook | `inject-memory.mjs` 挂 UserPromptSubmit，session_id 节流 | 同事件挂 ZCode `UserPromptSubmit`，stdout 走严格 JSON（`additionalContext` 字段）注入上下文 | ① ZCode stdout 解析为严格 JSON schema（多键即校验失败）——脚本输出必须包成 `{"additionalContext":"..."}`；② **marker 机制必须同步移植**：Kimi 版靠 `<项目>/.kimi-code/memory-project` 标记文件读项目名（缺失则静默退出、永不注入）——移植版改为 `.zcode/memory-project` 并在迁移手册创建；tmp 节流标记前缀 `kimi-memo-injected-` 改 `zcode-memo-injected-`；③ 原脚本用 `process.cwd()` 定位 marker，ZCode hook 进程 cwd 未验证——脚本优先读 payload 的 cwd 字段（P0-3 探测） |
-| 未合并分支提醒 hook | `report-worktrees.mjs` 挂 UserPromptSubmit | 同事件移植并**扩展双态**（qa 独立分支特例已废除，只扫 feat/*）：`--no-merged` 的 feat 分支 → 提醒人合并决策（或走废弃归档：人授权后 archiver branch -D + 废弃流程）；已 `--merged main` 仍存留的 feat 分支 → **提醒派 archiver 归档**（"已合并但未清理" = 待归档信号；archiver SOP 第 7 步删分支后提醒自动消失，即归档闭环）；历史遗留 qa/* 分支仅提示人工清理，不构成流程状态 | ① 输出格式适配 ZCode 严格 JSON（同 inject）；② 脚本扩展在 AITrader 版基础上加一段 `git branch --merged main` 检查，Phase 1 随三件套一起移植 |
+| 未合并分支提醒 hook | `report-worktrees.mjs` 挂 UserPromptSubmit | 同事件移植并**扩展双态**（qa 独立分支特例已废除，只扫 feat/*）：`--no-merged` 的 feat 分支 → 提醒合并待决：活跃链路按质量门继续推进（gates 全绿 auto-merge 留痕），门不全绿、链路停滞或拟废弃由人裁决（废弃归档仍须人明确授权后 archiver branch -D + 废弃流程）；已 `--merged main` 仍存留的 feat 分支 → **提醒派 archiver 归档**（"已合并但未清理" = 待归档信号；archiver SOP 第 8 步删分支后提醒自动消失，即归档闭环）；历史遗留 qa/* 分支仅提示人工清理，不构成流程状态 | ① 输出格式适配 ZCode 严格 JSON（同 inject）；② 脚本扩展在 AITrader 版基础上加一段 `git branch --merged main` 检查，Phase 1 随三件套一起移植 |
 | hook 注册位置 | 用户级 `~/.kimi-code/config.toml` | **用户级** `~/.zcode/cli/config.json`（2026-09-02 C2 实测：同事件用户级/项目级并存时项目级被覆盖丢弃；全项目一次部署）；**执行位同在用户域** `~/.zcode/hooks/harness/`（2026-09-07 上收，不指向仓库目录）——注册文件与执行位均在仓库外，Agent 的写入防护靠 **guard 自防御条款**（SHIELD 表无论 cwd 一律阻断，详见 05 §3） | 注册模板见 `templates/user-config-hooks-template.json`（`__HOME__` 替换为展开后的用户主目录）；项目级 `.zcode/config.json` 只承载 MCP（`templates/zcode-config-template.json`） |
 | basic-memory MCP | 项目级 `.kimi-code/mcp.json`（`mcpServers` 键） | 项目级 `.zcode/config.json` → `mcp.servers`（嵌套键；`.agents/mcp.json` 的 `mcpServers` 为兼容回退） | 键结构不同，见模板；ZCode 所有作用域 MCP 自动连接（无 Kimi 的 trust folder 手动步骤） |
 | worktree 隔离 | `git gtr`（git 别名注册，跨 session 稳定） | 原样复用（机制与 CLI 无关） | 无动作；`git config --global alias.gtr ...` 已在位 |
@@ -54,15 +54,15 @@
 
 | 维度 | archiver（沉淀官） | 其他角色/人 |
 |---|---|---|
-| 做什么 | 工单收尾七步 SOP（见角色文件 `templates/agents/archiver.md`） | planner 管 spec 正文与修订；developer 管代码；reviewer/QA 管质量结论；**人管合并决策** |
+| 做什么 | 工单收尾八步 SOP（见角色文件 `templates/agents/archiver.md`） | planner 管 spec 正文与修订；developer 管代码；reviewer/QA/red-teamer 管质量门结论；**合并按质量门规则**：符合自治链票型且 gates 全绿时，由 main agent 按既定规则 auto-merge；门不全绿、永久人闸票和例外事项由人裁决 |
 | 不做什么 | 零业务代码、零质量判断、不改 spec 正文（只允许更新 ticket 状态字段）、不合并分支 | — |
 | 物理约束 | 无工具禁用（需要 Bash/Edit/Write 执行提交与清理）；主检出写入被 guard 白名单限定在 `docs/` 等目录，业务代码物理碰不到 | reviewer 只读（tools 正向清单）；planner 禁 Edit/Bash |
-| 触发时机 | 人完成合并后，main agent 携 ticket slug + 合并 commit hash 派发 | developer 的修复轮触发不了它（request changes 退回 developer，不走归档） |
+| 触发时机 | 合并完成后（auto-merge 与人执行合并两径皆同），main agent 携 ticket slug + 合并 commit hash 派发 | developer 的修复轮触发不了它（request changes 退回 developer，不走归档） |
 | vs docs-architect（按需角色） | **每工单**的轻量归档（日常、流水线常驻） | docs-architect 做**里程碑/季度**的深度整理（basic-memory 修剪、文档体系重构、工作区草稿批量归位协助）——日常与深扫互补，不重叠 |
 
 角色文件：`templates/agents/archiver.md`（含完整边界/约束级别标注/SOP 顺序/交付物清单；Phase 1 真实工单验证）。
 
-**归档阶段的 hooks 自动化**：report-worktrees hook 扩展为双态提醒——存在已合并未清理的 feat 分支时，每条用户消息注入"待归档"提醒，推动 main agent 派 archiver；archiver 清理分支后提醒自动消失（闭环信号）。两个边界必须知道：① **hook 只提醒、不执行**——合并与归档触发仍是人/main agent 的决策，不违反"合并决策永远是人"红线；② **事件唯一选项是 UserPromptSubmit**——ZCode 官方仅七事件，**不含 SubagentStop**（Kimi 版靠它做 subagent 完成提醒，ZCode 没有这个事件；且 Kimi 已实测 SubagentStop 的 stdout 不注入主会话）。后人照 Kimi 版"优化"回 SubagentStop 即失效。另注：分支清理≠归档完成（人可手动删分支绕过提醒），故 04 文档"归档闭环率"指标是第二道信号。
+**归档阶段的 hooks 自动化**：report-worktrees hook 扩展为双态提醒——存在已合并未清理的 feat 分支时，每条用户消息注入"待归档"提醒，推动 main agent 派 archiver；archiver 清理分支后提醒自动消失（闭环信号）。两个边界必须知道：① **hook 只提醒、不执行**——hook 不决定合并、不执行归档、不新增审批门；合并按质量门规则，合并完成后 main agent 派 archiver；② **事件唯一选项是 UserPromptSubmit**——ZCode 官方仅七事件，**不含 SubagentStop**（Kimi 版靠它做 subagent 完成提醒，ZCode 没有这个事件；且 Kimi 已实测 SubagentStop 的 stdout 不注入主会话）。后人照 Kimi 版"优化"回 SubagentStop 即失效。另注：分支清理≠归档完成（人可手动删分支绕过提醒），故 04 文档"归档闭环率"指标是第二道信号。
 
 ## 5b. 第六角色 red-teamer（对抗审查官）：合并前最后门禁
 
@@ -82,7 +82,7 @@
 - [ ] 大小写混合路径仍被阻断（`.toLowerCase()` 归一化保留）
 - [ ] AGENTS.md 写入被阻断（流水线宪法只能人改）
 - [ ] basic-memory MCP 自动连接，`mcp__basic-memory__*` 工具可见，`--project` 命名空间正确
-- [ ] 真实小工单走完五棒全流程（复刻 Test04 双 ticket 验证的最小版本 + archiver 归档七步）
+- [ ] 真实小工单走完六角色全流程（复刻 Test04 双 ticket 验证的最小版本 + archiver 归档八步）
 - [ ] 归档提醒闭环：构造已合并未清理的 feat 分支 → 下条用户消息出现"待归档"提醒 →
       派 archiver 归档 → 分支清理后提醒消失
 

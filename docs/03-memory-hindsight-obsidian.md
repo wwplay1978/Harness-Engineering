@@ -103,7 +103,7 @@ ZCode 会话
 
 ### 4.1 现状与目录分工
 
-已装 Obsidian 1.13.7，vault = `C:\Users\markliu\Documents\MyObsidian`，Johnny Decimal 结构：
+已装 Obsidian 1.13.7，vault = `<your-vault-path>`，Johnny Decimal 结构：
 
 ```
 00-Inbox / 10-知识库 / 20-项目库 / 30-工作区 / 40-配置库 / 80-模板 / 90-附件
@@ -135,7 +135,7 @@ ZCode 会话
 
 ```bash
 hindsight-obsidian-sync reconcile \
-  --vault "C:/Users/markliu/Documents/MyObsidian" \
+  --vault "<vault-root>" \
   --bank knowledge \
   --api-url http://localhost:8888 \
   --include "60-知识库" --include "50-项目库" --include "70-工作区/10-ZCODE"

@@ -72,8 +72,8 @@
 |---|---|---|
 | Plan | planner：spec + tickets（`docs/specs/`、`docs/tickets/`） | 需求追问完成、验收标准可判定 |
 | Code | developer：worktree 隔离实现 + TDD + 自测 | 自测绿 + spec 对照表 |
-| Deliver | code-reviewer（门禁1）→ qa-tester（门禁2）→ reviewer 增量快审 → red-teamer 对抗审查（第六角色，full/fast/skip 定级） | pass/request changes 双门禁 + 5a 定级对抗 + 人做合并决策 |
-| Archive | archiver（沉淀官，第五角色）：合并结论入记忆、归档提交、知识草稿写 Obsidian 工作区（<zone_workspace>/<agent_segment>，路径以 harness 配置为准）、metrics 代录、worktree 清理 | 归档七步 SOP 全部有证据（角色文件交付物清单） |
+| Deliver | code-reviewer（门禁1）→ qa-tester + reviewer 增量快审（门禁2）→ red-team 定级门（门禁3：full=red-teamer 对抗审查；fast=code-reviewer 攻击清单 pass；skip=planner 定级琐碎票） | 三道质量门按各自适用规则满足（red-team 门=按 full/fast/skip 定级合规完成且非阻断，非一律 red-teamer pass）+ 其余 pre-merge gates 全绿，方可合并：符合自治链票型且全绿 auto-merge 留痕；门不全绿、永久人闸票与例外事项由人裁决 |
+| Archive | archiver（沉淀官，第五角色）：合并结论入记忆、归档提交、知识草稿写 Obsidian 工作区（<zone_workspace>/<agent_segment>，路径以 harness 配置为准）、metrics 代录、worktree 清理 | 归档八步 SOP 全部有证据（角色文件交付物清单） |
 
 ## 6. 反模式清单（红线级警惕）
 
@@ -84,7 +84,7 @@
 | 3 | Rules 一次写下永不维护 | 季度 harness-audit + 规范随度量迭代 |
 | 4 | MCP 疯狂接入 | 只接三件套（hindsight/basic-memory/项目必需），每个 MCP 必须回答"解决什么问题" |
 | 5 | Skill 大而全 | Skill 原子化：一个 Skill 一个场景 |
-| 6 | AI 输出直接上线不 review | L4 门禁：人 + reviewer 双审，合并决策永远是人 |
+| 6 | AI 输出直接上线不 review | review 与 QA+增量快审必须 pass；red-team 定级门按 full/fast/skip 对应规则满足（合规 skip 不属绕过，安全/数据 P0 返工令阻断）；合并须全部适用 gates 全绿——符合自治链票型 auto-merge 留痕，门不全绿与永久人闸（宪法/hooks/发布等）由人裁决 |
 | 7 | 聊天记录当文档 | 工件落 git（specs/tickets/reviews），经验落记忆与知识库 |
 | 8 | 一次 PR 改所有 | 一 ticket 一 worktree 一分支（feat/slug），串行依赖链 |
 

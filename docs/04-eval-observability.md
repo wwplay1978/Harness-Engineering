@@ -11,7 +11,7 @@
 | **L1 语法** | 能构建、能 lint | developer 自测（自动） | 项目构建命令 + linter（如 `ruff` / `tsc`） | 每 commit 前 |
 | **L2 逻辑** | 单元/集成测试绿 | developer 自测 → qa-tester 验收 | 测试框架；"假红检查"纪律（失败必须因正确原因） | developer 交付前 + QA 验收 |
 | **L3 规范符合** | 流水线约定是否被遵守 | code-reviewer + **harness-audit skill** | Standards 轴审查（Fowler 坏味道基线、密钥泄露一票否决、spec 防篡改检查） | 合并前门禁 1 |
-| **L4 架构与人审** | 设计合理性、最终合并 | **人** + reviewer 辅助 | diff 快照审阅 + spec 对照表 + 合并前检查（`git diff main...feat/slug -- docs/specs/ docs/tickets/` 应为空） | 合并决策（永远是人） |
+| **L4 架构与人审** | 设计合理性、合并决策合规 | **人**（架构裁决与门不全绿合并）+ reviewer 辅助；gates 全绿 auto-merge 留痕 | diff 快照审阅 + spec 对照表 + 合并前检查（`git diff main...feat/slug -- docs/specs/ docs/tickets/` 应为空） | 门不全绿必须人；gates 全绿可自动执行（宪法/hooks/发布/key/提权/破坏性等永久人闸恒人工——spec 20 §2/§3） |
 
 要点（继承 AITrader 实测结论）：
 

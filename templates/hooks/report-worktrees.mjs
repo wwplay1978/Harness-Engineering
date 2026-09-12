@@ -1,6 +1,6 @@
 // UserPromptSubmit hook：双态分支提醒（归档闭环的物理信号）
-// 状态A：有未合并 feat 分支        → 提醒人做合并决策（或走废弃归档）
-// 状态B：有已合并未清理的 feat 分支 → 提醒派 archiver 归档（archiver SOP 第7步
+// 状态A：有未合并 feat 分支        → 提醒合并待决（活跃链路按质量门推进，全绿 auto-merge；门不全绿/停滞/废弃由人裁决，废弃须人授权）
+// 状态B：有已合并未清理的 feat 分支 → 提醒派 archiver 归档（archiver SOP 第8步
 //        删分支后本提醒自动消失 = 归档闭环）
 // 附加：检测到遗留 qa/* 分支仅提示人工清理（qa 独立分支特例已废除，见 qa-tester.md）
 // ── ZCode 适配：cwd 从 payload 读；git -C 指定仓库；输出严格 JSON；fail-open ──
@@ -24,7 +24,7 @@ process.stdin.on('end', () => {
     const mergedUncleanFeat = branches.filter(b => /^feat\//.test(b) && isMerged(b));
     const legacyQa = branches.filter(b => /^qa\//.test(b));
     const lines = [];
-    if (unmergedFeat.length) lines.push('[待合并决策] 以下 feat 分支未合并，请人决策合并或废弃：' + NL +
+    if (unmergedFeat.length) lines.push('[待合并分支] 以下 feat 分支未合并——活跃链路按质量门继续推进（gates 全绿 auto-merge 留痕）；门不全绿、链路停滞或拟废弃由人裁决，废弃须人明确授权：' + NL +
       unmergedFeat.map(b => '  - ' + b).join(NL));
     if (mergedUncleanFeat.length) lines.push('[待归档] 以下 feat 分支已合并未清理，请派 archiver 执行归档 SOP：' + NL +
       mergedUncleanFeat.map(b => '  - ' + b).join(NL));

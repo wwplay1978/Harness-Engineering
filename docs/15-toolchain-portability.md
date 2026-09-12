@@ -42,7 +42,7 @@
 **每机必须重做的本地化**：
 1. ZCode 安装+登录（角色/hooks/config 依赖其目录结构）；
 2. gtr 安装与全局 alias（**来源已考证 2026-09-06：github.com/coderabbitai/git-worktree-runner**，获取命令见 16 §3 阶段二清单）；
-3. **hindsight 全套**：旧版 v4 曾硬编码用户路径（公开发布的 v5 已参数化：参数文件 + USERPROFILE 推导）；模型重新下载（ModelScope，GB 级）；pg0 的 Known-Folders junction 修复每台重做一次；服务环境必配 `PYTHONUTF8=1`（中文 Windows GBK 坑每台必现）；
+3. **hindsight 全套**：install-hindsight-service.cmd v4 内硬编码 `<your-home>` 路径与 key，**需参数化后才能他机使用**；模型重新下载（ModelScope，GB 级）；pg0 的 Known-Folders junction 修复每台重做一次；服务环境必配 `PYTHONUTF8=1`（中文 Windows GBK 坑每台必现）；
 4. z.ai API key（付费 plan，自备）；
 5. Obsidian vault 内容自行同步（个人数据，不在本体系内）。
 

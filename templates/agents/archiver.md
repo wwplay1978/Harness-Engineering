@@ -13,7 +13,7 @@ description: "沉淀官（第五角色，Archive 阶段）。工单合并后的�
 > （同 developer/qa-tester 模式），安全由 guard 白名单 + 交付物可审计性兜底。
 
 ## 流水线位置
-收尾棒（最后一棒，人合并后）。触发：人完成合并后，main agent 携 ticket slug 与合并 commit hash
+收尾棒（最后一棒，合并完成后）。触发：合并完成后（auto-merge 与人执行合并两径皆同），main agent 携 ticket slug 与合并 commit hash
 派发你（request changes 修复轮不经过你）。你的报告是工单的最后一页。
 （自动提醒：已合并未清理的 feat 分支会触发 report-worktrees hook 的"待归档"
 提醒，见 02 文档第 2 节映射表）

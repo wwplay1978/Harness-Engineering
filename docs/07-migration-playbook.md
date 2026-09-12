@@ -140,7 +140,7 @@ node templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
 
 - **自动集**：六角色 base、harness-audit 技能、变体生成器、models.config.json——源=templates/（git 版本化），用户域均为部署副本
 - **hooks 执行位（`~/.zcode/hooks/harness/`）只报告、永不代写**：AI 可改 templates 源（guard 白名单内），若脚本自动传播即等于 AI 可换掉运行中的 guard 自毁防线——该路径人工 cp（脚本打印现成命令）
-- 用户级 config.json 三正式注册与项目结构（AGENTS/文档目录/模板基线对照）随跑随报，同样只报告；**模板基线对照（2026-09-08 起）读 AGENTS-template.md 头部 `constitution-affecting-baseline` 标记**——仅当模板变更影响已渲染宪法的实质内容时人工更新该日期（渲染机制类/新装默认类改动不触发；此前按模板 git 提交日比对会把非宪法级改动误标为各项目"未吸收更新"）；盘点发现的归属=各自项目，跨项目发现不构成当前项目的任务
+- 用户级 config.json 三正式注册与项目结构（AGENTS/文档目录/宪法恒等对照）随跑随报，同样只报告；**宪法恒等对照（v3）**以规范仓 `templates/AGENTS-template.md` 为基准，对项目根 AGENTS.md 做 normalize（strip BOM + CRLF→LF）后比较完整正文——全文相同=[OK]，正文不同而首行同源=[DRIFT]（宪法漂移，人工对照），首行不同=[MIGRATE]（旧制 span 渲染版启发式）；sync 只报告、**永不写回项目 AGENTS.md**，宪法换版由人工按 spec 19 §6 执行并复核（旧 `constitution-affecting-baseline` 日期基线已退役，历史与裁决见 docs/08 与 spec 19 D3；相关配置状态由 spec 19 §3.4 与 sync 源码定义，本行不重复）；盘点发现的归属=各自项目，跨项目发现不构成当前项目的任务
 - **新项目接入后**：把项目根路径加入 `~/.zcode/harness-projects.json`（JSON 数组；首跑缺失会自动 seed 本机默认集），此后该项目的结构盘点随跑随报
 - **--apply 会覆盖部署副本**（无备份）：部署副本手改会被无声覆盖——正确姿势=只改 templates/ 源头；拿不准先跑 `--check` 看 DRIFT 清单
 - 角色/路由表变更后按提示重跑 `generate-role-variants.mjs` 重铸 rerun 变体，并**新开会话**生效（C1 快照）
