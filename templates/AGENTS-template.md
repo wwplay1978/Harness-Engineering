@@ -39,6 +39,7 @@ planner → developer → code-reviewer → qa-tester → code-reviewer（增量
 - 知识库（Obsidian）：**vault 根与三区以机器级 harness 配置为准**（common.config.md：vault_root / zone_final_project / zone_final_common / zone_workspace；agent 段=<host>.config.md 的 agent_segment；项目段=项目配置 project_segment，缺省派生式）——定稿知识在通用定稿区与项目定稿区（**只能人写，AI 永不直接写**），进行中未整理知识一律在工作区（按类型：工单沉淀/决策速记/环境怪癖/调研笔记）。planner 开工前必检定稿项目页与工作区两处；**信任分级：定稿区可直接引用，工作区（folder 标签以 zone_workspace 值前缀）为未整理草稿、结论须验证**；archiver 只写工作区
 - **fail-loud**：harness 配置缺失或字段非法时，停止一切依赖该配置值的操作并报告；仅可继续收集和报告不依赖缺失值的本地只读证据，不访问网络，不尝试读取、构造、猜测或替代缺失值，不生成默认值，不写任何文件或配置，不启动安装，不执行依赖该配置的操作，不触发 merge、push、发布或其他外部副作用；下一步一旦需要缺失值立即停止，不能推进则按“受阻未完成”报告
 - 边界：可审查决策 → git/basic-memory；个体经验 → hindsight；人类知识 → Obsidian
+- 平行记忆树禁令（D6）：本项目为 harness 管辖项目，禁用 codex-memory 家族（bootstrap/sync/task-init/compress/promote-global）的任何执行——不创建或更新 `.codex-memory/` 目录树与 AGENTS.md 的 CODEX-MEMORY 管理块，记忆一律走上列三通道（该家族 2026-09-14 已修补为仅用户显式触发；本条为 harness 项目的进一步禁用）
 
 ## 红线（违反即流程事故）
 
