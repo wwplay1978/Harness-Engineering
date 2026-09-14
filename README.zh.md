@@ -79,7 +79,7 @@ templates/installer/install-hindsight-service.cmd --rehearse   # 正式安装前
 
 ## v3 升级说明（2026-09-10）：配置中心 + 零参数宪法 + 自治合并
 
-**变更内容**——一切项目/机器可变参数从 AGENTS.md 宪法迁入级联配置中心（机器级 `~/.agents/Harness-Configuration/`：common.config.md 共享 + `<host>.config.md` 每宿主一份；项目级=项目根 `harness.config.md`）。宪法零参数、全项目全宿主逐字节恒等——安装即原样复制，sync 按字节做漂移比对。三区默认统一为 `50-项目库 / 60-知识库 / 70-工作区`，agent 段=`10-<agent 名>`。合并门修订（经人确认）：质量门全绿=自动执行并留痕（pre-merge-check.mjs 断言 + `auto-merge: gates green` 尾注）；有红=必须人。planner 与开发之间新增方案层红队门。
+**变更内容**——一切项目/机器可变参数从 AGENTS.md 宪法迁入级联配置中心（机器级 `~/.agents/Harness-Configuration/`：common.config.md 共享 + `<host>.config.md` 每宿主一份；项目级=项目根 `harness.config.md`）（[`docs/19`](docs/19-constitution-config-split.md)）。宪法零参数、全项目全宿主逐字节恒等——安装即原样复制，sync 按字节做漂移比对。三区默认统一为 `50-项目库 / 60-知识库 / 70-工作区`，agent 段=`10-<agent 名>`。合并门修订（经人确认）：质量门全绿=自动执行并留痕（pre-merge-check.mjs 断言 + `auto-merge: gates green` 尾注）；有红=必须人（[`docs/20`](docs/20-autonomous-merge.md)）。planner 与开发之间新增方案层红队门——planner 改为分段工作 A→B→C：A=spec+红队定级、B=P0/P1 闭合（有争议发现保持阻断、交人工裁决）、C=人终确认后才拆 tickets；archiver 改为双路径触发（auto-merge 与人执行合并皆触发）。2026-09-14 增补（D6）：宪法模板新增平行记忆树禁令——记忆只走三条受辖通道（git/basic-memory · hindsight · Obsidian），harness 管辖项目内禁建智能体私有记忆树。
 
 **在装项目升级**——`git pull` 后逐项目执行：冻结在飞工单 → 建机器配置与 vault 三区（纯新增）→ 每项目：从旧渲染版 AGENTS.md 抽参数生成 `harness.config.md`、AGENTS.md 换零参数模板 → 最后 `sync-harness.mjs --apply` 重铸角色文件（顺序有讲究：宪法是配置的第一个读者、角色是最后一个读者）。
 
@@ -91,17 +91,22 @@ templates/installer/install-hindsight-service.cmd --rehearse   # 正式安装前
 
 ```
 Harness-Engineering/
-├── docs/        可复用规范层（理念、六角色、记忆、评估、约束、迁移手册、
+├── docs/        可复用规范层（理念、六角色、记忆、评估、约束、宿主适配包、
+│                宪法配置分离、自治合并、迁移手册、
 │                工具链可移植性、宿主无关安装器、agent 辅助安装）——
 │                docs/06/08–14 为内部工程档案，刻意不随发布
 ├── templates/
 │   ├── agents/            六个角色文件（+3 个由工具物化的 rerun 变体）
+│   ├── adapters/          五宿主即用适配包（docs/18）
 │   ├── hooks/             guard / inject-memory / report-worktrees（payload 双读）
 │   ├── installer/         check-env 探测 · 参数化 NSSM 服务安装器（v5，
 │   │                      --rehearse）· pg0 junction 修复（v3）
-│   ├── tools/             sync-harness 分发器 · 角色变体生成器
+│   ├── tools/             sync-harness v2 分发器（字节恒等+配置 schema）·
+│   │                      pre-merge-check 合并门断言 · 角色变体生成器
 │   ├── skills/            harness-audit 可执行审计规范
-│   ├── AGENTS-template.md 宪法骨架（含 commit 白名单）
+│   ├── AGENTS-template.md 零参数宪法骨架（含 commit 白名单）
+│   ├── harness-*-template.md  级联配置中心模板（机器级 common/host
+│   │                      + 项目级 harness.config.md）
 │   ├── models.config.json 分级模型路由表
 │   └── *.json             用户级 hooks 模板 · 项目 MCP 模板
 ```
