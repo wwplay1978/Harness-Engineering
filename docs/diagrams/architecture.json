@@ -17,13 +17,14 @@
           "worktree",
           "gates"
         ],
-        "note": "从人的需求出发，到人的合并决策收口。"
+        "note": "从人的需求出发，到质量门全绿的自治合并收口。"
       },
       {
         "id": "physical-guard",
         "label": "物理防护",
         "focus": [
           "constitution",
+          "config",
           "guard",
           "worktree",
           "human"
@@ -58,7 +59,7 @@
       "id": "human",
       "type": "external",
       "label": "人 · 掌舵",
-      "sublabel": "需求 · 合并 · 宪法维护",
+      "sublabel": "需求 · 裁决 · 宪法维护",
       "tag": "humans steer",
       "pos": [
         44,
@@ -116,7 +117,7 @@
       "id": "gates",
       "type": "security",
       "label": "L1–L4 门禁 + 度量",
-      "sublabel": "审查 · QA · 红队 · metrics",
+      "sublabel": "审查 · QA · 红队 · pre-merge 断言",
       "pos": [
         1044,
         310
@@ -130,11 +131,26 @@
       "id": "constitution",
       "type": "security",
       "label": "宪法与红线",
-      "sublabel": "AGENTS.md ≤100 行",
+      "sublabel": "零参数 · 全项目恒等",
       "tag": "人写",
       "pos": [
         272,
         100
+      ],
+      "size": [
+        176,
+        64
+      ]
+    },
+    {
+      "id": "config",
+      "type": "database",
+      "label": "三级配置中心",
+      "sublabel": "common · host · project",
+      "tag": "安装后人写",
+      "pos": [
+        44,
+        540
       ],
       "size": [
         176,
@@ -229,6 +245,7 @@
       "kind": "region",
       "label": "用户域安装（一次装好）",
       "wraps": [
+        "config",
         "memory",
         "skills"
       ],
@@ -241,7 +258,14 @@
       "from": "human",
       "to": "host",
       "label": "需求",
-      "variant": "emphasis"
+      "variant": "emphasis",
+      "toSide": "top"
+    },
+    {
+      "id": "config-host",
+      "from": "config",
+      "to": "host",
+      "label": "参数注入"
     },
     {
       "id": "host-roles",
@@ -283,7 +307,7 @@
       "id": "gates-human",
       "from": "gates",
       "to": "human",
-      "label": "合并决策（人）",
+      "label": "全绿自治合并 · 不全绿人决",
       "variant": "emphasis",
       "fromSide": "top",
       "toSide": "top",
@@ -359,11 +383,11 @@
   "cards": [
     {
       "dot": "cyan",
-      "title": "单一人机契约",
+      "title": "人机分权 · 两端人闸",
       "items": [
-        "人只做三件事：提需求、做合并决策、维护宪法",
-        "其余全流程由六角色子代理执行，证据落盘可审查",
-        "合并决策永远是人——没有自动合并"
+        "人闸集中两端：需求/设计确认 + 终验收",
+        "中间链路门全绿自动执行，auto-merge 留痕可事后复核",
+        "门不全绿、宪法/发布/凭据类操作——永久人闸"
       ]
     },
     {
@@ -371,7 +395,7 @@
       "title": "物理约束，不止约定",
       "items": [
         "guard hook 以 exit 2 物理阻断主检出写入",
-        "宪法 AGENTS.md 永远人手维护，Agent 不可改写",
+        "宪法零参数、全项目恒等；参数住三级配置中心（人写）",
         "sync 分发绝不写运行中的 hook 副本"
       ]
     },

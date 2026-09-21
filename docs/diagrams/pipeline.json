@@ -18,10 +18,10 @@
           "qa",
           "quick",
           "redteam",
-          "human",
+          "premerge",
           "archiver"
         ],
-        "note": "从 spec 立项到归档沉淀的完整正向路径。"
+        "note": "质量门全绿的自治正向路径（spec 20 自治合并链）。"
       },
       {
         "id": "repair-loop",
@@ -129,7 +129,7 @@
     "qa",
     "quick",
     "redteam",
-    "human",
+    "premerge",
     "archiver"
   ],
   "nodes": [
@@ -139,7 +139,7 @@
       "col": 0,
       "type": "backend",
       "label": "planner",
-      "sublabel": "spec + tickets · 定级",
+      "sublabel": "阶段 A/B/C · spec 定级",
       "width": 155,
       "height": 42
     },
@@ -224,11 +224,22 @@
       "width": 155
     },
     {
-      "id": "human",
+      "id": "premerge",
       "lane": "land",
       "col": 5,
+      "type": "security",
+      "label": "pre-merge-check",
+      "sublabel": "门 A–E·P 断言",
+      "height": 42,
+      "width": 155
+    },
+    {
+      "id": "human",
+      "lane": "gates",
+      "col": 5,
       "type": "external",
-      "label": "人 · 合并决策",
+      "label": "人 · 掌舵",
+      "sublabel": "不全绿 · 例外裁决",
       "height": 42,
       "width": 155
     },
@@ -238,7 +249,7 @@
       "col": 5,
       "type": "backend",
       "label": "archiver",
-      "sublabel": "归档七步 SOP",
+      "sublabel": "双路径触发 · 归档 SOP",
       "height": 42,
       "width": 155
     }
@@ -289,19 +300,32 @@
       "role": "main"
     },
     {
-      "id": "redteam-human",
+      "id": "redteam-premerge",
       "from": "redteam",
-      "to": "human",
+      "to": "premerge",
       "label": "攻击结论",
+      "role": "main"
+    },
+    {
+      "id": "premerge-archiver",
+      "from": "premerge",
+      "to": "archiver",
+      "label": "全绿 auto-merge",
       "role": "main"
     },
     {
       "id": "human-archiver",
       "from": "human",
       "to": "archiver",
-      "role": "main",
-      "fromSide": "bottom",
-      "toSide": "top"
+      "label": "人工合并",
+      "role": "branch"
+    },
+    {
+      "id": "premerge-human",
+      "from": "premerge",
+      "to": "human",
+      "label": "门不全绿",
+      "role": "error"
     },
     {
       "id": "reviewer-fix",
@@ -376,16 +400,16 @@
       "dot": "rose",
       "title": "双门禁 + 对抗审查",
       "items": [
-        "reviewer 对照 spec；qa 攻边界回归",
-        "red-teamer 七攻击面，零重叠盲区"
+        "red-teamer 双职责位：方案门 + 合并门",
+        "pre-merge 断言 A–E·P 把守合并"
       ]
     },
     {
       "dot": "emerald",
-      "title": "唯一合并点 + 知识飞轮",
+      "title": "自治合并 + 知识飞轮",
       "items": [
-        "合并决策永远是人；archiver 归档七步",
-        "沉淀记忆/Obsidian/metrics 回灌下票"
+        "门全绿 auto-merge 留痕；不全绿必须人",
+        "archiver 双路径触发，沉淀回灌下票"
       ]
     }
   ]
