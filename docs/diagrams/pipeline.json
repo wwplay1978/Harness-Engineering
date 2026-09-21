@@ -176,7 +176,7 @@
     {
       "id": "escalate",
       "lane": "build",
-      "col": 5,
+      "col": 4,
       "type": "external",
       "label": "escalate",
       "sublabel": ">4 次 · 人工接管",
@@ -340,20 +340,7 @@
       "to": "fix",
       "label": "缺陷退回",
       "role": "error",
-      "fromSide": "right",
-      "toSide": "right",
-      "variant": "dashed",
-      "via": [
-        [
-          770,
-          367
-        ],
-        [
-          770,
-          243
-        ]
-      ],
-      "labelSegment": 1
+      "variant": "dashed"
     },
     {
       "id": "fix-reviewer",
@@ -400,7 +387,7 @@
       "dot": "rose",
       "title": "双门禁 + 对抗审查",
       "items": [
-        "red-teamer 双职责位：方案门 + 合并门",
+        "red-teamer 双门：P0 皆回退整改",
         "pre-merge 断言 A–E·P 把守合并"
       ]
     },
