@@ -311,14 +311,21 @@
       "from": "premerge",
       "to": "archiver",
       "label": "全绿 auto-merge",
-      "role": "main"
+      "role": "main",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        1150,
+        556
+      ]
     },
     {
       "id": "human-archiver",
       "from": "human",
       "to": "archiver",
       "label": "人工合并",
-      "role": "branch"
+      "role": "branch",
+      "toSide": "right"
     },
     {
       "id": "premerge-human",
