@@ -3909,6 +3909,22 @@
       }
     }
 
+    /* Local patch 2026-09-21: toolbar in-flow at ultra-wide-short viewports.
+       Upstream keeps .toolbar fixed top-right; above 2:1 aspect the compressed
+       layout lets canvas content slide under the floating cluster (observed at
+       2902x848 / 1935x565). Mirrors the <=720px mobile pattern. */
+    @media (min-width: 721px) and (min-aspect-ratio: 2/1) {
+      .toolbar {
+        position: relative;
+        justify-content: flex-end;
+        width: max-content;
+        max-width: 100%;
+        margin-left: auto;
+        margin-bottom: 1rem;
+      }
+      .header { padding-right: 0; }
+    }
+
     @media (max-width: 420px) {
       .export-menu-section { grid-template-columns: 1fr; }
       .export-menu-heading,
