@@ -29,6 +29,7 @@
         "focus": [
           "reviewer",
           "qa",
+          "redteam",
           "fix",
           "escalate"
         ],
@@ -112,14 +113,6 @@
       "fromCol": 2,
       "toCol": 3,
       "variant": "emphasis"
-    },
-    {
-      "id": "g-rerun",
-      "label": "rerun 变体",
-      "lane": "build",
-      "fromCol": 3,
-      "toCol": 3,
-      "variant": "dashed"
     }
   ],
   "mainPath": [
@@ -314,9 +307,11 @@
       "role": "main",
       "fromSide": "bottom",
       "toSide": "top",
-      "labelAt": [
-        1150,
-        556
+      "via": [
+        [
+          1096.7,
+          553
+        ]
       ]
     },
     {
@@ -325,7 +320,22 @@
       "to": "archiver",
       "label": "人工合并",
       "role": "branch",
-      "toSide": "right"
+      "toSide": "right",
+      "fromSide": "right",
+      "via": [
+        [
+          1200,
+          367
+        ],
+        [
+          1200,
+          615
+        ]
+      ],
+      "labelAt": [
+        1176,
+        645
+      ]
     },
     {
       "id": "premerge-human",
@@ -348,6 +358,33 @@
       "label": "缺陷退回",
       "role": "error",
       "variant": "dashed"
+    },
+    {
+      "id": "redteam-fix",
+      "from": "redteam",
+      "to": "fix",
+      "label": "P0 返工",
+      "role": "error",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          885.3,
+          664
+        ],
+        [
+          1210,
+          664
+        ],
+        [
+          1210,
+          182
+        ],
+        [
+          673.9,
+          182
+        ]
+      ]
     },
     {
       "id": "fix-reviewer",
