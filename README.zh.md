@@ -85,6 +85,12 @@ templates/installer/install-hindsight-service.cmd --rehearse   # 正式安装前
 
 在装项目升级时，先 `git pull`，再逐项目依次执行以下步骤：冻结在飞工单；建机器配置与 vault 三区（纯新增）；从旧渲染版 AGENTS.md 抽参数生成 `harness.config.md`、AGENTS.md 换零参数模板；最后 `sync-harness.mjs --apply` 重铸角色文件。顺序有讲究：宪法是配置的第一个读者，角色是最后一个。
 
+## 2026-09-28 说明：宿主无关身份定调 + 记忆机制分析（docs/21）
+
+经一轮对抗审查定调：本 harness 设计上**宿主无关——ZCode 是首个完成实证的宿主，不是体系核心**；其余五宿主适配包（claude-code / kimi-code / codex / opencode / pi-agent）已产出、装机实测未做（[`docs/16`](docs/16-host-agnostic-installer.md)、[`docs/18`](docs/18-host-adapters.md)）。新增 [`docs/21`](docs/21-memory-system-analysis.md)：以「长期 / 短期 / 参数记忆 × 抽取、管理、存储、检索」分析机制的记忆管理，附逐宿主记忆面分级矩阵与「陈述对象 × 成熟度」双维判定原则（用于区分机制层规则、宿主适配与单机实例）；ZCode 内建项目记忆明确定为宿主附加层、非机制组成。
+
+本批同步还包含：docs/16 §4 降级矩阵按 v3 重述（组件缺失不改宪法正文，降级落装配层）；docs/07、17 安装入口加适用范围声明；docs/00 增文档身份分类、docs/19–20 标注已实施；角色卡防线加固（planner 禁 Write、planner/red-teamer 凭据禁读）；补发此前漏发布的 pre-merge-check 六修版本及其 sync 消费位恒等条目；模板分层——models.config.json 拆出宿主无关 `routing` 与按宿主绑定的 `model_bindings`（先登记 zcode），inject-memory.mjs 明确标注 host-bound（行为契约留在机制层，见 docs/21 §0.3）。
+
 ## 架构与设计要点
 
 [![体系总体架构](docs/diagrams/architecture-light.png)](https://pages.20081005.xyz/architecture.html)

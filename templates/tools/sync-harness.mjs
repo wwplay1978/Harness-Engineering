@@ -36,8 +36,10 @@ const SYNC = [
     src: `templates/agents/${r}.md`, dst: join(HOME, '.zcode', 'agents', `${r}.md`), why: '角色定义',
   })),
   { src: 'templates/skills/harness-audit/SKILL.md', dst: join(HOME, '.agents', 'skills', 'harness-audit', 'SKILL.md'), why: '审计技能' },
+  { src: 'templates/skills/delegate-kimi/SKILL.md', dst: join(HOME, '.agents', 'skills', 'delegate-kimi', 'SKILL.md'), why: 'Kimi 订阅委派技能（前置=kimi CLI+订阅登录；2026-09-23 实弹审查修订版）' },
   { src: 'templates/tools/generate-role-variants.mjs', dst: join(HOME, '.zcode', 'tools', 'generate-role-variants.mjs'), why: '变体生成器' },
   { src: 'templates/models.config.json', dst: join(HOME, '.zcode', 'models.config.json'), why: 'OPT-2 路由表' },
+  { src: 'templates/tools/pre-merge-check.mjs', dst: join(HOME, '.agents', 'Harness-Engineering', 'templates', 'tools', 'pre-merge-check.mjs'), why: '自治合并门控断言（消费位恒等同步，对抗审查 P2-2）' },
 ];
 
 // ── hooks 执行位（只报告）+ 三正式注册（只报告）──────────────────
@@ -48,7 +50,7 @@ console.log(apply ? '== APPLY（写入用户域）==' : '== CHECK（默认只读
 console.log(`repo = ${repo}\n`);
 
 // 1) 自动集
-console.log('-- 自动集（角色/技能/生成器/路由表）--');
+console.log('-- 自动集（角色/技能/生成器/路由表/合并门控）--');
 for (const it of SYNC) {
   const srcAbs = join(repo, it.src);
   const s = read(srcAbs);

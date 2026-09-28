@@ -23,7 +23,7 @@
 | [09-optimization-plan.md](09-optimization-plan.md) | 优化方案：服务化 / 分级模型 / 红队角色（含风险分级） | Phase 1.5 议程 |
 | [10-role-architecture-analysis.md](10-role-architecture-analysis.md) | 红队角色架构论证（结论：第六角色独立、QA 后合并前，full/fast/skip 定级） | 架构决策记录 |
 | [11-opt2-implementation.md](11-opt2-implementation.md) | OPT-2 分级模型实施记录（✅ 全绿） | 实施记录 |
-| [12-status-roadmap.md](12-status-roadmap.md) | **项目状态与路线（活文档，当前权威快照）** | 状态与下一步 |
+| [12-status-roadmap.md](12-status-roadmap.md) | 项目状态与路线（**历史快照 2026-09-13**——缺 19–21 落地后内容；当前状态以本索引与 git log 为准） | 项目档案 |
 | [13-metrics-review-1.md](13-metrics-review-1.md) | 指标复盘（滚动·每 5 票；红队 3/3 零重叠固化） | 度量闭环 |
 | [14-gap-analysis.md](14-gap-analysis.md) | 双文对照差距分析（22 项：16✅/6⚠️/2 缺口；采纳 N11/N12） | 对照与决策记录 |
 | [15-toolchain-portability.md](15-toolchain-portability.md) | 工具链清单与可移植性（缺失降级矩阵/AITrader 适配/跨机安装） | 迁移必读 |
@@ -32,6 +32,18 @@
 | [18-host-adapters.md](18-host-adapters.md) | 五宿主适配包（claude-code/kimi-code/codex/opencode/pi-agent 判级证据+适配产物+装机验证清单） | 迁移必读 |
 | [19-constitution-config-split.md](19-constitution-config-split.md) | 宪法与配置分离 v3（零参数宪法+三级配置中心+四阶段在装项目升级手册——已裁决 D1/通用默认合一 50/60/70） | v3 实施 |
 | [20-autonomous-merge.md](20-autonomous-merge.md) | 自治流水线（两端人闸+gates 全绿 auto-merge+方案红队前置门 §2.5——红线修订已获确认） | v3 实施 |
+| [21-memory-system-analysis.md](21-memory-system-analysis.md) | 记忆管理机制分析（机制层视角：长期/短期/参数三视角 × 抽取/管理/存储/检索四环节 + 五宿主记忆面分级；ZCode 内建记忆移入宿主附加层） | 状态与记忆 |
+
+## 文档身份分类（2026-09-28 起，导航表的前置滤镜）
+
+同仓 ≠ 同类。本仓文档分四种身份（判别口径与判定原则见 [21 号 §0](21-memory-system-analysis.md)）：
+
+| 身份 | 含义 | 本仓文档 |
+|---|---|---|
+| **A 机制规范** | 约束消费项目的规则，随分发生效 | 01、02、03、04、05、07、16、17、18、19、20、21（各篇含少量首宿主/本机实例段落，以各篇口径声明与 21 §0 判定为准） |
+| **A-host 宿主适配** | 单宿主接线形态与判级（verified / unverified） | 18 主体 + `templates/adapters/<host>/README.md` |
+| **B 项目档案** | 本仓自身建设记录（快照/存档） | 06（历史路线）、08（P0 实测）、09、10、11、12（2026-09-13 快照）、13、14 |
+| **工件** | 本仓工单过程资产，非机制组件 | `docs/changes/`、`docs/reviews/`、`docs/metrics.md` |
 
 ## 模板（迁移时复制）
 
@@ -50,7 +62,7 @@
 ## 作用域约定（重要）
 
 - **用户域安装（全局一次）**：工具（uv、hindsight、basic-memory）、技能（`~/.agents/skills/`）、插件（hindsight-zcode）、六个 hook（`~/.zcode/cli/config.json`）、六个角色子代理文件 + 3 个 *-rerun 变体（`~/.zcode/agents/`，sync-harness.mjs 分发）。
-- **本仓库（规范与模板）**：所有规范 md 与配置模板随 git 版本化，是唯一事实来源；改规范先改这里，再分发。
+- **本仓库（规范与模板）**：机制规范（A 类）与项目档案（B 类）md 及全部模板随 git 版本化；**机制规范以本仓为唯一事实来源——改规范先改这里，再分发**（B 类档案与工件不参与分发）。
 - **业务项目（按需复制）**：`AGENTS.md`、`.zcode/config.json`（仅 MCP）、`docs/` 子目录约定——迁移手册六步完成。
 
 ## 与既有资产的关系

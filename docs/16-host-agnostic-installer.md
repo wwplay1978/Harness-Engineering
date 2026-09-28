@@ -33,7 +33,7 @@
 ```
 阶段一 检测                阶段二 安装                    阶段三 适配
 check-env.cmd/mjs    →    参数化安装脚本            →    按组件在位情况裁剪工作流配置
-（零依赖 .cmd 引导）        install-hindsight-service.cmd     宪法条款开关 / hooks 注册集 /
+（零依赖 .cmd 引导）        install-hindsight-service.cmd     装配层开关：hooks 注册集 /
   ↓ 产出                   （读 hindsight-params.cmd，        MCP 段 / archiver SOP 步骤开关
   env-config.json           key 只运行时读取不落盘）
   hindsight-params.cmd      + 标准安装器：git/Node/Python/
@@ -68,14 +68,16 @@ check-env.cmd/mjs    →    参数化安装脚本            →    按组件在
 
 ## 4. 组件×缺失→工作流适配矩阵（阶段三的执行表）
 
-| 缺失组件 | 宪法（AGENTS）改动 | 机制改动 | 角色改动 |
+**v3 重述（2026-09-28，Codex 审查 P0-3 处置）**：本表 v2 版第一列为「宪法（AGENTS）改动」（按组件删改宪法条款）——该做法**已废止**：spec 19 落地后宪法零参数、全项目全宿主逐字节恒等，任何组件缺失都**不改宪法正文**（照 v2 表执行会被 sync 恒等比对判 DRIFT）。组件缺失的降级全部落**装配层**（hooks 注册集 / MCP 段 / archiver SOP 步骤 / 纪律承载），降级语义权威=docs/15 §1。下表为重述版：
+
+| 缺失组件 | 宪法正文（v3：零参数恒等，**一律不改**） | 机制/装配改动 | 角色改动 |
 |---|---|---|---|
-| Node.js | 写入隔离条款改纪律条款（"主检出不写，抽查两次越权即停线"） | 三 hooks 不注册；合并前白名单对照升级为主防线；sync 脚本不可用→手工 cp | 无 |
-| hindsight 全家 | "个体记忆"行删除 | recall/retain/session hooks 不注册；知识检索通道=Obsidian 直读 + basic-memory | planner 检索通道说明同步删 |
-| Obsidian/vault | 知识库节降级：git docs 为唯一知识源 | 无 | archiver SOP 第 4 步跳过 Obsidian 草稿（归档报告注明） |
-| hindsight-obsidian-sync | 无 | reconcile 不执行 | archiver 第 4 步只写草稿、记"reconcile 未执行" |
-| basic-memory | "团队记忆"行删除 | MCP 段裁剪；inject hook 不注册 | 记忆类交付物（合并结论条目）改记 docs/ |
-| gtr | worktree 命令改原生 `git worktree add/list/remove` 三件套 | guard 提示文案对应调整 | 无 |
+| Node.js | 不改——写入隔离红线条款恒等在场，物理防线缺席由纪律承载（"主检出不写，抽查两次越权即停线"，15 §1） | 三 hooks 不注册；合并前白名单对照升级为主防线；sync 脚本不可用→手工 cp | 无 |
+| hindsight 全家 | 不改——"个体记忆"行恒等在场（描述完整机制目标态），该通道空置 | recall/retain/session hooks 不注册；知识检索通道=Obsidian 直读 + basic-memory | planner 检索通道说明同步调整 |
+| Obsidian/vault | 不改——"知识库"行恒等在场，通道降级=git docs 为唯一知识源 | 无 | archiver SOP 第 5 步跳过 Obsidian 草稿（归档报告注明） |
+| hindsight-obsidian-sync | 无 | reconcile 不执行 | archiver 第 5 步只写草稿、记"reconcile 未执行" |
+| basic-memory | 不改——"团队记忆"行恒等在场，交付物落点见角色列 | MCP 段裁剪；inject hook 不注册 | 记忆类交付物（合并结论条目）改记 docs/ |
+| gtr | 不改——worktree 纪律条款不变 | worktree 命令改原生 `git worktree add/list/remove` 三件套；guard 提示文案对应调整 | 无 |
 | skills 包 | 无 | 无 | 角色 Anchors 降级为角色文件内 SOP（质量预期下调，建议装） |
 
 **profile 分级**（check-env 自动判定）：`full`（**三正式 hooks 3/3 注册齐** + Node + basic-memory + hindsight + Obsidian + sync CLI 全在位）/ `core-plus`（Node + basic-memory 在；hindsight/Obsidian/hooks 有一缺）/ `minimal`（Node 或 basic-memory 缺——物理防线或团队记忆不成立）。**判级以 hooks 注册态为准，不只看组件在位**——装了组件却未注册 guard 的机器不得报 full。降级语义详见 docs/15 §1。

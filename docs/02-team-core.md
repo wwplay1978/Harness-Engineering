@@ -3,6 +3,7 @@
 > 资产来源：AITrader 四角色团队（Kimi Code，v1.2，2026-08-30 真实工单验证通过）
 > 原方案：`C:\Forex\Project\AITrader\docs\team\kimi-code-agent-team-plan.md`
 > 本文只讲**移植到 ZCode 的差异与动作**；角色行为规范、流水线逻辑、验证制度全部原样继承，不重述。
+> **状态注（2026-09-28，Codex 审查 P1-7 处置）**：文中「待 P0-3/P0-4 实测」为设计期口径残留——P0 已于 2026-09-02 实测收口（payload=`file_path`、派发/回收/后台运行、disallowedTools 物理生效均实证，见 08）；唯 `injectAgentsMd` 一项仍待核。现状以 08 为准。
 
 ## 1. 为什么四角色是团队核心
 

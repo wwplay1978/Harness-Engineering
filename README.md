@@ -85,6 +85,12 @@ The merge gate was revised (user-ratified): quality gates green means auto-merge
 
 Upgrading an existing clone: `git pull`, then per installed project freeze in-flight tickets; create the machine config and vault zones (pure additions); extract params from the old rendered AGENTS.md into `harness.config.md`; replace AGENTS.md with the zero-parameter template; finally run `sync-harness.mjs --apply` to recast role files. Order matters: the constitution is the first reader of config, the roles are the last.
 
+## 2026-09-28 note: host-agnostic identity + memory-system analysis (doc 21)
+
+Identity clarified after an adversarial review: this harness is host-agnostic by design — **ZCode is the first fully verified host, not the core of the system**; the five other host adapters (claude-code / kimi-code / codex / opencode / pi-agent) are produced but not yet install-verified ([`docs/16`](docs/16-host-agnostic-installer.md), [`docs/18`](docs/18-host-adapters.md)). New [`docs/21`](docs/21-memory-system-analysis.md) analyzes how the mechanism manages memory across three classes — long-term / short-term / parameter memory × extraction, management, storage, retrieval — with a per-host memory-surface matrix and a two-dimensional classification (statement target × maturity) for telling mechanism-layer rules from host adapters and per-machine instances; ZCode's built-in project memory is explicitly reclassified as a host-additive layer, not a mechanism component.
+
+Also in this sync: docs/16 §4 degradation matrix restated for v3 (component loss never edits the constitution body — degradation lands in the assembly layer); install-entry scope banners in docs/07 and docs/17; docs/00 gains document identity classes and docs/19–20 are marked implemented; role-card hardening (planner Write ban, planner/red-teamer credential-read prohibition); the missed pre-merge-check six-fix publication plus its sync-managed consumption-identity entry; and templates layering — models.config.json now splits host-agnostic `routing` from per-host `model_bindings` (zcode registered first), while inject-memory.mjs is explicitly labeled host-bound with its behavior contract kept at the mechanism layer (doc 21 §0.3).
+
 ## Architecture & design highlights
 
 [![System architecture](docs/diagrams/architecture-light.png)](https://pages.20081005.xyz/architecture.html)

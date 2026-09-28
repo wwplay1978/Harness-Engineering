@@ -3,6 +3,7 @@
 > **⚠️ 架构修订（2026-09-02，P0-3 实测结论 C2）**：hooks 一律部署在**用户级** `~/.zcode/cli/config.json`（同一事件用户级/项目级并存时项目级被覆盖丢弃——实测结论，见 08 文档 C2）。guard 防跨项目泄漏靠脚本白名单设计（非团队项目静默放行）。因此：**第 0 步含用户级 hooks 一次性部署；项目级 `.zcode/config.json` 只承载 MCP**。逐项目重复的只剩：目录结构、AGENTS.md、marker、basic-memory 登记。
 > **⚠️ 执行位修订（2026-09-07，落点修补）**：三正式脚本**执行位同步上收用户域** `~/.zcode/hooks/harness/`（人工自 `templates/hooks/` 复制），不再指向任何仓库目录——仓库锚定执行位会随仓库切分支/改名波及全机（Test05 全新安装暴露，08 有回灌）。guard 另带自防御条款：Agent 写执行位/注册文件无论 cwd 一律阻断（05 §3）。
 
+> **⚠️ 适用范围（2026-09-28 标注，Codex 审查 P0-2 处置）**：本手册六步为 **ZCode 宿主适配路径**（`.zcode/config.json`、`.zcode/memory-project` marker 等落点均为 ZCode 形态）。宿主无关安装总入口=docs/16（三段式）+ docs/17（kickoff）；五宿主适配态=docs/18（装机实测未做）；非 ZCode 宿主的项目接入见 17 S5 降级条款。
 > 作用域设计（沿用 AITrader 验证过的模式）：**软件与全局机制一次安装（用户域），项目机制按项目复制**。
 > 以下命令在 ZCode 终端（Git Bash）执行；每个代码块自带变量声明、可独立执行；块内 **`HARNESS=`（harness 仓库在本机的位置）与 `NEW=`（目标项目目录）两行**按本机实际修改（占位用「改成新项目目录名」中文写法——**不用尖括号**，`<` 在 bash 是重定向符）。
 
@@ -25,7 +26,7 @@ cmd //c "templates\installer\install-hindsight-service.cmd" --rehearse "%TEMP%\h
 
 ## 第 0 步：用户域一次性安装（全局，只做一次）
 
-| 组件 | 动作 | 状态（2026-09-02 盘点） |
+| 组件 | 动作 | 本机实例快照（2026-09-02 起盘点；**目标机安装判据=「动作」列**，本机勾选状态不构成前提——Codex 审查 P1-6 处置） |
 |---|---|---|
 | git + git-worktree-runner | `git config --global alias.gtr '!~/git-worktree-runner/bin/git-gtr'`（gtr 本体按 16 §3 clone 到用户主目录） | ✅ 已在位（AITrader 实施） |
 | uv + basic-memory | `uv tool install basic-memory`（当前 v0.22.1；项目 config 模板已钉 `basic-memory@0.22.1` 防跨机漂移） | ✅ 已在位 |
@@ -35,6 +36,7 @@ cmd //c "templates\installer\install-hindsight-service.cmd" --rehearse "%TEMP%\h
 | hindsight 服务 | 按 06 文档 P0-1 结论部署（用户域全局服务） | ✅ OPT-1 收官（NSSM 服务化：崩溃自启/10MB 日志轮转/开机自启全实证） |
 | hindsight-zcode 集成 | `uv tool install hindsight-zcode` + `hindsight-zcode install`（安装器在 Git Bash 下有 MSYS 反斜杠 bug，config 写入需手工兜底——见 08 §P0-2） | ✅ 三 hooks（session_start/recall/retain）已注册用户级 config（安装器崩溃后手工注册，08 实证） |
 | harness-audit skill | 源=`templates/skills/harness-audit/SKILL.md`（sync 分发到 `~/.agents/skills/`） | ✅ 已装并首跑基线 93/A（2026-09-05，web2api） |
+| delegate-kimi skill | 源=`templates/skills/delegate-kimi/SKILL.md`（sync 分发到 `~/.agents/skills/`）；Kimi 订阅委派只读角色（planner/red-teamer），**前置=Kimi Code CLI+订阅登录+kimi 侧六角色档案与 hooks（docs/18 §3 装机）**，未装机器冒烟即红、回退 ZCode API 路由 | ✅ 已装+实弹审查闭环（2026-09-23：guard 阻断/inject 注入/red-teamer 方案门全实证） |
 | Obsidian 同步 CLI（hindsight-obsidian-sync） | 官方 npm 包 `@vectorize-io/hindsight-obsidian`（v0.2.1）；命令要点：`--include` **可重复单值**（逗号形态无效）、reconcile 后事实抽取由服务后台异步完成（详见 03 §4.2 首跑注记） | ✅ 2026-09-06 已装并首跑（+50 文档入 knowledge bank） |
 
 ## 第 1 步：复制团队机制目录到新项目
@@ -131,14 +133,14 @@ echo "{\"session_id\":\"verify-01\",\"cwd\":\"$(cygpath -m "$NEW")\"}" | node ~/
 
 ## 规范修订后的再分发（N11 自动化，2026-09-05 起）
 
-角色/技能/生成器/路由表修订合入本仓库后，一条命令分发到用户域（新项目接入前也建议先跑 `--check` 体检）：
+角色/技能/生成器/路由表/合并门控工具修订合入本仓库后，一条命令分发到用户域与标准位（新项目接入前也建议先跑 `--check` 体检）：
 
 ```bash
 node templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1；在 REPO 根执行）
 node templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
 ```
 
-- **自动集**：六角色 base、harness-audit 技能、变体生成器、models.config.json——源=templates/（git 版本化），用户域均为部署副本
+- **自动集**：六角色 base、harness-audit 技能、delegate-kimi 技能、变体生成器、models.config.json、pre-merge-check.mjs（消费位=标准位 `~/.agents/Harness-Engineering/templates/tools/`，2026-09-15 对抗审查 P2-2 纳管——防门控防线修订后消费位静默过期）——源=templates/（git 版本化），用户域/标准位均为部署副本
 - **hooks 执行位（`~/.zcode/hooks/harness/`）只报告、永不代写**：AI 可改 templates 源（guard 白名单内），若脚本自动传播即等于 AI 可换掉运行中的 guard 自毁防线——该路径人工 cp（脚本打印现成命令）
 - 用户级 config.json 三正式注册与项目结构（AGENTS/文档目录/宪法恒等对照）随跑随报，同样只报告；**宪法恒等对照（v3）**以规范仓 `templates/AGENTS-template.md` 为基准，对项目根 AGENTS.md 做 normalize（strip BOM + CRLF→LF）后比较完整正文——全文相同=[OK]，正文不同而首行同源=[DRIFT]（宪法漂移，人工对照），首行不同=[MIGRATE]（旧制 span 渲染版启发式）；sync 只报告、**永不写回项目 AGENTS.md**，宪法换版由人工按 spec 19 §6 执行并复核（旧 `constitution-affecting-baseline` 日期基线已退役，历史与裁决见 docs/08 与 spec 19 D3；相关配置状态由 spec 19 §3.4 与 sync 源码定义，本行不重复）；盘点发现的归属=各自项目，跨项目发现不构成当前项目的任务
 - **新项目接入后**：把项目根路径加入 `~/.zcode/harness-projects.json`（JSON 数组；首跑缺失会自动 seed 本机默认集），此后该项目的结构盘点随跑随报

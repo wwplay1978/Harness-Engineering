@@ -60,7 +60,7 @@
 ## 3. Kickoff 提示词（复制整段到目标机 agent 会话）
 
 ```text
-角色：Harness 安装助手（宿主无关：ZCode / Claude Code / Kimi Code 等任何具备文件读写与终端执行能力的 AI agent 皆可）。
+角色：Harness 安装助手（担任**安装执行者**的宿主无关：ZCode / Claude Code / Kimi Code 等任何具备文件读写与终端执行能力的 AI agent 皆可；注意：S4 宿主配置分发与 S5 项目接入目前**仅 ZCode 宿主完整闭合**，其他宿主按 docs/18 适配态降级处理——Codex 审查 P0-2 处置 2026-09-28）。
 
 背景：本机要接入六角色 Harness 工程化体系。规范仓库标准落位为用户域 `~/.agents/Harness-Engineering`（下称 REPO；Windows 展开 %USERPROFILE%\.agents\Harness-Engineering，全机 AI agent 共用一份）：已就位则直接用；未就位且本机 git 可用，你先自行 clone（git clone https://github.com/wwplay1978/Harness-Engineering.git ~/.agents/Harness-Engineering）再继续；不能联网/无 git 则先指导人获取（17 §2.5.1）。目标项目：开场先问我（我回答项目根目录绝对路径，或"暂无，先装全局件"）。
 
@@ -84,7 +84,7 @@ S5 项目接入（**仅当宿主为 ZCode**——07 手册六步全是 ZCode 路
    ① **两级配置生成 + 宪法原样复制**（v3，spec 19 §3/§5；安装窗口一次性豁免"只能人改"红线——人复核即视为人授权，S7 验收通过=红线生效切换点）：**先查机器级配置** `~/.agents/Harness-Configuration/common.config.md`——无则问机器级三项（vault 根、三区名、本宿主 agent 段；默认 50-项目库/60-知识库/70-工作区、agent 段=10-<宿主名大写>，全局单一口径 spec 19 r9）并生成 common + `<host>.config.md`（各修订记录表首行 init）；有则**只读沿用不再问**，向我展示当前生效值一行摘要供过目（解析失败→安装中止先修 fail-loud）。**再问项目级七项**：你先只读探测目标项目（语言/框架指纹→技术栈候选、核心目录→速览候选、惯例构建/测试命令候选），逐项问——项目名（默认=目录名）、一句话定位（默认=待补）、技术栈（默认=探测结果或"待补（planner 首个 spec 校正）"）、构建命令与测试命令（默认=候选或"待补（developer 首票确认）"）、目录速览（默认=你生成的一行图）、项目段（默认=派生式 `<zone_final_project>/<agent_segment>/<project_name>`）——按答案生成项目根 `harness.config.md`（模板=REPO/templates/harness-project-template.md，修订记录首行 init）。**宪法 AGENTS.md=原样 cp 零参数模板，零渲染零替换**（REPO/templates/AGENTS-template.md → 项目根），向我展示两文件全文复核；确认后**不单独提交**——随 ② 的 git 入库一次提交（07 第 5 步 feat: harness engineering mechanism…；单独留痕可选补 docs: agents init 提交带 authorization 尾注，二取一勿双收）。目标项目已有 AGENTS.md 时不得覆盖——列差异请我决策。**已武装 guard 的机器**（harness 已装好后再加新项目）：项目级文件草稿落 `docs/harness.config.rendered.md`（白名单可写、项目根不可写），给我一条 move 命令我执行后删渲染稿；**机器级文件不走降级路径**——已武装机器的装机前提=机器配置已在，缺失即"在册非空而配置缺失"异常态→安装中止报错（fail-loud，spec 19 r7）。
    ② config 模板复制与 PROJECTNAME 替换、basic-memory 登记 + marker、git 入库、三项快速验证（07 第 1/3/4/5/6 步）。
    若目标宿主非 ZCode：S5 降级为"记录项目接入待办（该宿主装机适配未完成——适配包与验证清单见 docs/18，07 六步的 .zcode 路径须按宿主落点改写）"，不复制 .zcode 结构；但 ① 的两级配置生成+宪法原样 cp 仍可执行（宪法与配置层均宿主无关，Codex/OpenCode 等本就原生读 AGENTS.md）。
-S6 阶段三适配：逐条落实 adaptation-plan.md（宪法条款开关/hooks 注册集/MCP 段/archiver SOP 步骤）；宪法类改动全部走"diff→批准"。
+S6 阶段三适配：逐条落实 adaptation-plan.md（**装配层开关：hooks 注册集 / MCP 段 / archiver SOP 步骤**——v3 起宪法零参数恒等，组件缺失**不改宪法正文**，降级语义=16 §4 v3 重述版 + 15 §1；Codex 审查 P0-3 处置 2026-09-28）；hooks/适配类改动全部走"diff→批准"。
 S7 最终验证与验收单：07 第 6 步三项（gtr doctor / guard 模拟 exit=2 / 记忆注入）+ hindsight /health +（若装了 sync CLI）首次 reconcile 冒烟——**量大时注意 LLM 429 限流（03 §4.2 注 5：按目录分批 --include 或接受后台异步抽取）**；**v3 增两项：sync v2 宪法恒等比对 [OK]（项目 AGENTS.md 与零参数模板逐字节一致）+ 两级配置 schema 校验 [OK]（sync 项目盘点段）；验收通过=安装窗口关闭、配置红线生效（spec 19 §5 第 5 条）**；全部由你执行并逐项判定；**先重跑 check-env 得到最终 profile（S1 时 hooks 未注册会偏低，S4 注册后重测才准）**；通过后输出《安装验收单》：最终 profile、组件与防线注册态清单、每项验证的证据、遗留项与建议——**遗留项分两栏：「本次安装范围」与「机队巡检（既有）」**：sync 项目盘点遍历 ~/.zcode/harness-projects.json 全部在册项目，非目标项目的发现属机队既有事项，归各自项目维护环处理，不计入也不阻塞本次安装（AITrader2 首装实证 2026-09-08：web2api 的 [REVIEW] 曾误列入 AITrader2 验收单遗留项，安装全程并不涉及该项目）。
 S8 收尾回灌：把过程中新踩的坑按 REPO/docs/08 风格拟 1-2 条候选回灌条目（我不一定采纳），并提醒我将变更同步回 harness 规范仓库（REPO）。
 

@@ -7,6 +7,10 @@
 // 3) cwd 从 payload 读（hook 进程 cwd 不可依赖，实测结论）
 // 4) 节流：按 session_id 打临时标记，每会话只注入一次
 // 5) 零反斜杠写法 + fail-open（任何异常静默放行，绝不阻塞会话）
+// ── 归层（2026-09-28，docs/21 §0.3；Codex 审查 P0-4 处置）──
+// 本文件=ZCode 宿主适配实现（host-bound：.zcode marker / ZCode 严格 JSON 输出 / zcode-memo- 节流前缀）；
+// 机制行为契约（按项目注入 basic-memory 近 7 天、每会话一次、fail-open）见 docs/21 §2.2；
+// 非 ZCode 宿主的 per-host 变体待 docs/18 装机实测后由适配器物化（未实测宿主的输出 schema 勿臆造）。
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

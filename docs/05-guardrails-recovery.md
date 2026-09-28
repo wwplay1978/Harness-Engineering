@@ -36,7 +36,7 @@ guard-worktree.mjs 的逻辑（路径归一化 `\\`→`/` + `.toLowerCase()`、`
 | **自防御条款（2026-09-07 新增）** | 无（Kimi 注册在仓库外，当时无对等机制） | guard 的 **SHIELD 表**：各宿主 hooks 执行位（`~/.zcode/hooks/harness/` 等）+ 注册文件（`~/.zcode/cli/config.json`、`~/.claude/settings.json`、`~/.kimi-code/config.toml`、`~/.codex/hooks.json` 与 `config.toml`）——无论 cwd，Write/Edit/ApplyPatch 一律 exit 2；路径 `homedir()` 运行时计算（禁硬编码机器路径） | 注册文件与执行位均在仓库外，root 前缀逻辑对它们**不设防**——旧形态下 Agent 可直接改写 config 关闭 hooks（docs/08 回灌的现存漏洞，本条款补上）。检查必须置于 root 前缀判断**之前**，否则被"不在主检出→放行"先吃掉 |
 | 配套后果 | — | 用户级注册与 `~/.zcode/hooks/harness/` 执行位**只能人改**；Agent 试图修改（Write/Edit/ApplyPatch 面）被自防御条款拦下——这是设计行为，不是 bug。Bash 盲区沿用下方补偿 | 与 AGENTS.md 同等待遇（流水线宪法类） |
 
-其余三处适配：
+其余三处适配（**状态注 2026-09-28，Codex 审查 P1-7 处置**：下表「待 P0-3 探测」等为设计期口径——已实测收口：ZCode payload=`file_path`、guard 双读兼容在役、matcher 含 ApplyPatch 防御冗余均实证，见 08；现状以 08 为准）：
 
 | 项 | Kimi（AITrader 实测） | ZCode 移植 | 动作 |
 |---|---|---|---|
