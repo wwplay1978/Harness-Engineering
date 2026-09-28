@@ -3,7 +3,6 @@
 > 定位：整理对象 = **六角色 harness 机制**——规范仓 docs/templates 定义、面向六宿主（ZCode + claude-code/kimi-code/codex/opencode/pi-agent）的记忆体系；**不是**某台机器或某个项目（如本仓、ZCode 宿主）的实现细节。机制契约面向所列宿主；各宿主 adapter 的可用性以 docs/18 的验证等级为准（五宿主装机实测未做）。
 > 写作：2026-09-28；同日 v2 修订——首版把「ZCode 内建记忆」计入长期记忆载体、以本机部署为主体，与"安装到无 ZCode 宿主的机器"情形不符；本版改为机制层 / 宿主适配层 / 落地实例三层口径（§0），ZCode 内建记忆移入宿主附加层（§0.2）。
 > 同日 v3 修订（外部对抗审查回灌，报告存档 [reviews/codex-identity-audit-2026-09-28.md](reviews/codex-identity-audit-2026-09-28.md)）：①补判定原则——"源码住在规范仓"不等于机制层，按运行时行为判定（§0.3）；②inject-memory 现实现（`.zcode` marker / ZCode 输出 schema）归宿主适配层，机制层只保留行为契约（§0.1/§2.2/§6）；③hindsight 端口改为部署默认值口径（§3.1）；④修正与 03 的权威链表述（03 含首宿主历史口径，身份判定以本文 §0 为准）。
-> 公开副本注（随发布批同步）：文内 `docs/reviews/`、`docs/changes/`、`memory/` 等内部工件引用与 §7 本机实例附录为私有开发仓/单机内容，公开仓不含对应文件。
 > 本文是**分析与总览层**——机制细节以 03（四层设计）/19（参数出宪）/02（流水线分工）/15–18（可移植性与宿主适配）为准（**03 含首宿主历史口径，其身份判定以本文 §0 为准**，见 §8），本文给结论与指针。
 
 ## 0. 对象界定：机制层 / 宿主适配层 / 落地实例
@@ -120,7 +119,7 @@
 |---|---|---|
 | 宪法 AGENTS.md | **零参数不变式**：流水线、红线、记忆边界、语言约定 | 全项目**全宿主**逐字节恒等（模板原样 cp 零渲染）；Codex/OpenCode 等宿主原生可读 |
 | 两级配置中心 | 机器级 `common.config.md`（vault_root、三区名 zone_*、harness_repo）+ `<host>.config.md`（agent_segment，每宿主一份）；项目级 `harness.config.md`（project_name、one_liner、tech_stack、build_cmd/test_cmd、dir_brief、checkpoint_every、auto_push_remote、project_segment） | 项目级配置**不进宿主专属目录**（明确不进 `.zcode/`，spec 19 §3.1 有意决策）；级联：项目级 > 宿主级 > 共享级 > 内置默认 |
-| 模型路由表 models.config.json | defaults=inherit；escalation 规则——developer 首败（attempt≥2）升 developer-rerun、复审 r≥2 升 code-reviewer-rerun、复测升 qa-tester-rerun，attempts>4 停自动升级转人工 | 路由**结构**是机制；模型 ID 形态是宿主参数（ZCode 形如 `builtin:<provider>/<Model>`，其他宿主按其子代理模型指定约定改写或先不启用——docs/15 §2） |
+| 模型路由表 models.config.json | defaults=inherit；escalation 规则——developer 首败（attempt≥2）升 developer-rerun、复审 r≥2 升 code-reviewer-rerun、复测升 qa-tester-rerun，attempts>4 停自动升级转人工 | 路由**结构**是机制；模型 ID 形态是宿主参数（ZCode 形如 `builtin:<provider>/<Model>`，其他宿主按其子代理模型指定约定改写或先不启用——docs/15 §2）；**机器级 pin 走 `~/.zcode/models.config.local.json` 覆盖**（用户域不入仓——个人订阅 ID 不进公开模板；生成器 local>部署 config 深合并，2026-09-28 dogfood 票 models-local-binding） |
 | 角色文件 | 六角色卡 + 3 个 -rerun 变体（生成器从 base 物化）；分区等字面量已参数化（读配置定位） | 源=`templates/agents/` 单一来源；五宿主由 build-adapters.mjs 物化各自形态（md/toml/prompts），内容同源 |
 
 ### 4.2 抽取（参数从哪来）
@@ -175,7 +174,7 @@
 
 | 设施 | 状态 |
 |---|---|
-| hindsight 服务 | 运行中（:8888/:9999）；bank_missions 在册 11 个项目 bank；zcode::AITrader2 fact_count=3982、knowledge fact_count=1897 |
+| hindsight 服务 | 运行中（:8888 API 实测 healthy；**:9999 Control Plane 本机未监听**——服务安装未启用，必要性待 B6 核正，二轮审查勘误 2026-09-28）；bank_missions 在册 11 个项目 bank；zcode::AITrader2 fact_count=3982、knowledge fact_count=1897 |
 | hindsight 宿主集成 | `~/.zcode/hooks/hindsight/scripts/`（session_start/recall/retain）+ settings（budget=mid、≤1024 token、每轮 retain、中文抽取 mission） |
 | basic-memory | 0.22.1；7 个项目命名空间；`memory/decisions/` 实例在档（redteam-p0-edge 合并结论） |
 | 流转 hooks | guard/inject/report 三正式 hook + hindsight 三脚本，用户级注册；本仓 `.zcode/memory-project` 标记在位 |
@@ -190,6 +189,7 @@
 - 03 号原文仍以 ZCode 首宿主视角把内建记忆写进中期层——本文 §0.2 已按机制口径修正表述；外部审查同点此为 P1-2（01/03/04 总纲层仍含首宿主口径），**身份判定一律以本文 §0 为准**，三篇待后续修订同步。
 - 外部对抗审查（2026-09-28，存档 `docs/reviews/codex-identity-audit-2026-09-28.md`）处置跟踪——D1/D2/D3/D6 及 D4 源头分层经用户批准于同日实施：README 公开身份与 00/12 导航身份分类（D1）、07/17 安装入口宿主范围声明（D3）、16 §4 降级矩阵 v3 重述（D2：降级全落装配层、宪法正文不改）、models.config 路由×绑定分层 + 生成器双格式兼容 + inject-memory 归层注释（D4）均已落地。**仍开放**：inject-memory 的 per-host 变体拆分待 N19 装机阶段（五宿主输出 schema 未实测，按勿臆断纪律不预写）。本仓治理模型口径（审查 P1-8/D5）已于 2026-09-28 经用户裁决收口为**限定 dogfood**（规范类变更走流水线、日常小修直提——19 §11 已重写、metrics.md 首行已加定位注）。
 - 本机 `~/.basic-memory/config.json` 存在 `null` 项目名（历史残留，无消费），可择机清理。
+- **二轮遗漏审查（2026-09-28，存档 [reviews/codex-omission-audit-2026-09-28.md](reviews/codex-omission-audit-2026-09-28.md)）处置跟踪**：P0（生成器 extras 整块追加致三 rerun 卡重复键）与 P1-2（variant 层浅覆盖）已当日修复票 gen-variant-dedup 重铸（合并 e771e44、归档 1c177d4：键级块合并+字段级覆盖+fail-loud+重复键断言+幂等验证）；P1-1 local.json 已入用户域备份并增 05 恢复行；P1-3 归入 B1 增强、P1-4/5/6/7/8/10 与 P2-1/2/4 归入 00 backlog B3–B9、P2-3 已勘误 19 §11。观察项：ZCode 宿主自身若回写角色卡可能再引入其托管键——无生成器运行仍现重复键即属宿主写入器行为，另立票。
 
 ## 参考文档
 

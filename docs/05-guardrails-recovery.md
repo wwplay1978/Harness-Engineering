@@ -65,5 +65,6 @@ guard-worktree.mjs 的逻辑（路径归一化 `\\`→`/` + `.toLowerCase()`、`
 | spec 被质疑 | spec 修订号机制（r1/r2…）+ `docs/changes/` delta 追溯；reviewer 的"spec 问题"回退通道 | 继承 AITrader，已实测 |
 | 规范本身出错 | 本仓库 git 历史回滚；分发后目标项目按迁移手册重同步 | 随本仓库 git init 生效 |
 | 误合并 | `git revert` + 合并结论记忆更正 + 工单复盘进知识库 | 按需 |
+| 机器私有配置丢失（`~/.zcode/models.config.local.json` 被删/换机/profile 损坏） | 该文件是机器级模型绑定的**唯一持久载体**（不入 git——个人订阅 provider ID 不进仓）：恢复=从用户自管备份目录取回（备份责任=人；恢复验收=重跑生成器后九卡 frontmatter 的 model 值与本机路由一致、无重复键）；无备份时只能手工重建（字段 schema 见 templates/models.config.json `_readme`） | 2026-09-28 立（二轮审查 P1-1）；备份落位见当轮部署记录 |
 
 **Checkpoint 纪律**（宪法层原则 7）：每棒交付物即检查点——planner 的 spec、developer 的分支+commit hash、reviewer 的报告、QA 的结论、归档提交，链条任一环节可从上一检查点重放。
