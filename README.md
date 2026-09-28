@@ -148,7 +148,7 @@ Where others genuinely win:
 
 - **Community & adoption.** spec-kit and BMAD have orders of magnitude more users and cross-team battle-testing. This repo's evidence is one real pilot (6 tickets, 0 implementation defects in QA) plus an independent 93/100 audit baseline.
 - **Onboarding ergonomics.** An `npx`-style installer and polished CLI beat a spec + templates repo that assumes install discipline. Our one-sentence agent-assisted install helps, but the entry cost is real.
-- **Host verification.** Only ZCode is fully on-machine verified today; the other four adapters ship as ready packages with on-machine checks deliberately left as the first install step.
+- **Host verification.** Only ZCode is fully on-machine verified today; the other five adapters ship as ready packages with on-machine checks deliberately left as the first install step.
 - **Platform breadth.** Ops hardening is Windows-first (NSSM, codepage, service lessons); Unix equivalents are less exercised.
 - **Language.** Full docs are Chinese; this English README is a partial mirror, not a complete translation.
 

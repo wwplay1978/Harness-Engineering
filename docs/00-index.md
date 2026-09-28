@@ -34,6 +34,8 @@
 | [20-autonomous-merge.md](20-autonomous-merge.md) | 自治流水线（两端人闸+gates 全绿 auto-merge+方案红队前置门 §2.5——红线修订已获确认） | v3 实施 |
 | [21-memory-system-analysis.md](21-memory-system-analysis.md) | 记忆管理机制分析（机制层视角：长期/短期/参数三视角 × 抽取/管理/存储/检索四环节 + 五宿主记忆面分级；ZCode 内建记忆移入宿主附加层） | 状态与记忆 |
 
+> 注（公开副本）：上表 06、08–14 及 backlog/工件节所涉内部工作档案与工件**仅存在于私有开发仓**——相应链接在公开仓无效，内容以私有仓为准。
+
 ## 文档身份分类（2026-09-28 起，导航表的前置滤镜）
 
 同仓 ≠ 同类。本仓文档分四种身份（判别口径与判定原则见 [21 号 §0](21-memory-system-analysis.md)）：
@@ -51,13 +53,13 @@
 |---|---|---|
 | B1 | **门 B 白名单 × 开发仓 dogfood 模型适配**：pre-merge-check.mjs 门 B 的 main 直提白名单是消费项目口径（chore: archive* / docs: spec* / docs: agents* / 授权尾注），与 19 §11 限定 dogfood 的"日常小修直提"并存会让每张 dogfood 票撞历史红（首例 models-local-binding：门 B 红系 09-23 批+09-28 处置批历史直提，人闸合并留痕）。方向：门 B 识别 dogfood 语义（小修类直提放行+留痕）或并入第四类授权尾注惯例。**二轮审查 P1-3 增强：票内须给出机器可执行裁判方案（独立门 B profile / 直提强制授权尾注 / 显式分类标签文件三选一），禁止仅凭"历史红"文字放行——须固定起止 commit 与逐提交分类** | merge 3553d3a 留痕 + basic-memory 遗留风险（2026-09-28） |
 | B2 | **五宿主 per-host inject-memory 变体**（联动 N19 装机实测）：现源 host-bound（`.zcode` marker / ZCode JSON schema），per-host 文件须装机实测后由适配器物化，未实测宿主输出 schema 勿臆造 | Codex 审查 P0-4 处置余项（21 §0.3/§8） |
-| B3 | **公开发布 manifest 与内部↔公开对账门**：机器可判定的 A 类发布清单 + SHA 对账 + A 类合并后自动产生"待发布"项；并入公开路径脱敏检测（`C:\Users\<真实用户名>` 等形态，二轮 P2-4——公开仓 03/15 仍含真实路径）。**当前待发布**：models-local-binding+gen-variant-dedup 两票的 A 类变更（generator/models.config/21/05/19/00） | 二轮审查 P1-4/P2-4（2026-09-28） |
+| B3 | **公开发布 manifest 与内部↔公开对账门**：机器可判定的 A 类发布清单 + SHA 对账 + A 类合并后自动产生"待发布"项；并入公开路径脱敏检测（`C:\Users\<真实用户名>` 等形态，二轮 P2-4——公开仓 03/15 仍含真实路径）与公开仓断链检测（三轮 P2-D1：00 对 06/08–14 的 8 个断链已随发布适配修复，机制检测仍缺）。**当日两批 A 类变更已随 a2ca8eb 发布（三轮勘误——"待发布"状态过期未收敛的教训即本票动机）** | 二轮审查 P1-4/P2-4 + 三轮 P2-D1（2026-09-28） |
 | B4 | **bank 重建演练 runbook**：git 工件→项目 bank 的批量 retain 路径（输入清单/顺序/幂等/核验查询）在 docs/05 落 runbook 并做一次隔离 bank 演练；不可行则把"可再生"声明降为"部分可再生" | 二轮审查 P1-5 |
 | B5 | **运行时版本支持矩阵 + check-env 版本校验**：Node/Python/basic-memory 最低版本与已知不兼容范围进 docs/15；check-env 从"能跑"升级为版本校验 | 二轮审查 P1-6 |
 | B6 | **hindsight 写侧健康探针 + Control Plane 核正**：临时 bank 哨兵 retain→recall→清理的非破坏探针（/health 测不出 GLM 写侧失效）；:9999 本机未监听——必要性核正（21 §7 已勘误） | 二轮审查 P1-7 |
 | B7 | **sync-harness 真只读模式**：--check 现状写 harness-projects.json / harness-config-state.json 与"默认只读"自述不符——改内存计算+显式 --refresh-state | 二轮审查 P1-8 |
 | B8 | **current-state 面**：机器可生成的轻量状态报告（内部 HEAD/公开 HEAD/待发布差异/部署模板 hash/local 备份态/backlog/复盘票号），补"00+git log 答不了部署与发布状态"的缺口 | 二轮审查 P1-10 |
-| B9 | **散落待核项收编**：injectAgentsMd 待核（02 状态注）、skills 锚点包获取来源待核（16 §3）、13 号"每 5 票"计数域定义（单仓/全体系、无 metrics 行的票怎么计） | 二轮审查 P2-1/P2-2 |
+| B9 | **散落待核项收编**：injectAgentsMd 待核（02 状态注）、skills 锚点包获取来源待核（16 §3）、13 号"每 5 票"计数域定义（单仓/全体系、无 metrics 行的票怎么计）。**三轮 P2-C2 增强：须定义修复票计票规则（gen-variant-dedup 曾被折叠进原行更正注不计票——已补独立行；规则=修复票照常计票、以更正注与原票关联）、metrics 是否唯一计数源、谁在第 10 票合并时触发复盘门** | 二轮 P2-1/P2-2 + 三轮 P2-C2 |
 | B10 | **archiver 卡清理命令回灌**：SOP 第 8 步补现场实证形态——`git gtr rm <branch> --delete-branch --yes` + 残留核验（worktree list / branch --list）+ 已合并分支 `git branch -d` 补删 + 逐步退出码入归档证据（角色卡模板变更，走 dogfood 票） | 二轮审查 P1-9（两单归档现场适配未回灌） |
 
 （Codex 身份审查的其余开放项以 [21 号 §8](21-memory-system-analysis.md) 为准跟踪。）
