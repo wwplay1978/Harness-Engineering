@@ -34,7 +34,12 @@ if (existsSync(LOCAL)) {
   };
   console.log('[OK] local binding override applied: ' + LOCAL);
 }
+// 标识 allowlist（gen-variant-hardening：防路径逃逸 `../x` 与正则元字符 `x$`——校验先于任何写入）
+const ID_RE = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 for (const [id, v] of Object.entries(zc.variants ?? {})) {
+  if (!ID_RE.test(id) || !ID_RE.test(String(v?.base ?? ''))) {
+    die('variant/base id must match [A-Za-z0-9][A-Za-z0-9_-]* (path or regex metachar rejected): ' + JSON.stringify(id) + ' / ' + JSON.stringify(v?.base));
+  }
   if (typeof v?.base !== 'string' || typeof v?.model !== 'string') {
     die('variant invalid (need base+model strings): ' + id + ' → ' + JSON.stringify(v));
   }
@@ -45,6 +50,10 @@ const rewriteFrontmatter = (src, { name, descPrefix, model }) => {
   const m = src.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!m) die('frontmatter not found in base file');
   let fm = m[1];
+  // 块标量/多行 description 防线（gen-variant-hardening：现行改写只支持单行值，遇 | 或 > 或空值尾随缩进块即拒绝——防产出无效 YAML）
+  if (/^description:[ \t]*(\||>|\|$)/m.test(fm)) {
+    die('multiline/block-scalar description not supported (refusing to mangle): ' + name);
+  }
   fm = fm.replace(/^name:\s*.*$/m, 'name: ' + name);
   fm = fm.replace(/^description:\s*"(.*)"$/m, (s, d) => 'description: "' + descPrefix + d + '"');
   if (fm.includes('description:') && !/^description:.*"/m.test(fm)) {
@@ -74,7 +83,8 @@ for (const [vid, v] of Object.entries(zc.variants ?? {})) {
   // 目标文件自身含重复键时取首块——因此本生成器重跑即可清洗历史重复键（幂等）
   if (existsSync(dest)) {
     const dm = readFileSync(dest, 'utf8').match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (dm) {
+    if (!dm) die('dest exists but frontmatter unparseable - refusing silent overwrite (extras would be lost): ' + dest);
+    {
       const fmKeys = new Set(out.match(/^---\n([\s\S]*?)\n---/)[1].split(/\r?\n/)
         .map(l => l.match(/^([A-Za-z_][\w-]*):/)).filter(Boolean).map(m => m[1]));
       const blocks = []; let cur = null;
@@ -93,7 +103,7 @@ for (const [vid, v] of Object.entries(zc.variants ?? {})) {
   writeFileSync(dest, out);
   // 正向断言：回读验证 name/model 确已写入（防假绿）
   const back = readFileSync(dest, 'utf8');
-  if (!new RegExp('^name:\\s*' + vid + '$', 'm').test(back)) die(vid + ': name not written');
+  if (!new RegExp('^name:\\s*' + vid.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '$', 'm').test(back)) die(vid + ': name not written');
   if (!new RegExp('^model:\\s*' + v.model.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '$', 'm').test(back)) die(vid + ': model not written');
   // 顶层键唯一性断言（gen-variant-dedup：重复键=解释器相关行为，视为生成失败）
   const keyLines = (back.match(/^---\r?\n([\s\S]*?)\r?\n---/)[1]).split(/\r?\n/)
