@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 3.0.1">
   <meta name="archify-reader-contract" content="declared-wide-v1">
-  <title>六角色流水线全貌</title>
+  <title>六角色记忆管理动态架构（机制层）</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4978,7 +4978,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
            data-preset-badge-blueprint="蓝图 / 修订 01"
            data-preset-badge-editorial="编辑风格 / 现场笔记">
         <div class="pulse-dot"></div>
-        <h1>六角色流水线全貌</h1>
+        <h1>六角色记忆管理动态架构（机制层）</h1>
       </div>
     </div>
 
@@ -4987,9 +4987,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / 图版 04">
-      <svg viewBox="0 0 1226 776" data-layout-contract="readable-v2" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase">
-        <title id="archify-diagram-title">六角色流水线全貌</title>
-        <desc id="archify-diagram-description">由 Archify 生成的工作流图。</desc>
+      <svg viewBox="0 0 1075 640" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase">
+        <title id="archify-diagram-title">六角色记忆管理动态架构（机制层）</title>
+        <desc id="archify-diagram-description">由 Archify 生成的数据流图。</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -5012,280 +5012,236 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <!-- Background Grid -->
         <rect width="100%" height="100%" fill="url(#grid)" />
 
-        <!-- Swimlanes -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-0" x="40" y="52" width="1143" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / Plan · 规划</text>
+        <!-- Data Stages -->
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="0" x="16" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="100" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">01 / 会话现场</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-1" x="40" y="176" width="1143" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / Code · 实现与修复</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="1" x="231" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="315" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">02 / 抽取 · 离场</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-2" x="40" y="300" width="1143" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="322" class="t-dim" font-size="10" font-weight="600">03 / Deliver · 门禁</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="2" x="446" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="530" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">03 / 长期载体</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-3" x="40" y="424" width="1143" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="446" class="t-dim" font-size="10" font-weight="600">04 / Adversarial · 对抗与合并</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="3" x="661" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="745" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">04 / 检索 · 注入</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-4" x="40" y="548" width="1143" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="570" class="t-dim" font-size="10" font-weight="600">05 / Archive · 沉淀</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="4" x="876" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="960" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">05 / 复用 · 下票</text>
 
-        <!-- Phase headers -->
-        <line x1="79.5" y1="35" x2="171.5" y2="35" class="a-default" stroke-width="1.1"/>
-        <rect x="79.5" y="27" width="92" height="16" rx="4" class="c-mask"/>
-        <text x="125.5" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">Plan</text>
-        <line x1="314.9" y1="35" x2="406.9" y2="35" class="a-default" stroke-width="1.1"/>
-        <rect x="314.9" y="27" width="92" height="16" rx="4" class="c-mask"/>
-        <text x="360.9" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">Code</text>
-        <line x1="434.8999999999999" y1="35" x2="931.3" y2="35" class="a-emphasis" stroke-width="1.1"/>
-        <rect x="434.8999999999999" y="27" width="496.4" height="16" rx="4" class="c-mask"/>
-        <text x="683.0999999999999" y="39" class="t-backend" font-size="8" font-weight="600" text-anchor="middle">Deliver · 门禁与对抗</text>
-        <line x1="1050.7" y1="35" x2="1142.7" y2="35" class="a-dashed" stroke-width="1.1"/>
-        <rect x="1050.7" y="27" width="92" height="16" rx="4" class="c-mask"/>
-        <text x="1096.7" y="39" class="t-messagebus" font-size="8" font-weight="600" text-anchor="middle">Merge + Archive</text>
-
-        <!-- Workflow groups -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="group" data-composition-frame-id="group-0" x="399.4" y="338" width="356" height="62" rx="9" class="c-lane" stroke-width="1"/>
-        <text x="409.4" y="336" class="t-backend" font-size="7" font-weight="600">双门禁</text>
-
-        <!-- Edge paths -->
-        <path data-edge-from="changes" data-edge-to="planner" data-edge-label="spec 修订回灌" data-edge-key="0" data-edge-id="changes-planner" data-composition-routing="workflow-v2-auto" data-edge-role="return" data-composition-points="283.4,119;203,119" d="M 283.4 119 L 203 119" class="a-dashed" data-animate="edge" style="--step:8" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="developer" data-edge-to="reviewer" data-edge-label="diff 快照" data-edge-key="1" data-edge-id="developer-reviewer" data-edge-role="main" data-composition-points="360.9,264;360.9,367;403.4,367" d="M 360.9 264 L 360.9 367 L 403.4 367" class="a-default" data-animate="edge" style="--step:1" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="escalate" data-edge-to="human" data-edge-label="人工接管" data-edge-key="2" data-edge-id="escalate-human" data-composition-routing="workflow-v2-auto" data-edge-role="branch" data-composition-points="962.8,243;1096.7,243;1096.7,346" d="M 962.8 243 L 1096.7 243 L 1096.7 346" class="a-dashed" data-animate="edge" style="--step:10" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="fix" data-edge-to="escalate" data-edge-label="&gt;4 次" data-edge-key="3" data-edge-id="fix-escalate" data-composition-routing="workflow-v2-auto" data-edge-role="error" data-composition-points="751.4,243;807.8,243" d="M 751.4 243 L 807.8 243" class="a-default" data-animate="edge" style="--step:11" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="fix" data-edge-to="reviewer" data-edge-label="复审" data-edge-key="4" data-edge-id="fix-reviewer" data-composition-routing="workflow-v2-auto" data-edge-role="branch" data-composition-points="596.4,238;473.9,238;473.9,346" d="M 596.4 238 L 473.9 238 L 473.9 346" class="a-dashed" data-animate="edge" style="--step:12" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="human" data-edge-to="archiver" data-edge-label="人工合并" data-edge-key="5" data-edge-id="human-archiver" data-edge-role="branch" data-composition-points="1174.2,367;1200,367;1200,615;1174.2,615" d="M 1174.2 367 L 1200 367 L 1200 615 L 1174.2 615" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="planner" data-edge-to="developer" data-edge-label="spec + tickets" data-edge-key="6" data-edge-id="planner-developer" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="125.5,140;125.5,166;360.9,166;360.9,222" d="M 125.5 140 L 125.5 166 L 360.9 166 L 360.9 222" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="premerge" data-edge-to="archiver" data-edge-label="全绿 auto-merge" data-edge-key="7" data-edge-id="premerge-archiver" data-edge-role="main" data-composition-points="1096.7,512;1096.7,553;1096.7,594" d="M 1096.7 512 L 1096.7 553 L 1096.7 594" class="a-default" data-animate="edge" style="--step:6" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="premerge" data-edge-to="human" data-edge-label="门不全绿" data-edge-key="8" data-edge-id="premerge-human" data-composition-routing="workflow-v2-auto" data-edge-role="error" data-composition-points="1096.7,470;1096.7,388" d="M 1096.7 470 L 1096.7 388" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="qa" data-edge-to="fix" data-edge-label="缺陷退回" data-edge-key="9" data-edge-id="qa-fix" data-composition-routing="workflow-v2-auto" data-edge-role="error" data-composition-points="673.9,346;673.9,264" d="M 673.9 346 L 673.9 264" class="a-dashed" data-animate="edge" style="--step:12" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="qa" data-edge-to="quick" data-edge-label="测试增量" data-edge-key="10" data-edge-id="qa-quick" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="751.4,367;807.8,367" d="M 751.4 367 L 807.8 367" class="a-default" data-animate="edge" style="--step:3" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="quick" data-edge-to="redteam" data-edge-key="11" data-edge-id="quick-redteam" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="885.3,388;885.3,470" d="M 885.3 388 L 885.3 470" class="a-default" data-animate="edge" style="--step:4" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="redteam" data-edge-to="fix" data-edge-label="P0 返工" data-edge-key="12" data-edge-id="redteam-fix" data-edge-role="error" data-composition-points="885.3,512;885.3,664;1210,664;1210,182;673.9,182;673.9,222" d="M 885.3 512 L 885.3 664 L 1210 664 L 1210 182 L 673.9 182 L 673.9 222" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="redteam" data-edge-to="premerge" data-edge-label="攻击结论" data-edge-key="13" data-edge-id="redteam-premerge" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="962.8,491;1019.2,491" d="M 962.8 491 L 1019.2 491" class="a-default" data-animate="edge" style="--step:5" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="reviewer" data-edge-to="fix" data-edge-label="request changes" data-edge-key="14" data-edge-id="reviewer-fix" data-composition-routing="workflow-v2-auto" data-edge-role="error" data-composition-points="487.9,346;487.9,290;580.4,290;580.4,248;596.4,248" d="M 487.9 346 L 487.9 290 L 580.4 290 L 580.4 248 L 596.4 248" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="reviewer" data-edge-to="qa" data-edge-label="pass" data-edge-key="15" data-edge-id="reviewer-qa" data-composition-routing="workflow-v2-auto" data-edge-role="main" data-composition-points="558.4,367;596.4,367" d="M 558.4 367 L 596.4 367" class="a-default" data-animate="edge" style="--step:2" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <!-- Flow paths -->
+        <path data-edge-from="pipeline" data-edge-to="gitart" data-edge-label="工件落盘" data-edge-key="0" data-edge-id="p-gitart" data-composition-points="170,372;322,372;322,157;474,157" d="M 170 372 L 322 372 L 322 157 L 474 157" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="pipeline" data-edge-to="vault" data-edge-label="工单沉淀草稿 SOP第5步" data-edge-key="1" data-edge-id="p-vault" data-composition-points="170,385;315,385;315,271;460,271" d="M 170 385 L 315 385 L 315 271 L 460 271" class="a-default" data-animate="edge" style="--step:1" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="pipeline" data-edge-to="hindsight" data-edge-label="retain 每轮抽取" data-edge-key="2" data-edge-id="p-hindsight" data-composition-points="170,385;474,385" d="M 170 385 L 474 385" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="pipeline" data-edge-to="bmem" data-edge-label="棒次写入+合并结论" data-edge-key="3" data-edge-id="p-bmem" data-composition-points="170,398;320,398;320,461;470,461" d="M 170 398 L 320 398 L 320 461 L 470 461" class="a-default" data-animate="edge" style="--step:3" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="human" data-edge-to="config" data-edge-label="安装问答生成" data-edge-key="4" data-edge-id="human-config" data-composition-points="371,537;474,537" d="M 371 537 L 474 537" class="a-emphasis" data-animate="edge" style="--step:4" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="vault" data-edge-to="hindsight" data-edge-label="reconcile 单向同步" data-edge-key="5" data-edge-id="vault-hindsight" data-composition-points="530,300;530,356" d="M 530 300 L 530 356" class="a-dashed" data-animate="edge" style="--step:5" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="bmem" data-edge-to="inject" data-edge-label="① 近7天团队近况" data-edge-key="6" data-edge-id="bmem-inject" data-composition-points="590,461;635,461;635,385;680,385" d="M 590 461 L 635 461 L 635 385 L 680 385" class="a-default" data-animate="edge" style="--step:6" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="hindsight" data-edge-to="inject" data-edge-label="② recall" data-edge-key="7" data-edge-id="hindsight-inject" data-composition-points="586,385;680,385" d="M 586 385 L 680 385" class="a-default" data-animate="edge" style="--step:7" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="vault" data-edge-to="inject" data-edge-label="③ 开工必检直读" data-edge-key="8" data-edge-id="vault-inject" data-composition-points="600,271;660,271;660,385;680,385" d="M 600 271 L 660 271 L 660 385 L 680 385" class="a-default" data-animate="edge" style="--step:8" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="inject" data-edge-to="session-next" data-edge-label="注入会话" data-edge-key="9" data-edge-id="inject-next" data-composition-points="810,385;904,385" d="M 810 385 L 904 385" class="a-emphasis" data-animate="edge" style="--step:9" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="gitart" data-edge-to="session-next" data-edge-label="文档地图 · --from 续作" data-edge-key="10" data-edge-id="gitart-next" data-composition-points="586,157;860,157;860,385;904,385" d="M 586 157 L 860 157 L 860 385 L 904 385" class="a-default" data-animate="edge" style="--step:10" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="config" data-edge-to="session-next" data-edge-label="用前必读" data-edge-key="11" data-edge-id="config-next" data-composition-points="586,537;875,537;875,385;904,385" d="M 586 537 L 875 537 L 875 385 L 904 385" class="a-default" data-animate="edge" style="--step:11" stroke-width="1.4" marker-end="url(#arrowhead)"/>
 
         <!-- Nodes -->
-        <g id="node-planner" data-node-id="planner" data-node-label="planner" tabindex="0" role="button" aria-label="聚焦planner，阶段 A/B/C · spec 定级, Plan · 规划 › Plan" aria-pressed="false" data-node-kind="backend" data-node-sublabel="阶段 A/B/C · spec 定级" data-node-context="Plan · 规划 › Plan">
-          <title>planner · 阶段 A/B/C · spec 定级 · Plan · 规划 › Plan</title>
-          <rect x="48" y="98" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="48" y="98" width="155" height="42" rx="6" class="c-backend" data-animate="node" style="--step:0" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(54 104) scale(0.6875)">
+        <g id="node-pipeline" data-node-id="pipeline" data-node-label="六角色流水线" tabindex="0" role="button" aria-label="聚焦六角色流水线，合并后触发归档 SOP, 01 / 会话现场" aria-pressed="false" data-node-kind="backend" data-node-sublabel="合并后触发归档 SOP" data-node-tag="短期 · 易失" data-node-context="01 / 会话现场">
+          <title>六角色流水线 · 合并后触发归档 SOP · 01 / 会话现场 · 短期 · 易失</title>
+          <rect x="30" y="356" width="140" height="58" rx="6" class="c-mask"/>
+          <rect x="30" y="356" width="140" height="58" rx="6" class="c-backend" data-animate="node" style="--step:0" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(36 362) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="125.5" y="119" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">planner</text>
-          <text data-detail="context" x="125.5" y="136" class="t-muted" font-size="8" text-anchor="middle">阶段 A/B/C · spec 定级</text>
+          <text data-node-label="" data-detail-anchor="" x="100" y="377" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">六角色流水线</text>
+          <text data-detail="context" x="100" y="393" class="t-muted" font-size="7" text-anchor="middle">合并后触发归档 SOP</text>
+        <text data-detail="fine" x="100" y="403" class="t-backend" font-size="7" text-anchor="middle">短期 · 易失</text>
         </g>
 
-        <g id="node-changes" data-node-id="changes" data-node-label="changes/ 缺口链" tabindex="0" role="button" aria-label="聚焦changes/ 缺口链，审查缺口 · r1→rN, Plan · 规划 › Code" aria-pressed="false" data-node-kind="database" data-node-sublabel="审查缺口 · r1→rN" data-node-context="Plan · 规划 › Code">
-          <title>changes/ 缺口链 · 审查缺口 · r1→rN · Plan · 规划 › Code</title>
-          <rect x="283.4" y="98" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="283.4" y="98" width="155" height="42" rx="6" class="c-database" data-animate="node" style="--step:9" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(289.4 104) scale(0.6875)">
+        <g id="node-human" data-node-id="human" data-node-label="人 · 掌舵" tabindex="0" role="button" aria-label="聚焦人 · 掌舵，安装问答 · 整理定稿, 02 / 抽取 · 离场" aria-pressed="false" data-node-kind="external" data-node-sublabel="安装问答 · 整理定稿" data-node-context="02 / 抽取 · 离场">
+          <title>人 · 掌舵 · 安装问答 · 整理定稿 · 02 / 抽取 · 离场</title>
+          <rect x="259" y="508" width="112" height="58" rx="6" class="c-mask"/>
+          <rect x="259" y="508" width="112" height="58" rx="6" class="c-external" data-animate="node" style="--step:4" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(265 514) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="315" y="529" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">人 · 掌舵</text>
+          <text data-detail="context" x="315" y="545" class="t-muted" font-size="7" text-anchor="middle">安装问答 · 整理定稿</text>
+        </g>
+
+        <g id="node-gitart" data-node-id="gitart" data-node-label="git 工件" tabindex="0" role="button" aria-label="聚焦git 工件，specs·reviews·metrics, 03 / 长期载体" aria-pressed="false" data-node-kind="database" data-node-sublabel="specs·reviews·metrics" data-node-tag="零依赖兜底" data-node-context="03 / 长期载体">
+          <title>git 工件 · specs·reviews·metrics · 03 / 长期载体 · 零依赖兜底</title>
+          <rect x="474" y="128" width="112" height="58" rx="6" class="c-mask"/>
+          <rect x="474" y="128" width="112" height="58" rx="6" class="c-database" data-animate="node" style="--step:1" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(480 134) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="360.9" y="119" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">changes/ 缺口链</text>
-          <text data-detail="context" x="360.9" y="136" class="t-muted" font-size="8" text-anchor="middle">审查缺口 · r1→rN</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="149" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">git 工件</text>
+          <text data-detail="context" x="530" y="165" class="t-muted" font-size="7" text-anchor="middle">specs·reviews·metrics</text>
+        <text data-detail="fine" x="530" y="175" class="t-database" font-size="7" text-anchor="middle">零依赖兜底</text>
         </g>
 
-        <g id="node-developer" data-node-id="developer" data-node-label="developer" tabindex="0" role="button" aria-label="聚焦developer，worktree · TDD 自测, Code · 实现与修复 › Code" aria-pressed="false" data-node-kind="backend" data-node-sublabel="worktree · TDD 自测" data-node-context="Code · 实现与修复 › Code">
-          <title>developer · worktree · TDD 自测 · Code · 实现与修复 › Code</title>
-          <rect x="283.4" y="222" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="283.4" y="222" width="155" height="42" rx="6" class="c-backend" data-animate="node" style="--step:1" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(289.4 228) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-vault" data-node-id="vault" data-node-label="Obsidian vault" tabindex="0" role="button" aria-label="聚焦Obsidian vault，定稿区(只能人写)+工作区草稿, 03 / 长期载体" aria-pressed="false" data-node-kind="database" data-node-sublabel="定稿区(只能人写)+工作区草稿" data-node-tag="信任分级" data-node-context="03 / 长期载体">
+          <title>Obsidian vault · 定稿区(只能人写)+工作区草稿 · 03 / 长期载体 · 信任分级</title>
+          <rect x="460" y="242" width="140" height="58" rx="6" class="c-mask"/>
+          <rect x="460" y="242" width="140" height="58" rx="6" class="c-database" data-animate="node" style="--step:2" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(466 248) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="360.9" y="243" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">developer</text>
-          <text data-detail="context" x="360.9" y="260" class="t-muted" font-size="8" text-anchor="middle">worktree · TDD 自测</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="263" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Obsidian vault</text>
+          <text data-detail="context" x="530" y="279" class="t-muted" font-size="7" text-anchor="middle">定稿区(只能人写)+工作区草稿</text>
+        <text data-detail="fine" x="530" y="289" class="t-database" font-size="7" text-anchor="middle">信任分级</text>
         </g>
 
-        <g id="node-fix" data-node-id="fix" data-node-label="developer-rerun" tabindex="0" role="button" aria-label="聚焦developer-rerun，≥2 次 · 钉强模型, Code · 实现与修复 › Deliver · 门禁与对抗" aria-pressed="false" data-node-kind="backend" data-node-sublabel="≥2 次 · 钉强模型" data-node-context="Code · 实现与修复 › Deliver · 门禁与对抗">
-          <title>developer-rerun · ≥2 次 · 钉强模型 · Code · 实现与修复 › Deliver · 门禁与对抗</title>
-          <rect x="596.4" y="222" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="596.4" y="222" width="155" height="42" rx="6" class="c-backend" data-animate="node" style="--step:11" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(602.4 228) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-hindsight" data-node-id="hindsight" data-node-label="hindsight" tabindex="0" role="button" aria-label="聚焦hindsight，个体语义 bank · 本地服务, 03 / 长期载体" aria-pressed="false" data-node-kind="database" data-node-sublabel="个体语义 bank · 本地服务" data-node-tag="可再生缓存" data-node-context="03 / 长期载体">
+          <title>hindsight · 个体语义 bank · 本地服务 · 03 / 长期载体 · 可再生缓存</title>
+          <rect x="474" y="356" width="112" height="58" rx="6" class="c-mask"/>
+          <rect x="474" y="356" width="112" height="58" rx="6" class="c-database" data-animate="node" style="--step:3" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(480 362) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="673.9" y="243" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">developer-rerun</text>
-          <text data-detail="context" x="673.9" y="260" class="t-muted" font-size="8" text-anchor="middle">≥2 次 · 钉强模型</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="377" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">hindsight</text>
+          <text data-detail="context" x="530" y="393" class="t-muted" font-size="7" text-anchor="middle">个体语义 bank · 本地服务</text>
+        <text data-detail="fine" x="530" y="403" class="t-database" font-size="7" text-anchor="middle">可再生缓存</text>
         </g>
 
-        <g id="node-escalate" data-node-id="escalate" data-node-label="escalate" tabindex="0" role="button" aria-label="聚焦escalate，&gt;4 次 · 人工接管, Code · 实现与修复 › Deliver · 门禁与对抗" aria-pressed="false" data-node-kind="external" data-node-sublabel="&gt;4 次 · 人工接管" data-node-context="Code · 实现与修复 › Deliver · 门禁与对抗">
-          <title>escalate · &gt;4 次 · 人工接管 · Code · 实现与修复 › Deliver · 门禁与对抗</title>
-          <rect x="807.8" y="222" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="807.8" y="222" width="155" height="42" rx="6" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(813.8 228) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+        <g id="node-bmem" data-node-id="bmem" data-node-label="basic-memory" tabindex="0" role="button" aria-label="聚焦basic-memory，memory/ · 随项目 git, 03 / 长期载体" aria-pressed="false" data-node-kind="database" data-node-sublabel="memory/ · 随项目 git" data-node-tag="显式 --project" data-node-context="03 / 长期载体">
+          <title>basic-memory · memory/ · 随项目 git · 03 / 长期载体 · 显式 --project</title>
+          <rect x="470" y="432" width="120" height="58" rx="6" class="c-mask"/>
+          <rect x="470" y="432" width="120" height="58" rx="6" class="c-database" data-animate="node" style="--step:4" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(476 438) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="885.3" y="243" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">escalate</text>
-          <text data-detail="context" x="885.3" y="260" class="t-muted" font-size="8" text-anchor="middle">&gt;4 次 · 人工接管</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="453" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">basic-memory</text>
+          <text data-detail="context" x="530" y="469" class="t-muted" font-size="7" text-anchor="middle">memory/ · 随项目 git</text>
+        <text data-detail="fine" x="530" y="479" class="t-database" font-size="7" text-anchor="middle">显式 --project</text>
         </g>
 
-        <g id="node-reviewer" data-node-id="reviewer" data-node-label="code-reviewer" tabindex="0" role="button" aria-label="聚焦code-reviewer，对照 spec · 门禁1, Deliver · 门禁 › 双门禁 › Deliver · 门禁与对抗" aria-pressed="false" data-node-kind="security" data-node-sublabel="对照 spec · 门禁1" data-node-context="Deliver · 门禁 › 双门禁 › Deliver · 门禁与对抗">
-          <title>code-reviewer · 对照 spec · 门禁1 · Deliver · 门禁 › 双门禁 › Deliver · 门禁与对抗</title>
-          <rect x="403.4" y="346" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="403.4" y="346" width="155" height="42" rx="6" class="c-security" data-animate="node" style="--step:2" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(409.4 352) scale(0.6875)">
+        <g id="node-config" data-node-id="config" data-node-label="参数记忆" tabindex="0" role="button" aria-label="聚焦参数记忆，宪法+配置中心+模型路由, 03 / 长期载体" aria-pressed="false" data-node-kind="security" data-node-sublabel="宪法+配置中心+模型路由" data-node-tag="只能人改" data-node-context="03 / 长期载体">
+          <title>参数记忆 · 宪法+配置中心+模型路由 · 03 / 长期载体 · 只能人改</title>
+          <rect x="474" y="508" width="112" height="58" rx="6" class="c-mask"/>
+          <rect x="474" y="508" width="112" height="58" rx="6" class="c-security" data-animate="node" style="--step:5" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(480 514) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="480.9" y="367" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">code-reviewer</text>
-          <text data-detail="context" x="480.9" y="384" class="t-muted" font-size="8" text-anchor="middle">对照 spec · 门禁1</text>
+          <text data-node-label="" data-detail-anchor="" x="530" y="529" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">参数记忆</text>
+          <text data-detail="context" x="530" y="545" class="t-muted" font-size="7" text-anchor="middle">宪法+配置中心+模型路由</text>
+        <text data-detail="fine" x="530" y="555" class="t-security" font-size="7" text-anchor="middle">只能人改</text>
         </g>
 
-        <g id="node-qa" data-node-id="qa" data-node-label="qa-tester" tabindex="0" role="button" aria-label="聚焦qa-tester，边界回归 · 门禁2, Deliver · 门禁 › 双门禁 › Deliver · 门禁与对抗" aria-pressed="false" data-node-kind="security" data-node-sublabel="边界回归 · 门禁2" data-node-context="Deliver · 门禁 › 双门禁 › Deliver · 门禁与对抗">
-          <title>qa-tester · 边界回归 · 门禁2 · Deliver · 门禁 › 双门禁 › Deliver · 门禁与对抗</title>
-          <rect x="596.4" y="346" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="596.4" y="346" width="155" height="42" rx="6" class="c-security" data-animate="node" style="--step:3" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(602.4 352) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
+        <g id="node-inject" data-node-id="inject" data-node-label="注入三通道" tabindex="0" role="button" aria-label="聚焦注入三通道，inject·recall·开工必检, 04 / 检索 · 注入" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="inject·recall·开工必检" data-node-tag="fail-open" data-node-context="04 / 检索 · 注入">
+          <title>注入三通道 · inject·recall·开工必检 · 04 / 检索 · 注入 · fail-open</title>
+          <rect x="680" y="356" width="130" height="58" rx="6" class="c-mask"/>
+          <rect x="680" y="356" width="130" height="58" rx="6" class="c-messagebus" data-animate="node" style="--step:7" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(686 362) scale(0.6875)">
+            <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+            <circle cx="5" cy="4.5" r="1" class="sigil-fill"/>
+            <circle cx="10.5" cy="8" r="1" class="sigil-fill"/>
+            <circle cx="7" cy="11.5" r="1" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="673.9" y="367" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">qa-tester</text>
-          <text data-detail="context" x="673.9" y="384" class="t-muted" font-size="8" text-anchor="middle">边界回归 · 门禁2</text>
+          <text data-node-label="" data-detail-anchor="" x="745" y="377" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">注入三通道</text>
+          <text data-detail="context" x="745" y="393" class="t-muted" font-size="7" text-anchor="middle">inject·recall·开工必检</text>
+        <text data-detail="fine" x="745" y="403" class="t-messagebus" font-size="7" text-anchor="middle">fail-open</text>
         </g>
 
-        <g id="node-quick" data-node-id="quick" data-node-label="reviewer 快审" tabindex="0" role="button" aria-label="聚焦reviewer 快审，tests-only 增量, Deliver · 门禁 › Deliver · 门禁与对抗" aria-pressed="false" data-node-kind="security" data-node-sublabel="tests-only 增量" data-node-context="Deliver · 门禁 › Deliver · 门禁与对抗">
-          <title>reviewer 快审 · tests-only 增量 · Deliver · 门禁 › Deliver · 门禁与对抗</title>
-          <rect x="807.8" y="346" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="807.8" y="346" width="155" height="42" rx="6" class="c-security" data-animate="node" style="--step:4" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(813.8 352) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
+        <g id="node-session-next" data-node-id="session-next" data-node-label="会话 · 下一轮" tabindex="0" role="button" aria-label="聚焦会话 · 下一轮，上票沉淀 = 下票 recall, 05 / 复用 · 下票" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="上票沉淀 = 下票 recall" data-node-tag="飞轮闭环" data-node-context="05 / 复用 · 下票">
+          <title>会话 · 下一轮 · 上票沉淀 = 下票 recall · 05 / 复用 · 下票 · 飞轮闭环</title>
+          <rect x="904" y="356" width="112" height="58" rx="6" class="c-mask"/>
+          <rect x="904" y="356" width="112" height="58" rx="6" class="c-frontend" data-animate="node" style="--step:10" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(910 362) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="885.3" y="367" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">reviewer 快审</text>
-          <text data-detail="context" x="885.3" y="384" class="t-muted" font-size="8" text-anchor="middle">tests-only 增量</text>
+          <text data-node-label="" data-detail-anchor="" x="962" y="377" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">会话 · 下一轮</text>
+          <text data-detail="context" x="960" y="393" class="t-muted" font-size="7" text-anchor="middle">上票沉淀 = 下票 recall</text>
+        <text data-detail="fine" x="960" y="403" class="t-frontend" font-size="7" text-anchor="middle">飞轮闭环</text>
         </g>
 
-        <g id="node-human" data-node-id="human" data-node-label="人 · 掌舵" tabindex="0" role="button" aria-label="聚焦人 · 掌舵，不全绿 · 例外裁决, Deliver · 门禁 › Merge + Archive" aria-pressed="false" data-node-kind="external" data-node-sublabel="不全绿 · 例外裁决" data-node-context="Deliver · 门禁 › Merge + Archive">
-          <title>人 · 掌舵 · 不全绿 · 例外裁决 · Deliver · 门禁 › Merge + Archive</title>
-          <rect x="1019.2" y="346" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="1019.2" y="346" width="155" height="42" rx="6" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(1025.2 352) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="1096.7" y="367" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">人 · 掌舵</text>
-          <text data-detail="context" x="1096.7" y="384" class="t-muted" font-size="8" text-anchor="middle">不全绿 · 例外裁决</text>
+        <!-- Flow labels -->
+        <g data-detail="context" data-edge-from="pipeline" data-edge-to="gitart" data-edge-label="工件落盘" data-edge-key="0" data-edge-id="p-gitart">
+          <rect x="232.7" y="183.5" width="178.6" height="27" rx="4" class="c-mask"/>
+          <text x="322" y="194.5" class="t-edge-emphasis" font-size="8" text-anchor="middle">工件落盘</text>
+        <text data-detail="fine" x="322" y="205.5" class="t-dim" font-size="7" text-anchor="middle">spec/diff/审查/QA/metrics·归档代录</text>
         </g>
-
-        <g id="node-redteam" data-node-id="redteam" data-node-label="red-teamer" tabindex="0" role="button" aria-label="聚焦red-teamer，七攻击面 · full/fast/skip, Adversarial · 对抗与合并 › Deliver · 门禁与对抗" aria-pressed="false" data-node-kind="security" data-node-sublabel="七攻击面 · full/fast/skip" data-node-context="Adversarial · 对抗与合并 › Deliver · 门禁与对抗">
-          <title>red-teamer · 七攻击面 · full/fast/skip · Adversarial · 对抗与合并 › Deliver · 门禁与对抗</title>
-          <rect x="807.8" y="470" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="807.8" y="470" width="155" height="42" rx="6" class="c-security" data-animate="node" style="--step:5" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(813.8 476) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="885.3" y="491" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">red-teamer</text>
-          <text data-detail="context" x="885.3" y="508" class="t-muted" font-size="8" text-anchor="middle">七攻击面 · full/fast/skip</text>
+        <g data-detail="context" data-edge-from="pipeline" data-edge-to="vault" data-edge-label="工单沉淀草稿 SOP第5步" data-edge-key="1" data-edge-id="p-vault">
+          <rect x="330.05" y="250" width="114.9" height="27" rx="4" class="c-mask"/>
+          <text x="387.5" y="261" class="t-edge-default" font-size="8" text-anchor="middle">工单沉淀草稿 SOP第5步</text>
+        <text data-detail="fine" x="387.5" y="272" class="t-dim" font-size="7" text-anchor="middle">来源slug+修订号+hash</text>
         </g>
-
-        <g id="node-premerge" data-node-id="premerge" data-node-label="pre-merge-check" tabindex="0" role="button" aria-label="聚焦pre-merge-check，门 A–E·P 断言, Adversarial · 对抗与合并 › Merge + Archive" aria-pressed="false" data-node-kind="security" data-node-sublabel="门 A–E·P 断言" data-node-context="Adversarial · 对抗与合并 › Merge + Archive">
-          <title>pre-merge-check · 门 A–E·P 断言 · Adversarial · 对抗与合并 › Merge + Archive</title>
-          <rect x="1019.2" y="470" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="1019.2" y="470" width="155" height="42" rx="6" class="c-security" data-animate="node" style="--step:6" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(1025.2 476) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="1096.7" y="491" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">pre-merge-check</text>
-          <text data-detail="context" x="1096.7" y="508" class="t-muted" font-size="8" text-anchor="middle">门 A–E·P 断言</text>
+        <g data-detail="context" data-edge-from="pipeline" data-edge-to="hindsight" data-edge-label="retain 每轮抽取" data-edge-key="2" data-edge-id="p-hindsight">
+          <rect x="327" y="364" width="110" height="27" rx="4" class="c-mask"/>
+          <text x="382" y="375" class="t-edge-emphasis" font-size="8" text-anchor="middle">retain 每轮抽取</text>
+        <text data-detail="fine" x="382" y="386" class="t-dim" font-size="7" text-anchor="middle">prompt+response 配对</text>
         </g>
-
-        <g id="node-archiver" data-node-id="archiver" data-node-label="archiver" tabindex="0" role="button" aria-label="聚焦archiver，双路径触发 · 归档 SOP, Archive · 沉淀 › Merge + Archive" aria-pressed="false" data-node-kind="backend" data-node-sublabel="双路径触发 · 归档 SOP" data-node-context="Archive · 沉淀 › Merge + Archive">
-          <title>archiver · 双路径触发 · 归档 SOP · Archive · 沉淀 › Merge + Archive</title>
-          <rect x="1019.2" y="594" width="155" height="42" rx="6" class="c-mask"/>
-          <rect x="1019.2" y="594" width="155" height="42" rx="6" class="c-backend" data-animate="node" style="--step:7" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1025.2 600) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="1096.7" y="615" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">archiver</text>
-          <text data-detail="context" x="1096.7" y="632" class="t-muted" font-size="8" text-anchor="middle">双路径触发 · 归档 SOP</text>
+        <g data-detail="context" data-edge-from="pipeline" data-edge-to="bmem" data-edge-label="棒次写入+合并结论" data-edge-key="3" data-edge-id="p-bmem">
+          <rect x="255.2" y="408.5" width="129.6" height="27" rx="4" class="c-mask"/>
+          <text x="320" y="419.5" class="t-edge-default" font-size="8" text-anchor="middle">棒次写入+合并结论</text>
+        <text data-detail="fine" x="320" y="430.5" class="t-dim" font-size="7" text-anchor="middle">决策/备注/结论·slug+hash</text>
         </g>
-
-        <!-- Edge labels -->
-        <g data-detail="context" data-edge-from="changes" data-edge-to="planner" data-edge-label="spec 修订回灌" data-edge-key="0" data-edge-id="changes-planner">
-          <rect x="207" y="99" width="72.4" height="14" rx="3" class="c-mask"/>
-          <text x="243.2" y="109" class="t-edge-dashed" font-size="8" text-anchor="middle">spec 修订回灌</text>
+        <g data-detail="context" data-edge-from="human" data-edge-to="config" data-edge-label="安装问答生成" data-edge-key="4" data-edge-id="human-config">
+          <rect x="384.65" y="516" width="75.7" height="27" rx="4" class="c-mask"/>
+          <text x="422.5" y="527" class="t-edge-emphasis" font-size="8" text-anchor="middle">安装问答生成</text>
+        <text data-detail="fine" x="422.5" y="538" class="t-dim" font-size="7" text-anchor="middle">人复核=人授权</text>
         </g>
-        <g data-detail="context" data-edge-from="developer" data-edge-to="reviewer" data-edge-label="diff 快照" data-edge-key="1" data-edge-id="developer-reviewer">
-          <rect x="334.29999999999995" y="295.5" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
-          <text x="360.9" y="305.5" class="t-edge-default" font-size="8" text-anchor="middle">diff 快照</text>
+        <g data-detail="context" data-edge-from="vault" data-edge-to="hindsight" data-edge-label="reconcile 单向同步" data-edge-key="5" data-edge-id="vault-hindsight">
+          <rect x="475.45" y="299" width="105.1" height="27" rx="4" class="c-mask"/>
+          <text x="528" y="310" class="t-edge-dashed" font-size="8" text-anchor="middle">reconcile 单向同步</text>
+        <text data-detail="fine" x="528" y="321" class="t-dim" font-size="7" text-anchor="middle">vault→bank 哈希增量</text>
         </g>
-        <g data-detail="context" data-edge-from="escalate" data-edge-to="human" data-edge-label="人工接管" data-edge-key="2" data-edge-id="escalate-human">
-          <rect x="1005.55" y="223" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="1029.75" y="233" class="t-edge-dashed" font-size="8" text-anchor="middle">人工接管</text>
+        <g data-detail="context" data-edge-from="bmem" data-edge-to="inject" data-edge-label="① 近7天团队近况" data-edge-key="6" data-edge-id="bmem-inject">
+          <rect x="592.25" y="402" width="85.5" height="27" rx="4" class="c-mask"/>
+          <text x="635" y="413" class="t-edge-default" font-size="8" text-anchor="middle">① 近7天团队近况</text>
+        <text data-detail="fine" x="635" y="424" class="t-dim" font-size="7" text-anchor="middle">inject hook</text>
         </g>
-        <g data-detail="context" data-edge-from="fix" data-edge-to="escalate" data-edge-label="&gt;4 次" data-edge-key="3" data-edge-id="fix-escalate">
-          <rect x="762.5999999999999" y="223" width="34" height="14" rx="3" class="c-mask"/>
-          <text x="779.5999999999999" y="233" class="t-edge-default" font-size="8" text-anchor="middle">&gt;4 次</text>
+        <g data-detail="context" data-edge-from="hindsight" data-edge-to="inject" data-edge-label="② recall" data-edge-key="7" data-edge-id="hindsight-inject">
+          <rect x="585.5" y="344" width="61" height="27" rx="4" class="c-mask"/>
+          <text x="616" y="355" class="t-edge-default" font-size="8" text-anchor="middle">② recall</text>
+        <text data-detail="fine" x="616" y="366" class="t-dim" font-size="7" text-anchor="middle">token 预算</text>
         </g>
-        <g data-detail="context" data-edge-from="fix" data-edge-to="reviewer" data-edge-label="复审" data-edge-key="4" data-edge-id="fix-reviewer">
-          <rect x="520.15" y="218" width="30" height="14" rx="3" class="c-mask"/>
-          <text x="535.15" y="228" class="t-edge-dashed" font-size="8" text-anchor="middle">复审</text>
+        <g data-detail="context" data-edge-from="vault" data-edge-to="inject" data-edge-label="③ 开工必检直读" data-edge-key="8" data-edge-id="vault-inject">
+          <rect x="614.7" y="250" width="80.6" height="27" rx="4" class="c-mask"/>
+          <text x="655" y="261" class="t-edge-default" font-size="8" text-anchor="middle">③ 开工必检直读</text>
+        <text data-detail="fine" x="655" y="272" class="t-dim" font-size="7" text-anchor="middle">保底通道</text>
         </g>
-        <g data-detail="context" data-edge-from="human" data-edge-to="archiver" data-edge-label="人工合并" data-edge-key="5" data-edge-id="human-archiver">
-          <rect x="1151.8" y="635" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="1176" y="645" class="t-edge-default" font-size="8" text-anchor="middle">人工合并</text>
+        <g data-detail="context" data-edge-from="inject" data-edge-to="session-next" data-edge-label="注入会话" data-edge-key="9" data-edge-id="inject-next">
+          <rect x="717.45" y="469" width="105.1" height="27" rx="4" class="c-mask"/>
+          <text x="770" y="480" class="t-edge-emphasis" font-size="8" text-anchor="middle">注入会话</text>
+        <text data-detail="fine" x="770" y="491" class="t-dim" font-size="7" text-anchor="middle">节流·截断·fail-open</text>
         </g>
-        <g data-detail="context" data-edge-from="planner" data-edge-to="developer" data-edge-label="spec + tickets" data-edge-key="6" data-edge-id="planner-developer">
-          <rect x="204.6" y="146" width="77.2" height="14" rx="3" class="c-mask"/>
-          <text x="243.2" y="156" class="t-edge-emphasis" font-size="8" text-anchor="middle">spec + tickets</text>
+        <g data-detail="context" data-edge-from="gitart" data-edge-to="session-next" data-edge-label="文档地图 · --from 续作" data-edge-key="10" data-edge-id="gitart-next">
+          <rect x="800.1" y="250" width="119.8" height="27" rx="4" class="c-mask"/>
+          <text x="860" y="261" class="t-edge-default" font-size="8" text-anchor="middle">文档地图 · --from 续作</text>
+        <text data-detail="fine" x="860" y="272" class="t-dim" font-size="7" text-anchor="middle">显式检索·度量复盘</text>
         </g>
-        <g data-detail="context" data-edge-from="premerge" data-edge-to="archiver" data-edge-label="全绿 auto-merge" data-edge-key="7" data-edge-id="premerge-archiver">
-          <rect x="1055.7" y="522.5" width="82" height="14" rx="3" class="c-mask"/>
-          <text x="1096.7" y="532.5" class="t-edge-default" font-size="8" text-anchor="middle">全绿 auto-merge</text>
-        </g>
-        <g data-detail="context" data-edge-from="premerge" data-edge-to="human" data-edge-label="门不全绿" data-edge-key="8" data-edge-id="premerge-human">
-          <rect x="1072.5" y="419" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="1096.7" y="429" class="t-edge-default" font-size="8" text-anchor="middle">门不全绿</text>
-        </g>
-        <g data-detail="context" data-edge-from="qa" data-edge-to="fix" data-edge-label="缺陷退回" data-edge-key="9" data-edge-id="qa-fix">
-          <rect x="649.6999999999999" y="295" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="673.9" y="305" class="t-edge-dashed" font-size="8" text-anchor="middle">缺陷退回</text>
-        </g>
-        <g data-detail="context" data-edge-from="qa" data-edge-to="quick" data-edge-label="测试增量" data-edge-key="10" data-edge-id="qa-quick">
-          <rect x="755.3999999999999" y="347" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="779.5999999999999" y="357" class="t-edge-default" font-size="8" text-anchor="middle">测试增量</text>
-        </g>
-
-        <g data-detail="context" data-edge-from="redteam" data-edge-to="fix" data-edge-label="P0 返工" data-edge-key="12" data-edge-id="redteam-fix">
-          <rect x="920.1500000000001" y="162" width="43.6" height="14" rx="3" class="c-mask"/>
-          <text x="941.95" y="172" class="t-edge-default" font-size="8" text-anchor="middle">P0 返工</text>
-        </g>
-        <g data-detail="context" data-edge-from="redteam" data-edge-to="premerge" data-edge-label="攻击结论" data-edge-key="13" data-edge-id="redteam-premerge">
-          <rect x="966.8" y="471" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="991" y="481" class="t-edge-default" font-size="8" text-anchor="middle">攻击结论</text>
-        </g>
-        <g data-detail="context" data-edge-from="reviewer" data-edge-to="fix" data-edge-label="request changes" data-edge-key="14" data-edge-id="reviewer-fix">
-          <rect x="493.15" y="270" width="82" height="14" rx="3" class="c-mask"/>
-          <text x="534.15" y="280" class="t-edge-default" font-size="8" text-anchor="middle">request changes</text>
-        </g>
-        <g data-detail="context" data-edge-from="reviewer" data-edge-to="qa" data-edge-label="pass" data-edge-key="15" data-edge-id="reviewer-qa">
-          <rect x="562.4" y="347" width="30" height="14" rx="3" class="c-mask"/>
-          <text x="577.4" y="357" class="t-edge-default" font-size="8" text-anchor="middle">pass</text>
+        <g data-detail="context" data-edge-from="config" data-edge-to="session-next" data-edge-label="用前必读" data-edge-key="11" data-edge-id="config-next">
+          <rect x="829.8" y="440" width="90.4" height="27" rx="4" class="c-mask"/>
+          <text x="875" y="451" class="t-edge-default" font-size="8" text-anchor="middle">用前必读</text>
+        <text data-detail="fine" x="875" y="462" class="t-dim" font-size="7" text-anchor="middle">改配置零改动生效</text>
         </g>
 
         <!-- Legend -->
         <g data-legend="" data-legend-bridge="">
-          <text x="20" y="676" class="t-primary" font-size="12" font-weight="650">图例</text>
-          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Agent 逻辑" data-legend-x="20" data-legend-baseline="696" data-legend-width="87">
-            <rect x="20" y="688" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-            <text x="42" y="696" class="t-muted" font-size="7.5" font-weight="500">Agent 逻辑</text>
+          <text x="40" y="584" class="t-primary" font-size="12" font-weight="650">图例</text>
+          <g data-legend-semantic-kind="emphasis" data-legend-x="40" data-legend-baseline="604" data-legend-width="83">
+            <path d="M 40 601 L 74 601" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+            <text x="83" y="604" class="t-muted" font-size="10" font-weight="500">主要数据</text>
           </g>
-          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="策略" data-legend-x="114" data-legend-baseline="696" data-legend-width="61">
-            <rect x="114" y="688" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-            <text x="136" y="696" class="t-muted" font-size="7.5" font-weight="500">策略</text>
+          <g data-legend-semantic-kind="dashed" data-legend-x="145" data-legend-baseline="604" data-legend-width="93">
+            <path d="M 145 601 L 179 601" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+            <text x="188" y="604" class="t-muted" font-size="10" font-weight="500">异步批处理</text>
           </g>
-          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="上下文 / 追踪" data-legend-x="182" data-legend-baseline="696" data-legend-width="100">
-            <rect x="182" y="688" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-            <text x="204" y="696" class="t-muted" font-size="7.5" font-weight="500">上下文 / 追踪</text>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="数据存储" data-legend-x="260" data-legend-baseline="604" data-legend-width="83">
+            <rect x="260" y="596" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+            <text x="282" y="604" class="t-muted" font-size="10" font-weight="500">数据存储</text>
           </g>
-          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="外部系统" data-legend-x="289" data-legend-baseline="696" data-legend-width="78">
-            <rect x="289" y="688" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
-            <text x="311" y="696" class="t-muted" font-size="7.5" font-weight="500">外部系统</text>
+          <g data-legend-semantic-kind="default" data-legend-x="365" data-legend-baseline="604" data-legend-width="73">
+            <path d="M 365 601 L 399 601" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+            <text x="408" y="604" class="t-muted" font-size="10" font-weight="500">数据流</text>
           </g>
         </g>
       </svg>
@@ -5467,33 +5423,33 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       <div class="card">
         <div class="card-header">
           <div class="card-dot cyan"></div>
-          <h3>先 Spec 后码</h3>
+          <h3>注入纪律（跨宿主不变）</h3>
         </div>
         <ul>
-          <li>无票不开工：一 spec 一 worktree 一分支</li>
-          <li>≥2 次换 rerun 变体；&gt;4 次升级人工</li>
+          <li>节流+预算+fail-open，绝不阻塞编码会话</li>
+          <li>三层逐层可缺：git 工件+宪法兜底保底</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-dot rose"></div>
-          <h3>双门禁 + 对抗审查</h3>
+          <div class="card-dot violet"></div>
+          <h3>一个家原则 · 信任分级</h3>
         </div>
         <ul>
-          <li>red-teamer 双门：P0 皆回退整改</li>
-          <li>pre-merge 断言 A–E·P 把守合并</li>
+          <li>决策→git/memory · 经验→hindsight · 知识→Obsidian</li>
+          <li>定稿区只能人写；工作区须验证；bank 禁手工建</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>自治合并 + 知识飞轮</h3>
+          <h3>知识飞轮 · 参数治理</h3>
         </div>
         <ul>
-          <li>门全绿 auto-merge 留痕；不全绿必须人</li>
-          <li>archiver 双路径触发，沉淀回灌下票</li>
+          <li>草稿当单可检索→人工定稿→下票 recall</li>
+          <li>参数只能人改：guard 拦截+sync --check 恒等</li>
         </ul>
       </div>
     </div>

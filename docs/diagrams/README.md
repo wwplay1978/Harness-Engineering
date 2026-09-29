@@ -2,14 +2,15 @@
 
 风格统一、Light/Dark 双主题的交互式体系图，均为**零依赖单文件 HTML**（下载后双击即开）。
 
-**在线版（自建静态站）**：[architecture.html](https://pages.20081005.xyz/architecture.html) · [pipeline.html](https://pages.20081005.xyz/pipeline.html)（打开后点「动态」播放流水线 trace 动画）
+**在线版（自建静态站）**：[architecture.html](https://pages.20081005.xyz/architecture.html) · [pipeline.html](https://pages.20081005.xyz/pipeline.html)（打开后点「动态」播放流水线 trace 动画） · memory.html（下一发布批上线）
 
 | 文件 | 内容 | 特性 |
 |---|---|---|
 | [`architecture.html`](architecture.html) | 体系总体架构：人机契约、宿主层、六角色、物理写入隔离、四层记忆、规范反馈环 | 主题切换、缩放平移、搜索聚焦、引导章节 |
 | [`pipeline.html`](pipeline.html) | 六角色流水线全貌：一票从立项到归档的完整路径与修复回路 | **Live trace 动画**（一票全流程逐步点亮）、主题切换、引导章节 |
-| `architecture-light.png` / `pipeline-light.png` | Light 主题静态预览（README 内嵌用） | — |
-| `*.json` | 两张图的源规范（[archify](https://github.com/tt-a1i/archify) 类型化 JSON，可版本化、可再生成） | — |
+| [`memory.html`](memory.html) | 记忆管理动态架构（机制层）：三类记忆×四环节数据流——注入三通道、retain/工件落盘双离场、知识飞轮、参数分发与治理纪律 | 引导章节（离场落盘/检索注入/知识飞轮/参数记忆）、主题切换 |
+| `architecture-light.png` / `pipeline-light.png` / `memory-light.png` | Light 主题静态预览（README 内嵌用） | — |
+| `*.json` | 三张图的源规范（[archify](https://github.com/tt-a1i/archify) 类型化 JSON，可版本化、可再生成） | — |
 
 提示：
 

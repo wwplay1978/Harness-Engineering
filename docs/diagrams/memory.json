@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "六角色记忆管理动态架构（机制层）",
+    "locale": "zh-CN",
+    "output": "memory.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1075,
+      640
+    ],
+    "views": [
+      {
+        "id": "write-path",
+        "label": "离场落盘",
+        "focus": [
+          "pipeline",
+          "gitart",
+          "vault",
+          "hindsight",
+          "bmem"
+        ],
+        "note": "短期→长期：retain 抽取、工件落盘、棒次写入、归档 SOP。"
+      },
+      {
+        "id": "read-path",
+        "label": "检索注入",
+        "focus": [
+          "inject",
+          "session-next",
+          "bmem",
+          "hindsight",
+          "vault"
+        ],
+        "note": "注入三通道回到会话，fail-open 零打扰；显式检索并行。"
+      },
+      {
+        "id": "flywheel",
+        "label": "知识飞轮",
+        "focus": [
+          "pipeline",
+          "vault",
+          "hindsight",
+          "session-next"
+        ],
+        "note": "草稿当单可检索，人工定稿后回灌下票 recall。"
+      },
+      {
+        "id": "params",
+        "label": "参数记忆",
+        "focus": [
+          "human",
+          "config",
+          "inject"
+        ],
+        "note": "安装问答生成，验收后只能人改，用前必读零改动生效。"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "label": "会话现场"
+    },
+    {
+      "label": "抽取 · 离场"
+    },
+    {
+      "label": "长期载体"
+    },
+    {
+      "label": "检索 · 注入"
+    },
+    {
+      "label": "复用 · 下票"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "pipeline",
+      "type": "backend",
+      "label": "六角色流水线",
+      "sublabel": "合并后触发归档 SOP",
+      "tag": "短期 · 易失",
+      "width": 140,
+      "stage": 0,
+      "row": 2
+    },
+    {
+      "id": "human",
+      "type": "external",
+      "label": "人 · 掌舵",
+      "sublabel": "安装问答 · 整理定稿",
+      "stage": 1,
+      "row": 4,
+      "yOffset": -76
+    },
+    {
+      "id": "gitart",
+      "type": "database",
+      "label": "git 工件",
+      "sublabel": "specs·reviews·metrics",
+      "tag": "零依赖兜底",
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "vault",
+      "type": "database",
+      "label": "Obsidian vault",
+      "sublabel": "定稿区(只能人写)+工作区草稿",
+      "tag": "信任分级",
+      "width": 140,
+      "stage": 2,
+      "row": 1
+    },
+    {
+      "id": "hindsight",
+      "type": "database",
+      "label": "hindsight",
+      "sublabel": "个体语义 bank · 本地服务",
+      "tag": "可再生缓存",
+      "stage": 2,
+      "row": 2
+    },
+    {
+      "id": "bmem",
+      "type": "database",
+      "label": "basic-memory",
+      "sublabel": "memory/ · 随项目 git",
+      "tag": "显式 --project",
+      "width": 120,
+      "stage": 2,
+      "row": 3,
+      "yOffset": -38
+    },
+    {
+      "id": "config",
+      "type": "security",
+      "label": "参数记忆",
+      "sublabel": "宪法+配置中心+模型路由",
+      "tag": "只能人改",
+      "stage": 2,
+      "row": 4,
+      "yOffset": -76
+    },
+    {
+      "id": "inject",
+      "type": "messagebus",
+      "label": "注入三通道",
+      "sublabel": "inject·recall·开工必检",
+      "tag": "fail-open",
+      "width": 130,
+      "stage": 3,
+      "row": 2
+    },
+    {
+      "id": "session-next",
+      "type": "frontend",
+      "label": "会话 · 下一轮",
+      "sublabel": "上票沉淀 = 下票 recall",
+      "tag": "飞轮闭环",
+      "stage": 4,
+      "row": 2
+    }
+  ],
+  "flows": [
+    {
+      "id": "p-gitart",
+      "from": "pipeline",
+      "to": "gitart",
+      "label": "工件落盘",
+      "classification": "spec/diff/审查/QA/metrics·归档代录",
+      "variant": "emphasis",
+      "labelDy": -60
+    },
+    {
+      "id": "p-vault",
+      "from": "pipeline",
+      "to": "vault",
+      "label": "工单沉淀草稿 SOP第5步",
+      "classification": "来源slug+修订号+hash",
+      "labelSegment": 2
+    },
+    {
+      "id": "p-hindsight",
+      "from": "pipeline",
+      "to": "hindsight",
+      "label": "retain 每轮抽取",
+      "classification": "prompt+response 配对",
+      "variant": "emphasis",
+      "route": "straight",
+      "labelDx": 60
+    },
+    {
+      "id": "p-bmem",
+      "from": "pipeline",
+      "to": "bmem",
+      "label": "棒次写入+合并结论",
+      "classification": "决策/备注/结论·slug+hash"
+    },
+    {
+      "id": "human-config",
+      "from": "human",
+      "to": "config",
+      "label": "安装问答生成",
+      "classification": "人复核=人授权",
+      "variant": "emphasis"
+    },
+    {
+      "id": "vault-hindsight",
+      "from": "vault",
+      "to": "hindsight",
+      "label": "reconcile 单向同步",
+      "classification": "vault→bank 哈希增量",
+      "variant": "dashed",
+      "labelAt": [
+        528,
+        310
+      ]
+    },
+    {
+      "id": "bmem-inject",
+      "from": "bmem",
+      "to": "inject",
+      "label": "① 近7天团队近况",
+      "classification": "inject hook"
+    },
+    {
+      "id": "hindsight-inject",
+      "from": "hindsight",
+      "to": "inject",
+      "label": "② recall",
+      "classification": "token 预算",
+      "route": "straight",
+      "labelAt": [
+        616,
+        355
+      ]
+    },
+    {
+      "id": "vault-inject",
+      "from": "vault",
+      "to": "inject",
+      "label": "③ 开工必检直读",
+      "classification": "保底通道",
+      "labelSegment": 0,
+      "labelDx": 25,
+      "via": [
+        [
+          660,
+          271
+        ],
+        [
+          660,
+          385
+        ]
+      ]
+    },
+    {
+      "id": "inject-next",
+      "from": "inject",
+      "to": "session-next",
+      "label": "注入会话",
+      "classification": "节流·截断·fail-open",
+      "variant": "emphasis",
+      "labelAt": [
+        770,
+        480
+      ]
+    },
+    {
+      "id": "gitart-next",
+      "from": "gitart",
+      "to": "session-next",
+      "label": "文档地图 · --from 续作",
+      "classification": "显式检索·度量复盘",
+      "via": [
+        [
+          860,
+          157
+        ],
+        [
+          860,
+          385
+        ]
+      ]
+    },
+    {
+      "id": "config-next",
+      "from": "config",
+      "to": "session-next",
+      "label": "用前必读",
+      "classification": "改配置零改动生效",
+      "via": [
+        [
+          875,
+          537
+        ],
+        [
+          875,
+          385
+        ]
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "注入纪律（跨宿主不变）",
+      "items": [
+        "节流+预算+fail-open，绝不阻塞编码会话",
+        "三层逐层可缺：git 工件+宪法兜底保底"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "一个家原则 · 信任分级",
+      "items": [
+        "决策→git/memory · 经验→hindsight · 知识→Obsidian",
+        "定稿区只能人写；工作区须验证；bank 禁手工建"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "知识飞轮 · 参数治理",
+      "items": [
+        "草稿当单可检索→人工定稿→下票 recall",
+        "参数只能人改：guard 拦截+sync --check 恒等"
+      ]
+    }
+  ]
+}
