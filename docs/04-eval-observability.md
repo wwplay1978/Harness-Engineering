@@ -46,6 +46,7 @@ Harness 文章的核心工艺之一——"Skill 就是规范的可执行版本"�
 | hindsight Control Plane | `:9999` Web UI | 记忆内容抽查（投毒/过时检测）、bank 隔离确认 |
 | ZCode 内建记忆 | `~/.zcode/cli/memories/projects/<id>/MEMORY.md` | 兜底层是否被滥用（应轻量） |
 | git 审计轨迹 | `docs/reviews/` 快照、spec 修订号、合并记录 | 每单的完整证据链 |
+| harness-stats 事件仓 | `~/.agents/harness-stats/`（22 号，未实施） | 角色×模型×token×返工计量、两源对账偏差 |
 | 会话恢复 | ZCode `ReadSessionContext`（#sess 交接）+ handoff skill | 断点续作能力 |
 
 ## 4. 度量指标（轻量启动，不建仪表盘）
@@ -54,11 +55,15 @@ Harness 文章的核心工艺之一——"Skill 就是规范的可执行版本"�
 
 | 指标 | 定义 | 目标方向 |
 |---|---|---|
-| 一次通过率 | reviewer 首轮即 pass 的工单占比 | ↑ |
-| 返工轮次 | 每单 request-changes 轮数均值 | ↓ |
+| **pass·reviewer-first** | reviewer 首轮即 pass 的工单占比（分母=merged 票） | ↑ |
+| **pass·pipeline-clean** | 首轮审查 pass 且 QA 无条件通过（web2api metrics 现行口径） | ↑ |
+| **pass·no-quality-rework** | 全程零质量返工轮（attempt 无 quality_rework；基础设施 retry 不计——分类学见 22 §2.2/§5.2） | ↑ |
+| 返工轮次 | 每单质量性返工轮数均值（基础设施 retry 单列不计；质量性拒因含 reviewer/QA/red-team/premerge 四 trigger_stage，不收窄为 reviewer-only——22 §2.2） | ↓ |
 | QA 缺陷密度 | 每单 QA 抓出的缺陷数（区分真缺陷/spec-gap） | 观察 |
 | 记忆命中 | 会话中 hindsight 注入被实际引用的次数（人工抽查） | ↑ |
 | audit 分数趋势 | 季度 harness-audit 总分 | ↑ |
 | 归档闭环率 | 完成记忆回写 + 知识回写的工单占比 | →100% |
+
+> 口径冻结（2026-09-30/10-01，Codex 三轮对抗审查回灌，随 22 号 v3）：旧"一次通过率"一词退役，拆为上表三个命名指标，分母一律=merged 票（abandoned/in-flight 不入）；机器计量数据面与算法归 22 号（事件仓=机器计数唯一源，本表 metrics.md=人读摘要）；**历史 metrics 行不做任何自动迁移（22 号 D10'）**——三仓旧"一次通过"列口径互异且未冻结定义（实测：Zcode_T1=按本票归因门项判定（非本票历史红项不改判）、web2api=首轮审查 pass 且 QA 无条件通过、AITrader2=全质量链零返工——均非冻结的机器定义），历史 pass 指标以事件仓回填后按上表三定义重算为准，旧列仅存档。
 
 度量纪律：**指标驱动规范修订**（反馈闭环的最后一段）——连续两个季度某指标无改善，对应规范要么改要么废，不留摆设指标。
