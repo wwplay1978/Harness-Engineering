@@ -1,0 +1,20 @@
+{
+  "fixture_kind": "cursor-state",
+  "description": "跨字段：cursor payload_sha256 与载荷不符（E2c 坏校验形态）",
+  "manifest_kind": "cursor-state",
+  "adapter_id": "zcode-sqlite",
+  "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+  "updated_at": "2026-09-25T02:00:00Z",
+  "terminal_cursor": {
+    "completed_at": "2026-09-21T09:30:00Z",
+    "id": "model_usage/910001"
+  },
+  "scan_lower_bound": "2026-09-21T07:00:00Z",
+  "open_set": [
+    "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-neg/agent_02/metadata.json"
+  ],
+  "committed_segments": [
+    "seg-000001"
+  ],
+  "payload_sha256": "8810ad581e59f2bc3928b261707a71308f7e139eb04820366dc4d5c18d980225"
+}

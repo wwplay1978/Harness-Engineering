@@ -1,0 +1,58 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "classifier-v2 裁决 A：derived 载荷 secondary_cause 扩枚举两新值（O-43/VR-S30）——upstream_sync（上游合并驱动复跑 H09 形态）+ staged_delivery（分段新交付 H16 形态）",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L141:drv:1",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L141",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/demo-ticket.md#L141",
+   "collected_at": "2026-09-22T10:05:00Z",
+   "observation_subtype": "derived",
+   "derivation_revision": 1,
+   "classifier_version": "stats3-attempt-2.0.0",
+   "derivation_origin": "auto",
+   "derivation": {
+    "attempt_kind": "quality_rework",
+    "trigger_stage": "unknown",
+    "secondary_cause": "upstream_sync",
+    "primary_signal_level": "structural",
+    "signal_evidence": {
+     "matched_phrase": "sync main",
+     "structural_basis": "attempt 序号 3（上游合并驱动复跑——非缺陷修复非拒因工件触发）"
+    },
+    "decided_at": "2026-09-22T10:06:00Z"
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L142:drv:1",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L142",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/demo-ticket.md#L142",
+   "collected_at": "2026-09-22T10:05:00Z",
+   "observation_subtype": "derived",
+   "derivation_revision": 1,
+   "classifier_version": "stats3-attempt-2.0.0",
+   "derivation_origin": "auto",
+   "derivation": {
+    "attempt_kind": "quality_rework",
+    "trigger_stage": "unknown",
+    "secondary_cause": "staged_delivery",
+    "primary_signal_level": "structural",
+    "signal_evidence": {
+     "matched_phrase": "执行段",
+     "structural_basis": "attempt 序号 4（合并后新执行段交付——新功能段非缺陷修复）"
+    },
+    "decided_at": "2026-09-22T10:06:00Z"
+   }
+  }
+ ]
+}

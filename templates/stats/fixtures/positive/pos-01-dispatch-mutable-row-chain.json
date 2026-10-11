@@ -1,0 +1,211 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "mutable-row 全链：dispatch running→terminal（同实体 revision 递增，不换键不丢史）+ model-request running→terminal（原地补写 token，started_at 不变）+ observation ticket_snapshot + derived auto→manual（derivation_revision 递增，manual 更正为更高优先级派生）",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "dispatch",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000123/agent_07/metadata.json:1",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000123/agent_07/metadata.json",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "sess-000123/agent_07/metadata.json",
+   "collected_at": "2026-09-21T09:00:00Z",
+   "source_revision": 1,
+   "role": "developer",
+   "variant": "",
+   "project_id": "aitrader2",
+   "ticket_slug": "phase1-fill-rerun-window",
+   "attribution": "DIRECT",
+   "state": "observed_running",
+   "created_at": "2026-09-21T08:00:00Z",
+   "completed_at": null,
+   "wall_clock_ms": null,
+   "attempt_kind": "unknown",
+   "trigger_stage": "unknown",
+   "secondary_cause": "",
+   "classifier_version": "clf-v0.1.0",
+   "route_anchor": {
+    "effective_model": "glm-5.3",
+    "route_hash": "5f2a9c",
+    "repo_models_config_commit": "3c1d22ab99",
+    "local_override_hash": "none",
+    "generated_role_card_hash": "9d4e77aa",
+    "host_version": "zcode-1.9.2",
+    "collector_version": "harness-stats-0.1.0"
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "dispatch",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000123/agent_07/metadata.json:2",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000123/agent_07/metadata.json",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "sess-000123/agent_07/metadata.json",
+   "collected_at": "2026-09-21T10:00:00Z",
+   "source_revision": 2,
+   "role": "developer",
+   "variant": "",
+   "project_id": "aitrader2",
+   "ticket_slug": "phase1-fill-rerun-window",
+   "attribution": "DIRECT",
+   "state": "terminal_completed",
+   "created_at": "2026-09-21T08:00:00Z",
+   "completed_at": "2026-09-21T09:30:00Z",
+   "wall_clock_ms": 5400000,
+   "attempt_kind": "initial",
+   "trigger_stage": "unknown",
+   "secondary_cause": "",
+   "classifier_version": "clf-v0.1.0",
+   "route_anchor": {
+    "effective_model": "glm-5.3",
+    "route_hash": "5f2a9c",
+    "repo_models_config_commit": "3c1d22ab99",
+    "local_override_hash": "none",
+    "generated_role_card_hash": "9d4e77aa",
+    "host_version": "zcode-1.9.2",
+    "collector_version": "harness-stats-0.1.0"
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "model-request",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:model_usage/900001:1",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:model_usage/900001",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "model_usage/900001",
+   "collected_at": "2026-09-21T09:00:00Z",
+   "source_revision": 1,
+   "parent_entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000123/agent_07/metadata.json",
+   "model": "glm-5.3",
+   "model_original": "GLM-5.3",
+   "status": "running",
+   "state": "observed_running",
+   "started_at": "2026-09-21T08:05:00Z",
+   "duration_ms": null,
+   "time_to_first_token_ms": null,
+   "retry_count": 0,
+   "usage": {
+    "input": null,
+    "output": null,
+    "reasoning": null,
+    "cache_read": null,
+    "cache_write": null
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "model-request",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:model_usage/900001:2",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:model_usage/900001",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "model_usage/900001",
+   "collected_at": "2026-09-21T10:00:00Z",
+   "source_revision": 2,
+   "parent_entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000123/agent_07/metadata.json",
+   "model": "glm-5.3",
+   "model_original": "GLM-5.3",
+   "status": "completed",
+   "state": "terminal_completed",
+   "started_at": "2026-09-21T08:05:00Z",
+   "duration_ms": 420000,
+   "time_to_first_token_ms": 1200,
+   "retry_count": 1,
+   "usage": {
+    "input": 15200,
+    "output": 3300,
+    "reasoning": 850,
+    "cache_read": 128000,
+    "cache_write": 0
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/phase1-fill-rerun-window.md:obs:ab12cd34",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/phase1-fill-rerun-window.md",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "docs/tickets/phase1-fill-rerun-window.md",
+   "collected_at": "2026-09-21T10:05:00Z",
+   "observation_subtype": "ticket_snapshot",
+   "ticket_slug": "phase1-fill-rerun-window",
+   "source_hash8": "ab12cd34",
+   "snapshot": {
+    "attempt_column_raw": "1",
+    "attempt_no": 1,
+    "role_column_raw": "developer",
+    "result_column_raw": "交付",
+    "date_column_raw": "2026-09-21",
+    "note_column_raw": "初始实现+review 修复",
+    "review_artifacts": [
+     "phase1-fill-rerun-window-r1-review.md"
+    ],
+    "source_refs": {
+     "tickets_path": "tickets/phase1-fill-rerun-window.md",
+     "line_range": "108-108"
+    }
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/phase1-fill-rerun-window.md:drv:1",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/phase1-fill-rerun-window.md",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "docs/tickets/phase1-fill-rerun-window.md",
+   "collected_at": "2026-09-21T10:06:00Z",
+   "observation_subtype": "derived",
+   "derivation_revision": 1,
+   "classifier_version": "clf-v0.1.0",
+   "derivation_origin": "auto",
+   "derivation": {
+    "attempt_kind": "compound_unparseable",
+    "trigger_stage": "unknown",
+    "secondary_cause": null,
+    "primary_signal_level": "dictionary",
+    "signal_evidence": {
+     "matched_phrase": "初始实现+review 修复",
+     "structural_basis": null
+    },
+    "decided_at": "2026-09-21T10:06:00Z"
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/phase1-fill-rerun-window.md:drv:2",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/phase1-fill-rerun-window.md",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "docs/tickets/phase1-fill-rerun-window.md",
+   "collected_at": "2026-09-21T11:00:00Z",
+   "observation_subtype": "derived",
+   "derivation_revision": 2,
+   "classifier_version": "clf-v0.1.0",
+   "derivation_origin": "manual",
+   "derivation": {
+    "attempt_kind": "initial",
+    "trigger_stage": "unknown",
+    "secondary_cause": null,
+    "primary_signal_level": "explicit",
+    "signal_evidence": {
+     "matched_phrase": null,
+     "structural_basis": "票面重录后按 r2 复审拒因人工更正（reconcile 输入 basis）"
+    },
+    "decided_at": "2026-09-21T11:00:00Z"
+   }
+  }
+ ]
+}

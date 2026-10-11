@@ -1,0 +1,14 @@
+{
+  "fixture_kind": "segment-manifest",
+  "description": "segment manifest 正例：closed 判定+SHA+复合游标高位（E2 重建取最大已提交序的依据）",
+  "manifest_kind": "segment-manifest",
+  "segment_seq": 7,
+  "segment_id": "seg-000007",
+  "adapter_id": "zcode-sqlite",
+  "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+  "closed": true,
+  "event_count": 412,
+  "sha256": "9f1c4a2b77e0d3c5b8a1f6249d0e7c3a5b8f2d4e6a9c0b3d7e5f1a2c4b6d8e0f",
+  "cursor_after": { "completed_at": "2026-09-21T09:30:00Z", "id": "model_usage/900001" },
+  "written_at": "2026-09-21T10:00:01.250Z"
+}

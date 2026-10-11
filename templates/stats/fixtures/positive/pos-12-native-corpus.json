@@ -1,0 +1,88 @@
+{
+ "fixture_kind": "native-corpus",
+ "description": "stats-3 阶段一：native-corpus manifest 全形（裁决⑧；O-45/O-46=VR-S32/VR-F13）——双源节+谓词 const 冻结+pilot 窗",
+ "manifest_kind": "native-corpus",
+ "corpus_id": "native-aitrader2-202609-1a2b3c4d",
+ "created_at": "2026-10-09T12:00:00Z",
+ "observed_at": "2026-10-09T12:00:00Z",
+ "project_id": "aitrader2",
+ "time_range": {
+  "from": "2026-09-01T00:00:00Z",
+  "until": "2026-10-01T00:00:00Z",
+  "bounds": "半开 [2026-09-01T00:00:00Z, 2026-10-01T00:00:00Z)"
+ },
+ "kimi": {
+  "adapter_id": "kimi-wire",
+  "adapter_type": "append-only",
+  "source_root": "C:/Users/demo/.kimi-code",
+  "total_scanned": 3,
+  "eligible_count": 2,
+  "excluded": [
+   {
+    "reason": "project 判定不中（workDir 非本项目）",
+    "count": 1
+   }
+  ],
+  "workdir_field": "session_index.jsonl workDir（会话目录级 join）",
+  "time_field": "首条 allowlist 行时戳",
+  "time_interval": "[2026-09-01T00:00Z, 2026-10-01T00:00Z)",
+  "eligible_predicate": "project 判定（session_index.jsonl workDir 归属 AITrader2，规范化 project_id 匹配）AND 会话时间判定（首条 allowlist 行时戳 ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)；行时戳不可得时以文件 mtime 近似并在 time_field 注记 mtime-approx）",
+  "eligible_files": [
+   {
+    "relative_path": "s1/wire.jsonl",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size_bytes": 100,
+    "mtime_ms": 1750000000000,
+    "workdir": "C:/demo/project-a",
+    "session_first_at": "2026-09-10T08:00:00Z",
+    "session_last_at": "2026-09-10T09:00:00Z"
+   },
+   {
+    "relative_path": "s2/wire.jsonl",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size_bytes": 100,
+    "mtime_ms": 1750000000000,
+    "workdir": "C:/demo/project-a",
+    "session_first_at": "2026-09-10T08:00:00Z",
+    "session_last_at": "2026-09-10T09:00:00Z"
+   }
+  ]
+ },
+ "codex": {
+  "adapter_id": "codex-sessions",
+  "adapter_type": "append-only",
+  "source_root": "C:/Users/demo/.codex/sessions",
+  "total_scanned": 3,
+  "eligible_count": 2,
+  "excluded": [
+   {
+    "reason": "project 判定不中（workDir 非本项目）",
+    "count": 1
+   }
+  ],
+  "workdir_field": "rollout session_meta.payload.cwd",
+  "time_field": "首条 allowlist 行时戳",
+  "time_interval": "[2026-09-01T00:00Z, 2026-10-01T00:00Z)",
+  "eligible_predicate": "project 判定（rollout session_meta.payload.cwd 归属 AITrader2，规范化 project_id 匹配）AND 会话时间判定（session_meta 首行时戳 ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)；时戳不可得时以文件 mtime 近似并在 time_field 注记 mtime-approx）",
+  "eligible_files": [
+   {
+    "relative_path": "2026/09/10/rollout-a.jsonl",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size_bytes": 100,
+    "mtime_ms": 1750000000000,
+    "workdir": "C:/demo/project-a",
+    "session_first_at": "2026-09-10T08:00:00Z",
+    "session_last_at": "2026-09-10T09:00:00Z"
+   },
+   {
+    "relative_path": "2026/09/11/rollout-b.jsonl",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size_bytes": 100,
+    "mtime_ms": 1750000000000,
+    "workdir": "C:/demo/project-a",
+    "session_first_at": "2026-09-10T08:00:00Z",
+    "session_last_at": "2026-09-10T09:00:00Z"
+   }
+  ]
+ }
+}

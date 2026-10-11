@@ -1,0 +1,81 @@
+{
+  "schema_id": "harness-stats-pilot-bundle-schema",
+  "schema_version": "v1",
+  "spec_anchor": "docs/22 §5.8 bounded pilot（D4'，行 283-292）+ §5.5-②（行 266）",
+  "description": "pilot bundle manifest schema=bundle-manifest-v1.json 的 pilot 特化（字段集同构全量复制 + 边界常量冻结）。冻结项：①时段=UTC 半开 [2026-09-01T00:00Z, 2026-10-01T00:00Z)（秒位规范形 00Z）；②metadata eligible 谓词原文逐字冻结。约束（22 §5.8 行 287）：全机 599 份 metadata 不得整批冻结——eligible 清单必须是谓词过滤结果而非全量。字段修订须与 bundle-manifest-v1.json 同步（对账登记于 traceability.md）。fixture 外形：{fixture_kind:'pilot-bundle', …字段}。",
+  "fixture_envelope": {
+    "rule": "VR-S28",
+    "type": "object",
+    "required": ["fixture_kind"],
+    "properties": {
+      "fixture_kind": { "type": "string", "const": "pilot-bundle" },
+      "description": { "type": "string" }
+    }
+  },
+  "manifest": {
+    "rule": "VR-S24",
+    "type": "object",
+    "required": ["manifest_kind", "bundle_id", "created_at", "project_id", "time_range", "sqlite_copy", "metadata_corpus", "tickets_reviews", "git_head"],
+    "properties": {
+      "manifest_kind": { "type": "string", "const": "pilot-bundle" },
+      "bundle_id": { "type": "string", "minLength": 1 },
+      "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+      "project_id": { "type": "string", "minLength": 1, "description": "pilot=AITrader2 的稳定 project_id（冻结时由注册表钉定入 manifest）" },
+      "time_range": {
+        "type": "object",
+        "description": "22 §5.8 行 285：时段 2026-09-01T00:00Z 至 2026-10-01T00:00Z（UTC 半开区间）；SQLite 侧时间字段=model_usage.started_at，metadata 侧=createdAt——常量冻结（VR-S25）",
+        "required": ["sqlite_time_field", "metadata_time_field", "from", "until", "bounds"],
+        "properties": {
+          "sqlite_time_field": { "type": "string", "const": "model_usage.started_at", "rule": "VR-S25" },
+          "metadata_time_field": { "type": "string", "const": "createdAt", "rule": "VR-S25" },
+          "from": { "type": "string", "const": "2026-09-01T00:00:00Z", "rule": "VR-S25" },
+          "until": { "type": "string", "const": "2026-10-01T00:00:00Z", "rule": "VR-S25" },
+          "bounds": { "type": "string", "const": "半开 [2026-09-01T00:00:00Z, 2026-10-01T00:00:00Z)", "rule": "VR-S25" }
+        },
+        "additionalProperties": false
+      },
+      "sqlite_copy": {
+        "type": "object",
+        "required": ["sha256", "row_count", "observed_at", "eligible_predicate"],
+        "properties": {
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" },
+          "row_count": { "type": "integer", "minimum": 0 },
+          "observed_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+          "eligible_predicate": { "type": "string", "minLength": 1, "description": "SQLite 侧范围谓词原文（pilot 语义=model_usage.started_at 落冻结时段；原文由冻结方照实记录）" }
+        },
+        "additionalProperties": false
+      },
+      "metadata_corpus": {
+        "type": "object",
+        "required": ["corpus_root", "total_scanned", "eligible_count", "excluded", "project_field", "project_normalized", "time_field", "time_interval", "eligible_predicate", "role_status_counts", "eligible_files"],
+        "properties": {
+          "corpus_root": { "type": "string", "minLength": 1 },
+          "total_scanned": { "type": "integer", "minimum": 0 },
+          "eligible_count": { "type": "integer", "minimum": 0 },
+          "excluded": { "type": "array", "items": { "type": "object", "required": ["reason", "count"], "properties": { "reason": { "type": "string", "minLength": 1 }, "count": { "type": "integer", "minimum": 0 } }, "additionalProperties": false } },
+          "project_field": { "type": "string", "minLength": 1 },
+          "project_normalized": { "type": "string", "minLength": 1 },
+          "time_field": { "type": "string", "const": "createdAt", "rule": "VR-S25" },
+          "time_interval": { "type": "string", "const": "[2026-09-01T00:00Z, 2026-10-01T00:00Z)", "rule": "VR-S25" },
+          "eligible_predicate": { "type": "string", "const": "project 判定（cwd/workspaceRoot 归属 AITrader2，规范化 project_id 匹配）AND createdAt ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)", "rule": "VR-S26", "description": "22 §5.8 行 287 逐字冻结（v4 metadata eligible 谓词）" },
+          "role_status_counts": { "type": "object", "rule": "VR-F12", "description": "eligible metadata 的 role×status 聚合（键=规范化 `role|status` 字典序、值=count；Σ值=eligible_count——与 bundle-manifest-v1.json 同步新增，审查 P0-1；三恒等=manifest 声明值/bundle 内 eligible 重算值/collect 后 dispatch 聚合值）" },
+          "eligible_files": { "type": "array", "items": { "type": "object", "required": ["relative_path", "sha256", "size_bytes", "created_at", "child_session_id"], "properties": { "relative_path": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" }, "size_bytes": { "type": "integer", "minimum": 0 }, "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" }, "child_session_id": { "type": ["string", "null"], "minLength": 1 } }, "additionalProperties": false } }
+        },
+        "additionalProperties": false
+      },
+      "tickets_reviews": {
+        "type": "object",
+        "required": ["slug_list", "tickets_dir", "reviews_dir", "sha256"],
+        "properties": {
+          "slug_list": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" } },
+          "tickets_dir": { "type": "string", "minLength": 1 },
+          "reviews_dir": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" }
+        },
+        "additionalProperties": false
+      },
+      "git_head": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+    },
+    "additionalProperties": false
+  }
+}

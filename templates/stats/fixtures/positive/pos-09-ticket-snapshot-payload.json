@@ -1,0 +1,36 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "stats-3 阶段一：ticket_snapshot 载荷 allowlist 全形（附件 A；O-42/VR-S29）——逐运行记录行快照，rN 已预处理（attempt_no=2），review_artifacts 拒因工件清单+source_refs 行号锚",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131:obs:ab12cd34",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/demo-ticket.md#L131",
+   "collected_at": "2026-09-22T10:05:00Z",
+   "observation_subtype": "ticket_snapshot",
+   "ticket_slug": "demo-ticket",
+   "source_hash8": "ab12cd34",
+   "snapshot": {
+    "attempt_column_raw": "r2",
+    "attempt_no": 2,
+    "role_column_raw": "developer-rerun",
+    "result_column_raw": "通过",
+    "date_column_raw": "2026-09-22",
+    "note_column_raw": "复审 request changes 修复轮",
+    "review_artifacts": [
+     "demo-ticket-r2-review.md",
+     "demo-ticket-qa-r1.md"
+    ],
+    "source_refs": {
+     "tickets_path": "tickets/demo-ticket.md",
+     "line_range": "131-131"
+    }
+   }
+  }
+ ]
+}

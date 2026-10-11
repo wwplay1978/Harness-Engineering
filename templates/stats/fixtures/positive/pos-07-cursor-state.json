@@ -1,0 +1,21 @@
+{
+  "fixture_kind": "cursor-state",
+  "description": "cursor 状态正例：复合游标（terminal 按 (completed_at,id) 推进）+扫描下界+开放集+已提交 segment 清单+自洽 checksum（校验和由工具脚本回填）",
+  "manifest_kind": "cursor-state",
+  "adapter_id": "zcode-sqlite",
+  "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+  "updated_at": "2026-09-21T10:00:02Z",
+  "terminal_cursor": {
+    "completed_at": "2026-09-21T09:30:00Z",
+    "id": "model_usage/900001"
+  },
+  "scan_lower_bound": "2026-09-21T07:00:00Z",
+  "open_set": [
+    "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000202/agent_03/metadata.json"
+  ],
+  "committed_segments": [
+    "seg-000001",
+    "seg-000007"
+  ],
+  "payload_sha256": "04d0b38aecff11f35ed043f605aee885c90f3a4dd2043a730cc8e890b86c13b1"
+}

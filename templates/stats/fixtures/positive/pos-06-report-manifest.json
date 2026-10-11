@@ -1,0 +1,17 @@
+{
+  "fixture_kind": "report-manifest",
+  "description": "report manifest 正例：钉 bundle_id+classifier_version+selection policy+revision watermark+segment SHA+时区/参数（M2 报表可复算前提）",
+  "manifest_kind": "report-manifest",
+  "report_id": "report-2026w40-aitrader2",
+  "generated_at": "2026-10-01T12:00:00Z",
+  "bundle_id": "bundle-2026-09-pilot-aitrader2",
+  "classifier_version": "clf-v0.1.0",
+  "derivation_selection_policy": "latest-valid;manual>auto",
+  "revision_watermark": "2026-09-30T16:30:00Z",
+  "segment_shas": [
+    "9f1c4a2b77e0d3c5b8a1f6249d0e7c3a5b8f2d4e6a9c0b3d7e5f1a2c4b6d8e0f",
+    "0e1f2a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7"
+  ],
+  "timezone": "Asia/Shanghai",
+  "params": { "project": "aitrader2", "window": "2026-09", "metrics": ["M1", "M2"] }
+}

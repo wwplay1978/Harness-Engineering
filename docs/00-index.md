@@ -77,6 +77,10 @@
 | [../templates/agents/](../templates/agents/) | 六个角色子代理文件（ZCode 格式：四角色移植 + archiver + red-teamer；另 3 个 *-rerun 变体由生成器物化） | `~/.zcode/agents/`（用户域，全局一次；sync-harness.mjs --apply 分发） |
 | [../templates/hooks/](../templates/hooks/) | guard/inject/report 三正式 hook 脚本（含真实 schema 适配） | 用户级 hooks 目录（参考部署形态） |
 | [../templates/adapters/](../templates/adapters/) | 五宿主适配包（物化器 + hooks 粘贴块 + opencode/pi guard 移植；docs/18） | 逐宿主见 templates/adapters/<host>/README.md |
+| [../templates/stats/](../templates/stats/) | 效能统计契约族（manifest schemas/attempt 词典/分类验收/追溯矩阵+fixtures——docs/22 数据面） | `harness-stats.mjs` 只读消费（sync-harness.mjs --apply 分发） |
+| [../templates/tools/stats2/](../templates/tools/stats2/) | 效能统计实现模块（采集/挖矿/校验/report/verify/lifecycle） | 随 `harness-stats.mjs` 就位（同上分发） |
+| [../templates/tools/harness-stats.mjs](../templates/tools/harness-stats.mjs) | 效能统计 CLI 入口（契约验证器+采集；Node ≥22.16 原生 sqlite） | `~/.agents/harness-stats/` 事件仓（本地） |
+| [../templates/tools/b3-redact-check.mjs](../templates/tools/b3-redact-check.mjs) | 公开路径脱敏检测器（B3：盘符/根路径/真实用户名——发布对账门） | 发布流程消费（相对名+cwd 调用） |
 
 ## 作用域约定（重要）
 

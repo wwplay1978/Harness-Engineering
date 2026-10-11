@@ -1,0 +1,84 @@
+{
+  "schema_id": "harness-stats-bundle-manifest",
+  "schema_version": "v1",
+  "spec_anchor": "docs/22 §5.5-②（行 266，字段=§5.8 全集）+ §5.8 多源 pilot bundle（行 285-288）",
+  "description": "bundle manifest（四层 manifest 第②层）：snapshots/<bundle_id>/manifest.json——冻结四源。生命周期：被 report 引用的 bundle 不删（引用计数）；未被引用的保留最近 3 份（stats-2 ⑫ 验收）。pilot 边界常量（时段半开区间/eligible 谓词原文）不入本文件、由 pilot-bundle-schema.json 特化冻结。fixture 外形：{fixture_kind:'bundle-manifest', …字段}。",
+  "fixture_envelope": {
+    "rule": "VR-S28",
+    "type": "object",
+    "required": ["fixture_kind"],
+    "properties": {
+      "fixture_kind": { "type": "string", "const": "bundle-manifest" },
+      "description": { "type": "string" }
+    }
+  },
+  "manifest": {
+    "rule": "VR-S24",
+    "type": "object",
+    "required": ["manifest_kind", "bundle_id", "created_at", "project_id", "time_range", "sqlite_copy", "metadata_corpus", "tickets_reviews", "git_head"],
+    "properties": {
+      "manifest_kind": { "type": "string", "const": "bundle-manifest" },
+      "bundle_id": { "type": "string", "minLength": 1 },
+      "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+      "project_id": { "type": "string", "minLength": 1, "description": "22 §5.8：project_id 冻结入 bundle manifest（值由项目注册表在冻结时钉定）" },
+      "time_range": {
+        "type": "object",
+        "description": "时段声明：UTC 半开区间 [from, until)；两侧时间字段在 manifest 声明（22 §5.8 行 285）",
+        "required": ["sqlite_time_field", "metadata_time_field", "from", "until", "bounds"],
+        "properties": {
+          "sqlite_time_field": { "type": "string", "minLength": 1 },
+          "metadata_time_field": { "type": "string", "minLength": 1 },
+          "from": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+          "until": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+          "bounds": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "sqlite_copy": {
+        "type": "object",
+        "description": "源①：SQLite Online Backup 整库副本（22 §5.8 行 286；备份双路径=ro 直连优先+node:sqlite.backup() 回退，§5.4-7）",
+        "required": ["sha256", "row_count", "observed_at", "eligible_predicate"],
+        "properties": {
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" },
+          "row_count": { "type": "integer", "minimum": 0 },
+          "observed_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "活库数字必附 observed_at（22 §2.4 数字纪律）" },
+          "eligible_predicate": { "type": "string", "minLength": 1, "description": "SQLite 侧 eligible 范围谓词原文（pilot=model_usage.started_at 时段半开区间）" }
+        },
+        "additionalProperties": false
+      },
+      "metadata_corpus": {
+        "type": "object",
+        "description": "源②：metadata corpus 清单（22 §5.8 行 287 字段全集：corpus root/全量扫描数/eligible 数/排除数+原因聚合/project 判定字段与规范化值/时间字段与区间原文/逐 eligible 文件/role×status 聚合——role_status_counts 为 stats-2 阶段一契约批新增（审查 P0-1），字段修订与 pilot-bundle-schema.json 同步）",
+        "required": ["corpus_root", "total_scanned", "eligible_count", "excluded", "project_field", "project_normalized", "time_field", "time_interval", "eligible_predicate", "role_status_counts", "eligible_files"],
+        "properties": {
+          "corpus_root": { "type": "string", "minLength": 1 },
+          "total_scanned": { "type": "integer", "minimum": 0 },
+          "eligible_count": { "type": "integer", "minimum": 0 },
+          "excluded": { "type": "array", "items": { "type": "object", "required": ["reason", "count"], "properties": { "reason": { "type": "string", "minLength": 1 }, "count": { "type": "integer", "minimum": 0 } }, "additionalProperties": false }, "description": "排除数+原因聚合" },
+          "project_field": { "type": "string", "minLength": 1, "description": "project 判定字段（cwd/workspaceRoot）" },
+          "project_normalized": { "type": "string", "minLength": 1, "description": "规范化 project 匹配值" },
+          "time_field": { "type": "string", "minLength": 1, "description": "metadata 侧时间字段（createdAt）" },
+          "time_interval": { "type": "string", "minLength": 1, "description": "时间区间原文" },
+          "eligible_predicate": { "type": "string", "minLength": 1, "description": "eligible 过滤谓词原文（pilot 特化=const 冻结，见 pilot-bundle-schema.json）" },
+          "role_status_counts": { "type": "object", "rule": "VR-F12", "description": "eligible metadata 的 role×status 聚合（键=规范化 `role|status`，role=model_usage.agent 去 zcode- 前缀的规范化值、status=metadata status 原值；键按字典序排列；值=count≥1 整数；Σ值=eligible_count——三恒等第一重的 manifest 声明面；键形/排序/合计由 VR-F12 跨字段复核）" },
+          "eligible_files": { "type": "array", "items": { "type": "object", "required": ["relative_path", "sha256", "size_bytes", "created_at", "child_session_id"], "properties": { "relative_path": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" }, "size_bytes": { "type": "integer", "minimum": 0 }, "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" }, "child_session_id": { "type": ["string", "null"], "minLength": 1 } }, "additionalProperties": false }, "description": "逐 eligible 文件（相对路径+hash+size+createdAt+childSessionId）" }
+        },
+        "additionalProperties": false
+      },
+      "tickets_reviews": {
+        "type": "object",
+        "description": "源③：docs/tickets 与 docs/reviews（pilot 时段在档票 slug 清单+目录+hash，22 §5.8 行 286）",
+        "required": ["slug_list", "tickets_dir", "reviews_dir", "sha256"],
+        "properties": {
+          "slug_list": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" } },
+          "tickets_dir": { "type": "string", "minLength": 1 },
+          "reviews_dir": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" }
+        },
+        "additionalProperties": false
+      },
+      "git_head": { "type": "string", "pattern": "^[0-9a-f]{40}$", "description": "源④：git HEAD commit（40 位 hex）" }
+    },
+    "additionalProperties": false
+  }
+}

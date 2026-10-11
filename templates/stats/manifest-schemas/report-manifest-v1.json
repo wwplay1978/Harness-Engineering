@@ -1,0 +1,34 @@
+{
+  "schema_id": "harness-stats-report-manifest",
+  "schema_version": "v1",
+  "spec_anchor": "docs/22 §5.5-③（行 267）+ §5.2 M2 读取语义（行 221）+ §5.7 时区（行 278）",
+  "description": "report manifest（四层 manifest 第③层）：引用 bundle_id + classifier_version + derivation selection policy + revision watermark + 事件 segment SHA + 时区/参数；随 report 文件永久。report 默认 stdout 零落盘、--out 仅白名单（22 §5.6，stats-4 实现面）。fixture 外形：{fixture_kind:'report-manifest', …字段}。",
+  "fixture_envelope": {
+    "rule": "VR-S28",
+    "type": "object",
+    "required": ["fixture_kind"],
+    "properties": {
+      "fixture_kind": { "type": "string", "const": "report-manifest" },
+      "description": { "type": "string" }
+    }
+  },
+  "manifest": {
+    "rule": "VR-S21",
+    "type": "object",
+    "required": ["manifest_kind", "report_id", "generated_at", "bundle_id", "classifier_version", "derivation_selection_policy", "revision_watermark", "segment_shas", "timezone", "params"],
+    "properties": {
+      "manifest_kind": { "type": "string", "const": "report-manifest" },
+      "report_id": { "type": "string", "minLength": 1 },
+      "generated_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+      "bundle_id": { "type": "string", "minLength": 1, "description": "引用 §5.5-② bundle（被引用的 bundle 不删——引用计数保留）；stats-4 report 全仓快照型取哨兵 all-store" },
+      "generation": { "type": "integer", "minimum": 1, "rule": "VR-S21", "description": "stats-4 红队修复轮二 P1-1③：世代锚——写入时 store 当前代（prune 旧代清理的引用保护消费，与 stats-3 裁决① pilot-eval 世代锚同标准）。向后兼容可选：历史 manifest 无此键" },
+      "classifier_version": { "type": "string", "minLength": 1, "description": "22 §5.2 行 221：report manifest 必记 classifier version（报表可复算前提）" },
+      "derivation_selection_policy": { "type": "string", "minLength": 1, "description": "默认 'latest-valid;manual>auto'——每 observation 实体取 policy 下最新有效 derivation，人工更正=更高优先级派生；历史派生只进 audit/history" },
+      "revision_watermark": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "本 report 覆盖的 revision 水位（水位线以下的源修订已入仓）" },
+      "segment_shas": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" }, "description": "本 report 读取的事件 segment SHA 清单（generation 快照读，22 §5.4-8）" },
+      "timezone": { "type": "string", "minLength": 1, "description": "报表显式时区（默认本地；ISO 周归 week-year，22 §5.7）" },
+      "params": { "type": "object", "description": "report 参数钉定（时段/项目集/指标开关等）" }
+    },
+    "additionalProperties": false
+  }
+}

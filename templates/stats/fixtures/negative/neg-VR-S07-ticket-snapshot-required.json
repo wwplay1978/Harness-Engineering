@@ -1,0 +1,34 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "结构层：ticket_snapshot 缺 source_hash8",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/neg-probe.md:obs:ab12cd34",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:docs/tickets/neg-probe.md",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "zcode-sqlite",
+   "adapter_type": "mutable-row",
+   "source_primary_key": "docs/tickets/neg-probe.md",
+   "collected_at": "2026-09-25T02:00:00Z",
+   "event_kind": "observation",
+   "observation_subtype": "ticket_snapshot",
+   "ticket_slug": "neg-probe",
+   "snapshot": {
+    "attempt_column_raw": "1",
+    "attempt_no": 1,
+    "role_column_raw": "developer",
+    "result_column_raw": "交付",
+    "date_column_raw": "2026-09-21",
+    "note_column_raw": "初始实现+review 修复",
+    "review_artifacts": [
+     "phase1-fill-rerun-window-r1-review.md"
+    ],
+    "source_refs": {
+     "tickets_path": "tickets/phase1-fill-rerun-window.md",
+     "line_range": "108-108"
+    }
+   }
+  }
+ ]
+}

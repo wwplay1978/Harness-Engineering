@@ -156,6 +156,7 @@ Choose by need: for planning discipline with a huge community, spec-kit; for a f
 
 ## Measurement & continuous improvement
 
+- **Effectiveness statistics system** (`docs/22` + `templates/stats/` + `harness-stats.mjs`): dual-source collection (dispatch metrics + per-host native adapters) into a local event store; M1–M4 indicator layers, a versioned attempt classifier (frozen dictionary + acceptance gates + held-out protocol), and `report`/`verify` consumers — every number reproducible from the store.
 - **Metrics ledger per ticket** (`docs/04`): attempts, review rounds, QA rounds, QA defects, first-pass rate, test count, ±lines, recorded by the archiver and reviewed on a rolling cadence.
 - **`harness-audit`**: an executable 7-dimension, 100-point audit spec (constitution quality, rules & enforcement, skills layering, tools, SDD process, engineering gates, memory & archive) producing S/A/B/C/D with P0–P3 remediation, run quarterly and after major spec changes. Pilot baseline: 93/A.
 - **Quality gates that bite**: first-pass ≠ 100% in early tickets is healthy. It means reviewer/QA gates catch real issues; severity trends should decay over time (P1 → P2/P3 in the pilot).

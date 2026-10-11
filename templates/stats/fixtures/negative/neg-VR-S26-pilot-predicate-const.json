@@ -1,0 +1,70 @@
+{
+  "fixture_kind": "pilot-bundle",
+  "description": "结构层：metadata eligible 谓词原文被改写（非正文逐字）",
+  "manifest_kind": "pilot-bundle",
+  "bundle_id": "bundle-neg",
+  "created_at": "2026-09-25T02:00:00Z",
+  "project_id": "aitrader2",
+  "time_range": {
+    "sqlite_time_field": "model_usage.started_at",
+    "metadata_time_field": "createdAt",
+    "from": "2026-09-01T00:00:00Z",
+    "until": "2026-10-01T00:00:00Z",
+    "bounds": "半开 [2026-09-01T00:00:00Z, 2026-10-01T00:00:00Z)"
+  },
+  "sqlite_copy": {
+    "sha256": "1a2b3c4d5e6f70819a2b3c4d5e6f70819a2b3c4d5e6f70819a2b3c4d5e6f7081",
+    "row_count": 100,
+    "observed_at": "2026-09-25T01:59:58Z",
+    "eligible_predicate": "model_usage.started_at ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)"
+  },
+  "metadata_corpus": {
+    "corpus_root": "~/.zcode/cli/agents/",
+    "total_scanned": 12,
+    "eligible_count": 2,
+    "excluded": [
+      {
+        "reason": "project 判定不中",
+        "count": 8
+      },
+      {
+        "reason": "createdAt 区间外",
+        "count": 2
+      }
+    ],
+    "project_field": "cwd",
+    "project_normalized": "aitrader2",
+    "time_field": "createdAt",
+    "time_interval": "[2026-09-01T00:00Z, 2026-10-01T00:00Z)",
+    "eligible_predicate": "全量冻结（禁——谓词必须是过滤面）",
+    "role_status_counts": {
+      "developer|completed": 1,
+      "planner|completed": 1
+    },
+    "eligible_files": [
+      {
+        "relative_path": "a/agent_01/metadata.json",
+        "sha256": "aa11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778890",
+        "size_bytes": 500,
+        "created_at": "2026-09-05T00:00:00Z",
+        "child_session_id": "sess-a1"
+      },
+      {
+        "relative_path": "b/agent_02/metadata.json",
+        "sha256": "bb11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778899",
+        "size_bytes": 510,
+        "created_at": "2026-09-06T00:00:00Z",
+        "child_session_id": null
+      }
+    ]
+  },
+  "tickets_reviews": {
+    "slug_list": [
+      "neg-probe"
+    ],
+    "tickets_dir": "docs/tickets",
+    "reviews_dir": "docs/reviews",
+    "sha256": "ca1f2e3d4c5b6a798877665544332211ffeeddccbbaa99887766554433221100"
+  },
+  "git_head": "0288873a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e"
+}

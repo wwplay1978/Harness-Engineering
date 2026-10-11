@@ -1,0 +1,16 @@
+{
+  "fixture_kind": "segment-manifest",
+  "description": "结构层：segment manifest 缺 sha256",
+  "manifest_kind": "segment-manifest",
+  "segment_seq": 3,
+  "segment_id": "seg-000003",
+  "adapter_id": "zcode-sqlite",
+  "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+  "closed": true,
+  "event_count": 120,
+  "cursor_after": {
+    "completed_at": "2026-09-21T09:30:00Z",
+    "id": "model_usage/910001"
+  },
+  "written_at": "2026-09-21T10:00:01.250Z"
+}

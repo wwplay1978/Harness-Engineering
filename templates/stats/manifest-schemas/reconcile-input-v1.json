@@ -1,0 +1,32 @@
+{
+  "schema_id": "harness-stats-reconcile-input",
+  "schema_version": "v1",
+  "spec_anchor": "stats-3 票面附件 A 第三块（reconcile 输入 schema，批准基线 2026-10-09）+ 22 §2.2-8（人工更正）+ §2.3（MANUAL_RECONCILED：归因者/时间/依据/源 hash）",
+  "description": "reconcile 子命令的输入文件 schema（票面阶段三：归因者/依据/源 hash/目标实体/更正值→origin=manual derived 事件）。归因者/依据/源 hash 的持久记录=本输入工件（内容寻址归档于仓 snapshots/reconcile/<sha8>/input.json）；事件载荷面仅承载附件 A derivation 六字段（basis 文本映射 signal_evidence.structural_basis，见 classifier-dictionary.md §0）。fixture 外形：{fixture_kind:'reconcile-input', …字段}。",
+  "fixture_envelope": {
+    "rule": "VR-S28",
+    "type": "object",
+    "required": ["fixture_kind"],
+    "properties": {
+      "fixture_kind": { "type": "string", "const": "reconcile-input" },
+      "description": { "type": "string" }
+    }
+  },
+  "manifest": {
+    "rule": "VR-S31",
+    "type": "object",
+    "required": ["ticket_slug", "target_entity_ids", "attribution_level", "reconciler", "basis", "source_hash8", "created_at"],
+    "properties": {
+      "ticket_slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,64}$" },
+      "target_entity_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "description": "更正目标实体（dispatch/observation entity_id；至少一个）" },
+      "attribution_level": { "type": "string", "enum": ["EXPLICIT", "DIRECT", "CANDIDATE", "MANUAL_RECONCILED", "UNATTRIBUTED"], "description": "更正后归因级（§2.3 五值）" },
+      "attempt_kind": { "type": "string", "enum": ["initial", "quality_rework", "infrastructure_retry", "cancellation_retry", "evidence_refresh", "unknown", "compound_unparseable"], "description": "可选：更正 attempt_kind（缺省=沿当前有效值）" },
+      "trigger_stage": { "type": "string", "enum": ["reviewer", "qa", "red_team", "premerge", "environment", "user", "unknown"], "description": "可选：更正 trigger_stage（缺省=沿当前有效值）" },
+      "reconciler": { "type": "string", "minLength": 1, "description": "归因者（人工环节标识）" },
+      "basis": { "type": "string", "minLength": 1, "description": "更正依据（自由文本；映射事件 derivation.signal_evidence.structural_basis）" },
+      "source_hash8": { "type": "string", "pattern": "^[0-9a-f]{8}$", "description": "依据源文件内容 SHA-256 前 8 位（票据工件 hash）" },
+      "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" }
+    },
+    "additionalProperties": false
+  }
+}

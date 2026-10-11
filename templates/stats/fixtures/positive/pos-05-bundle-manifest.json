@@ -1,0 +1,71 @@
+{
+  "fixture_kind": "bundle-manifest",
+  "description": "通用 bundle manifest 正例（非 pilot 时段）：四源冻结全集；eligible 计数自洽（eligible_count=eligible_files 长度 ≤ total_scanned）",
+  "manifest_kind": "bundle-manifest",
+  "bundle_id": "bundle-2026-08-window-aitrader2",
+  "created_at": "2026-09-02T08:00:00Z",
+  "project_id": "aitrader2",
+  "time_range": {
+    "sqlite_time_field": "model_usage.started_at",
+    "metadata_time_field": "createdAt",
+    "from": "2026-08-01T00:00:00Z",
+    "until": "2026-09-01T00:00:00Z",
+    "bounds": "半开 [2026-08-01T00:00:00Z, 2026-09-01T00:00:00Z)"
+  },
+  "sqlite_copy": {
+    "sha256": "1a2b3c4d5e6f70819a2b3c4d5e6f70819a2b3c4d5e6f70819a2b3c4d5e6f7081",
+    "row_count": 24310,
+    "observed_at": "2026-09-02T07:59:58Z",
+    "eligible_predicate": "model_usage.started_at ∈ [2026-08-01T00:00Z, 2026-09-01T00:00Z)"
+  },
+  "metadata_corpus": {
+    "corpus_root": "~/.zcode/cli/agents/",
+    "total_scanned": 512,
+    "eligible_count": 2,
+    "excluded": [
+      {
+        "reason": "project 判定不中（cwd 非本项目）",
+        "count": 488
+      },
+      {
+        "reason": "createdAt 区间外",
+        "count": 22
+      }
+    ],
+    "project_field": "cwd",
+    "project_normalized": "aitrader2",
+    "time_field": "createdAt",
+    "time_interval": "[2026-08-01T00:00Z, 2026-09-01T00:00Z)",
+    "eligible_predicate": "project 判定（cwd/workspaceRoot 归属 AITrader2，规范化 project_id 匹配）AND createdAt ∈ [2026-08-01T00:00Z, 2026-09-01T00:00Z)",
+    "role_status_counts": {
+      "developer|completed": 1,
+      "planner|completed": 1
+    },
+    "eligible_files": [
+      {
+        "relative_path": "sess-000099/agent_02/metadata.json",
+        "sha256": "aa11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778890",
+        "size_bytes": 512,
+        "created_at": "2026-08-14T03:20:00Z",
+        "child_session_id": "sess-000099-c1"
+      },
+      {
+        "relative_path": "sess-000101/agent_01/metadata.json",
+        "sha256": "bb11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778899",
+        "size_bytes": 498,
+        "created_at": "2026-08-27T11:02:00Z",
+        "child_session_id": null
+      }
+    ]
+  },
+  "tickets_reviews": {
+    "slug_list": [
+      "phase0-bootstrap",
+      "legacy-review-window"
+    ],
+    "tickets_dir": "docs/tickets",
+    "reviews_dir": "docs/reviews",
+    "sha256": "ca1f2e3d4c5b6a798877665544332211ffeeddccbbaa99887766554433221100"
+  },
+  "git_head": "4c4d242a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e"
+}

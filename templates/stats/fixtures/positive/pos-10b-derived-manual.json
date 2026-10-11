@@ -1,0 +1,32 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "stats-3 阶段一：derived manual 派生（origin=manual；人工性由外层字段承载，载荷无 reconciler/basis 键——归因者/依据/源 hash 由 reconcile 输入工件归档）",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131:drv:2",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/demo-ticket.md#L131",
+   "collected_at": "2026-09-22T10:05:00Z",
+   "observation_subtype": "derived",
+   "derivation_revision": 2,
+   "classifier_version": "stats3-attempt-1.0.0",
+   "derivation_origin": "manual",
+   "derivation": {
+    "attempt_kind": "initial",
+    "trigger_stage": "unknown",
+    "secondary_cause": null,
+    "primary_signal_level": "explicit",
+    "signal_evidence": {
+     "matched_phrase": null,
+     "structural_basis": "按 r2 复审拒因人工更正（reconcile basis）"
+    },
+    "decided_at": "2026-09-22T11:00:00Z"
+   }
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "stats-3：snapshot 载荷缺 review_artifacts（8 必填之一）——恰中 VR-S29",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131:obs:ab12cd34",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/demo-ticket.md#L131",
+   "collected_at": "2026-09-22T10:05:00Z",
+   "observation_subtype": "ticket_snapshot",
+   "ticket_slug": "demo-ticket",
+   "source_hash8": "ab12cd34",
+   "snapshot": {
+    "attempt_column_raw": "r2",
+    "attempt_no": 2,
+    "role_column_raw": "developer-rerun",
+    "result_column_raw": "通过",
+    "date_column_raw": "2026-09-22",
+    "note_column_raw": "复审 request changes 修复轮",
+    "source_refs": {
+     "tickets_path": "tickets/demo-ticket.md",
+     "line_range": "131-131"
+    }
+   }
+  }
+ ]
+}

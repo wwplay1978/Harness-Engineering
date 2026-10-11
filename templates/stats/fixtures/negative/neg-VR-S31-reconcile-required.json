@@ -1,0 +1,14 @@
+{
+ "ticket_slug": "demo-ticket",
+ "target_entity_ids": [
+  "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:sess-000123/agent_07/metadata.json"
+ ],
+ "attribution_level": "MANUAL_RECONCILED",
+ "attempt_kind": "quality_rework",
+ "trigger_stage": "reviewer",
+ "reconciler": "planner",
+ "source_hash8": "ab12cd34",
+ "created_at": "2026-10-09T08:00:00Z",
+ "fixture_kind": "reconcile-input",
+ "description": "stats-3：reconcile 输入缺 basis（必填）——恰中 VR-S31"
+}

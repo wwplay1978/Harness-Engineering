@@ -154,6 +154,7 @@ Harness-Engineering/
 
 ## 度量与持续优化
 
+- **效能统计系统**（`docs/22` + `templates/stats/` + `harness-stats.mjs`）：双面采集（派发计量+各宿主原生 adapter）入本地事件仓；M1–M4 指标层、版化 attempt 分类器（冻结词典+验收门+held-out 协议）与 `report`/`verify` 消费面——数字可从事件仓复算。
 - **逐票度量台账**（`docs/04`）：attempts、审查轮次、QA 轮次、QA 缺陷、一次通过率、测试数、±行数，由 archiver 代录、滚动复盘。
 - **`harness-audit`**：七维百分制可执行审计（宪法质量/规则与强制/技能分层/工具/SDD 流程/工程门禁/记忆与归档），S/A/B/C/D 评级 + P0–P3 整改，季度跑，重大规范变更后加跑。试点基线：93/A。
 - **有约束力的质量门禁**：早期工单一次通过 ≠100% 是健康信号，说明 reviewer/QA 在真实拦截；严重度应随票次衰减（试点：P1 → P2/P3）。

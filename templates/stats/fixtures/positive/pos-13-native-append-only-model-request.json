@@ -1,0 +1,34 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "stats-3 阶段二：原生面 append-only model-request 全形（Kimi usage.record 五路映射——reasoning=null N/A 断言锚；terminal_completed + duration_ms=null=O-34 适用面细化：duration 子句限 mutable-row）",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "model-request",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:kimi-wire:s1/wire.jsonl#12:1",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:kimi-wire:s1/wire.jsonl#12",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "kimi-wire",
+   "adapter_type": "append-only",
+   "source_primary_key": "s1/wire.jsonl#12",
+   "collected_at": "2026-10-09T12:30:00Z",
+   "source_revision": 1,
+   "parent_entity_id": null,
+   "model": "kimi-k3",
+   "model_original": "kimi-k3",
+   "status": "usage.record",
+   "state": "terminal_completed",
+   "started_at": "2026-09-10T08:01:02Z",
+   "duration_ms": null,
+   "time_to_first_token_ms": null,
+   "retry_count": 0,
+   "usage": {
+    "input": 15200,
+    "output": 3300,
+    "reasoning": null,
+    "cache_read": 128000,
+    "cache_write": 4096
+   }
+  }
+ ]
+}

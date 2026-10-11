@@ -1,0 +1,41 @@
+{
+  "schema_id": "harness-stats-cursor-state",
+  "schema_version": "v1",
+  "spec_anchor": "docs/22 §5.5-④（行 268）+ §5.4-3 复合游标（行 248）+ §5.4-6 E2 四型（行 254）",
+  "description": "cursor 状态（四层 manifest 第④层）：唯一提交点产物；可从 segment manifest 重建（E2）。checksum 字段 payload_sha256=E2c『坏校验』可判的载体（本票 schema 细化，docs/changes/stats-1-gap-3）：canonical JSON=去除信封键（fixture_kind/description）与 payload_sha256 本字段后，键递归字典序排序、无空白序列化，取 SHA-256。fixture 外形：{fixture_kind:'cursor-state', …字段}。",
+  "fixture_envelope": {
+    "rule": "VR-S28",
+    "type": "object",
+    "required": ["fixture_kind"],
+    "properties": {
+      "fixture_kind": { "type": "string", "const": "cursor-state" },
+      "description": { "type": "string" }
+    }
+  },
+  "manifest": {
+    "rule": "VR-S22",
+    "type": "object",
+    "required": ["manifest_kind", "adapter_id", "source_instance_id", "updated_at", "terminal_cursor", "scan_lower_bound", "open_set", "committed_segments", "payload_sha256"],
+    "properties": {
+      "manifest_kind": { "type": "string", "const": "cursor-state" },
+      "adapter_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$", "rule": "VR-S19" },
+      "source_instance_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", "rule": "VR-S02" },
+      "updated_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+      "terminal_cursor": {
+        "type": "object",
+        "description": "复合游标：terminal 行按 (completed_at, id) 推进（22 §5.4-3）。append-only 源承载注记（stats-3 票载裁决⑦，2026-10-09）：id=`relpath#line`（文件相对路径#行号）、completed_at=所推进行的事件时戳；全序=文件相对路径字典序→行号（新文件按字典序插入即自然推进）；文件 size/hash 回退（截断/轮转/重写）→fail-loud；zcode-sqlite（mutable-row）沿 (completed_at,id) 复合序不变",
+        "required": ["completed_at", "id"],
+        "properties": {
+          "completed_at": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" },
+          "id": { "type": ["string", "null"], "minLength": 1 }
+        },
+        "additionalProperties": false
+      },
+      "scan_lower_bound": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "started_at 仅作扫描下界（非推进位）" },
+      "open_set": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "已见非 terminal 的 entity_id 开放集，每轮重读直至 terminal（22 §5.4-2）" },
+      "committed_segments": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "已过唯一提交点（cursor rename）的 segment 清单；E2d『指向不存在 segment』即此清单悬空" },
+      "payload_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S23" }
+    },
+    "additionalProperties": false
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "fixture_kind": "pilot-bundle",
+  "description": "跨字段：role_status_counts 值合计(2) ≠ eligible_count(3)——manifest 声明聚合与 eligible 计数不自洽（审查 P0-1 三恒等第一重的 schema 可判面）",
+  "manifest_kind": "pilot-bundle",
+  "bundle_id": "bundle-neg-f12",
+  "created_at": "2026-10-01T09:00:00Z",
+  "project_id": "aitrader2",
+  "time_range": {
+    "sqlite_time_field": "model_usage.started_at",
+    "metadata_time_field": "createdAt",
+    "from": "2026-09-01T00:00:00Z",
+    "until": "2026-10-01T00:00:00Z",
+    "bounds": "半开 [2026-09-01T00:00:00Z, 2026-10-01T00:00:00Z)"
+  },
+  "sqlite_copy": {
+    "sha256": "2b3c4d5e6f708192a3b3c4d5e6f708192a3b3c4d5e6f708192a3b3c4d5e6f708",
+    "row_count": 27366,
+    "observed_at": "2026-10-01T08:59:58Z",
+    "eligible_predicate": "model_usage.started_at ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)"
+  },
+  "metadata_corpus": {
+    "corpus_root": "~/.zcode/cli/agents/",
+    "total_scanned": 599,
+    "eligible_count": 3,
+    "excluded": [
+      {
+        "reason": "project 判定不中（cwd/workspaceRoot 非 AITrader2）",
+        "count": 480
+      },
+      {
+        "reason": "createdAt 区间外",
+        "count": 116
+      }
+    ],
+    "project_field": "cwd",
+    "project_normalized": "aitrader2",
+    "time_field": "createdAt",
+    "time_interval": "[2026-09-01T00:00Z, 2026-10-01T00:00Z)",
+    "eligible_predicate": "project 判定（cwd/workspaceRoot 归属 AITrader2，规范化 project_id 匹配）AND createdAt ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)",
+    "role_status_counts": {
+      "code-reviewer|completed": 1,
+      "developer|completed": 1
+    },
+    "eligible_files": [
+      {
+        "relative_path": "sess-000123/agent_07/metadata.json",
+        "sha256": "cc11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778800",
+        "size_bytes": 505,
+        "created_at": "2026-09-21T08:00:00Z",
+        "child_session_id": "sess-000123-c7"
+      },
+      {
+        "relative_path": "sess-000200/agent_01/metadata.json",
+        "sha256": "dd11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778801",
+        "size_bytes": 497,
+        "created_at": "2026-09-15T01:00:00Z",
+        "child_session_id": "sess-not-in-session-table"
+      },
+      {
+        "relative_path": "sess-000203/agent_04/metadata.json",
+        "sha256": "ee11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778802",
+        "size_bytes": 511,
+        "created_at": "2026-09-22T06:00:00Z",
+        "child_session_id": null
+      }
+    ]
+  },
+  "tickets_reviews": {
+    "slug_list": [
+      "phase1-fill-rerun-window"
+    ],
+    "tickets_dir": "docs/tickets",
+    "reviews_dir": "docs/reviews",
+    "sha256": "da1f2e3d4c5b6a798877665544332211ffeeddccbbaa9988776655443322110f"
+  },
+  "git_head": "0288873a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e"
+}

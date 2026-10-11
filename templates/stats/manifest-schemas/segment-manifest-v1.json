@@ -1,0 +1,41 @@
+{
+  "schema_id": "harness-stats-segment-manifest",
+  "schema_version": "v1",
+  "spec_anchor": "docs/22 §5.5-①（行 265）+ §5.4-4 提交链（行 249）+ §5.4-5 恢复规则（行 250）",
+  "description": "segment manifest（四层 manifest 第①层）：events/ 内每 segment 的 closed 判定+SHA——恢复与 cursor 重建（E2 取最大已提交序）的依据；随 segment 永久（compaction 按 E4 水位）。fixture 外形：{fixture_kind:'segment-manifest', …字段}（fixture_kind 为验证器判别用信封键，非 manifest 本体字段）。",
+  "fixture_envelope": {
+    "rule": "VR-S28",
+    "type": "object",
+    "required": ["fixture_kind"],
+    "properties": {
+      "fixture_kind": { "type": "string", "const": "segment-manifest" },
+      "description": { "type": "string" }
+    }
+  },
+  "manifest": {
+    "rule": "VR-S20",
+    "type": "object",
+    "required": ["manifest_kind", "segment_seq", "segment_id", "adapter_id", "source_instance_id", "closed", "event_count", "sha256", "cursor_after", "written_at"],
+    "properties": {
+      "manifest_kind": { "type": "string", "const": "segment-manifest" },
+      "segment_seq": { "type": "integer", "minimum": 1, "description": "同 (adapter_id, source_instance_id) 内单调递增序号；E2 cursor 重建取最大已提交序（22 §5.4-5）" },
+      "segment_id": { "type": "string", "minLength": 1 },
+      "adapter_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$", "rule": "VR-S19" },
+      "source_instance_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", "rule": "VR-S02" },
+      "closed": { "type": "boolean", "const": true, "description": "closed 判定——manifest 仅在 segment 关闭后写出（22 §5.4-4：segment rename 后、cursor 前的持久化序）" },
+      "event_count": { "type": "integer", "minimum": 0 },
+      "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27", "description": "segment 文件内容 SHA-256" },
+      "cursor_after": {
+        "type": "object",
+        "required": ["completed_at", "id"],
+        "properties": {
+          "completed_at": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "本 segment 内最后一条 terminal 行的复合游标位（null=本段无 terminal 行）" },
+          "id": { "type": ["string", "null"], "minLength": 1 }
+        },
+        "additionalProperties": false
+      },
+      "written_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" }
+    },
+    "additionalProperties": false
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "fixture_kind": "event-corpus",
+  "description": "结构层：usage 缺五路之一 reasoning（running 态隔离 F09）",
+  "events": [
+    {
+      "schema_version": "v1",
+      "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:model_usage/910001:1",
+      "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:zcode-sqlite:model_usage/910001",
+      "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+      "adapter_id": "zcode-sqlite",
+      "adapter_type": "mutable-row",
+      "source_primary_key": "model_usage/910001",
+      "collected_at": "2026-09-25T02:00:00Z",
+      "event_kind": "model-request",
+      "source_revision": 1,
+      "parent_entity_id": null,
+      "model": "glm-5.3",
+      "model_original": "GLM-5.3",
+      "status": "running",
+      "state": "observed_running",
+      "started_at": "2026-09-21T08:05:00Z",
+      "duration_ms": null,
+      "time_to_first_token_ms": null,
+      "retry_count": 0,
+      "usage": {
+        "input": 15200,
+        "output": 3300,
+        "cache_read": 128000,
+        "cache_write": 0
+      }
+    }
+  ]
+}

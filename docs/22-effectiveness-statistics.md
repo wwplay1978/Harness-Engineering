@@ -1,9 +1,9 @@
 # 22 · 效能统计系统（跨项目遥测 × 效能度量，v4）
 
 > 定位：为六角色 harness 增加机制层统计能力——在所有在册项目上自动回答三问：**每类角色实际用了什么模型、累计跑了多久；质量性返工（quality rework）花了多少（次数/时长/token）；两者随时间的变化趋势**。产出服务于 OPT-2 路由反馈（docs/09/11）、13 号指标复盘门与"内部摩擦成本"核算。
-> 身份与状态：**A 类机制规范 · 已采纳（v4；2026-10-01 转正——§10 聚焦确认通过：六项核对点全过、36 例回归集 36/36 绿，P3 备注已补 stats-2 ⑫ 收口）**。审查链：v0 首轮「须重大修订」(P0×4) → v1 二轮「修 P1 后可采纳」(P1×9) → v2 终审「需再修」(P1×4) → v3 第四轮全面轮「需再修」(P1×7/P2×2，held-out 实弹，报告 reviews/codex-22-v3-fullaudit-2026-10-01.md（私有仓存档）) → v4 回灌其 R1–R7 最小残余清单（变更映射见附录）。前序报告：reviews/codex-22-proposal-audit-2026-09-30.md（私有仓存档）、reviews/codex-22-v1-reaudit-2026-09-30.md（私有仓存档）、reviews/codex-22-v2-final-2026-09-30.md（私有仓存档）。D1'–D10' 已获用户批准（§9）；v4 修订与转正经用户 2026-10-01 批准。
+> 身份与状态：**A 类机制规范 · 已采纳（v4；2026-10-01 转正——§10 聚焦确认通过：六项核对点全过、36 例回归集 36/36 绿，P3 备注已补 stats-2 ⑫ 收口）**。审查链：v0 首轮「须重大修订」(P0×4) → v1 二轮「修 P1 后可采纳」(P1×9) → v2 终审「需再修」(P1×4) → v3 第四轮全面轮「需再修」(P1×7/P2×2，held-out 实弹，报告 [reviews/codex-22-v3-fullaudit-2026-10-01.md](reviews/codex-22-v3-fullaudit-2026-10-01.md)) → v4 回灌其 R1–R7 最小残余清单（变更映射见附录）。前序报告：[首轮](reviews/codex-22-proposal-audit-2026-09-30.md)、[二轮](reviews/codex-22-v1-reaudit-2026-09-30.md)、[终审](reviews/codex-22-v2-final-2026-09-30.md)。D1'–D10' 已获用户批准（§9）；v4 修订与转正经用户 2026-10-01 批准。
 > 分层口径（沿 21 §0.3）：指标体系/事件仓 schema/采集协议=机制层 portable-contract；各宿主采集器（含版本探针）=宿主适配层 host-bound；本机数字=落地实例（I:，谓词与快照口径见 §2.4）。
-> 写作：2026-09-30 v0→v1→v2 → 2026-10-01 v3→v4（R1–R7 回灌）。修订记录只追加。
+> 写作：2026-09-30 v0→v1→v2 → 2026-10-01 v3→v4（R1–R7 回灌）→ 2026-10-08 gap-1..6 回灌批（七处句级修订+stats-3 验收⑦；裁决记录=docs/changes/stats-1-gap-*.md）→ 2026-10-10 gap 回灌批二（八处 22 句级+state-mapping M5 注记+D7' 落地注记；stats-1-gap-4/6②、stats-2-gap-1..4、stats-3-gap-1..6 共 12 件闭合，gap-7 维持挂起归分类器 v2 票）→ 2026-10-11 classifier-v2 裁决 A（§4 三行同口径：质量性返工率分子/返工花费/M4 返工成本占比均剔 secondary_cause∈{non_defect, upstream_sync, staged_delivery}；分母=merged 票不变，「质量性返工票」由分子定义承载；历史 secondary=null 不回溯、前向生效（自 classifier 2.0.0 起派生标注）——趋势断裂声明：口径变更前后质量性返工率/返工花费/M4 返工成本占比不可直接对比，断裂声明同步入 formal v4 新工件）。修订记录只追加。
 
 ## 0. 设计立场（四轮审查确认）
 
@@ -41,7 +41,7 @@
 
 **宿主 ≠ 模型提供方**（二轮确认）：本机 planner/red-teamer 是 **ZCode 子代理调用 kimi-k3 模型**，token 已在 ZCode `model_usage`（I: zcode-planner×kimi-k3 792 请求、zcode-red-teamer×kimi-k3 1,177 请求）——G1 首期六角色无缺角；Kimi 面解决的是原生 Kimi Code 会话。
 
-**已知噪声**（I:）：`session.path` 含 `.venv` 内会话（AITrader2 pyeventbt 46 条）——按项目注册表白名单过滤；模型 ID 大小写分裂（`GLM-5.3-Flash`/`glm-5.3-flash`）——归一化合并、保留原值备查；`model_usage.agent` 含非机制角色——六角色+rerun 白名单过滤，其余归 `other` 并计 unknown 占比（§5.3 阈值）。
+**已知噪声**（I:）：`session.path` 含 `.venv` 内会话（AITrader2 pyeventbt 46 条）——按项目注册表白名单过滤；模型 ID 大小写分裂（`GLM-5.3-Flash`/`glm-5.3-flash`）——归一化合并、保留原值备查；`model_usage.agent` 含非机制角色——六角色+rerun 白名单过滤，其余归 `other` 并计 unknown 占比（§5.3 阈值）；宿主内建已知角色（如 `zcode-agent`）入版本化 known_enum_values 白名单、不计 unknown，白名单外才计（stats-2-gap-1 回灌 2026-10-10）。
 
 ### 2.2 面二：流程工件面（票据级质量计量）+ attempt 判定协议
 
@@ -62,8 +62,9 @@ trigger_stage: reviewer | qa | red_team | premerge | environment | user | unknow
 **判定协议**（v4 重排：预处理 → 统一优先级 → 条件式 initial → 词典 → 排除 → 质量门 → 数据集隔离）：
 
 1. **预处理规范化**：attempt 列值 `r<n>`/`R<n>` → attempt 序号 n；非数值且无 r 前缀 → 不作结构信号；
-2. **信号优先级（统一序，全文唯一）**：① 运行记录**显式原因声明**（原文明示原因短语，含"网络中断零产出""非返工"等）＞② 结构信号（规范化后的 attempt 序号、`-rerun` 变体名+拒因工件）＞③ 文本词典推导 ＞④ unknown；同级信号冲突时以高级别为准；
+2. **信号优先级（统一序，全文唯一）**：① 运行记录**显式原因声明**（原文明示原因短语，含"网络中断零产出""非返工"等——枚举冻结于分类器工件 classifier-dictionary.md、随 classifier_version 版化，stats-3-gap-3 回灌 2026-10-10）＞② 结构信号（规范化后的 attempt 序号、`-rerun` 变体名+拒因工件）＞③ 文本词典推导 ＞④ unknown；同级信号冲突时以高级别为准；
 3. **initial 条件式**：attempt 序号==1 **且**无环境零产出/取消声明 → initial；attempt 序号==1 且明示环境零产出 → infrastructure_retry（反例即正例：har-redact-url-substring 的 attempt 1）；
+   - **组合 sanity 注记**（gap-6② 裁 A 回灌，2026-10-08 stats-2 阶段一）：attempt_kind=initial ⇒ trigger_stage=unknown（initial 语义上无触发拒因，不得配非 unknown 的 trigger_stage）；其余 attempt_kind×trigger_stage 组合不设约束。schema 细化=VR-F11/义务 O-40（guard：仅当两维均通过各自 enum 结构校验后执行组合判定，防非法枚举值双命中）；
 4. **文本词典**（仅低级别信号缺失时；**含否定短语"非返工/非缺陷/时序"时不得因邻近出现"修复/重跑"误判**）：
 
    | 词典示例 | 归类 |
@@ -89,7 +90,7 @@ trigger_stage: reviewer | qa | red_team | premerge | environment | user | unknow
 | **EXPLICIT** | 票据运行记录行含 childSessionId（D7' 增强后） | 全指标 |
 | **DIRECT** | 派发 cwd 命中 `<项目>-worktrees/feat-<slug>`（I: 当前实例符合，n=1，不作"稳定"宣称） | 全指标 |
 | **CANDIDATE** | 仅日期/项目吻合（I: AITrader2 单日最多 13 票并列） | **永不入票级 M2/M3 统计**，只输出候选清单 |
-| **MANUAL_RECONCILED** | 人工判定，记录归因者/时间/依据/源 hash | 全指标（含归因元数据） |
+| **MANUAL_RECONCILED** | 人工判定，记录归因者/时间/依据/源 hash；载体=reconcile 输入工件内容寻址归档（`snapshots/reconcile/<sha8>/input.json`，stats-3-gap-5 回灌 2026-10-10） | 全指标（含归因元数据） |
 | **UNATTRIBUTED** | 以上皆非 | 只进体系级（非票级）聚合 |
 
 优先级 EXPLICIT ＞ DIRECT ＞ MANUAL_RECONCILED；CANDIDATE 永不自动升级。其余键：role=`model_usage.agent` 去 `zcode-` 前缀；run=metadata.json `agentId`（childSessionId 关联 token）；project 见 §5.7。
@@ -159,22 +160,22 @@ trace→span→generation 模型。吸收：两层事件结构（派发≈trace�
 
 | 层 | 指标 | 公式/口径 | 来源 | 偏差注记 |
 |---|---|---|---|---|
-| **M1 运行计量** | 派发次数 | count(派发事件) by role×variant×project×day | 面一 | 只含 ZCode 派发；Kimi/Codex 原生面 stats-3 起 |
+| **M1 运行计量** | 派发次数 | count(派发事件) by role×variant×project×day | 面一 | 派发口径恒 ZCode 面；Kimi/Codex 原生面自 stats-3 起入计量（model-request/token），不产派发事件（stats-3-gap-1 回灌 2026-10-10） |
 | | 实际模型 | model_usage.model_id（归一化） | 面一 | 与路由意图对照=漂移检测，差异单列 |
 | | 累计墙钟 | Σ(completedAt−createdAt) | 面一 | 并行派发重叠→墙钟与串行两口径 |
 | | 模型时长 | Σ(duration_ms) | 面一 | — |
 | | token 五路 | Σ input/output/reasoning/cache-read/cache-write 分列 | 面一 | 禁跨模型求和单值（D1'）；宿主缺路=N/A 不补零 |
 | | retry/失败 | Σ retry_count；terminal_failed 计数 | 面一 | — |
 | **M2 质量计量** | pass·reviewer-first / pass·pipeline-clean / pass·no-quality-rework | 定义见 04 §4（分母=merged 票） | 面一+面二 | 三指标分列输出，禁合并；历史以事件仓重算为准（D10' 不迁移） |
-| | 质量性返工率（票级） | 含 ≥1 次 quality_rework 的 merged 票占比；分母=terminal_completed+terminal_failed 派发所在票（cancelled 单列不入分母） | 面一+面二 | infra_retry 排除；两源互校偏差披露 |
-| | 返工花费 | quality_rework attempt 及其后续复审/复测派发的墙钟+token | 面一 join 面二 | 归因置信度随数披露（§2.3）；消费派生版本=报告钉定 policy 下最新有效（§5.2） |
+| | 质量性返工率（票级） | 含 ≥1 次质量性返工 attempt（attempt_kind=quality_rework 且 secondary_cause∉{non_defect, upstream_sync, staged_delivery}）的 merged 票占比；分母=terminal_completed+terminal_failed 派发所在票（cancelled 单列不入分母；「质量性返工票」由分子定义承载） | 面一+面二 | infra_retry 排除；secondary 剔除集=classifier-v2 裁决 A（历史 secondary=null 不回溯——前向生效）；两源互校偏差披露 |
+| | 返工花费 | 质量性返工 attempt（attempt_kind=quality_rework 且 secondary_cause∉{non_defect, upstream_sync, staged_delivery}）及其后续复审/复测派发的墙钟+token | 面一 join 面二 | 剔除集同上行（classifier-v2 裁决 A 同口径）；归因置信度随数披露（§2.3）；消费派生版本=报告钉定 policy 下最新有效（§5.2） |
 | | attempt 分布 | 票 × max attempt 直方图（attempt_kind 分色；rN 已预处理规范化；compound_unparseable 单列不入分布；触 4 轮上限单列） | 面二 | 代录缺行回退面一推数并标注 |
 | | QA 缺陷密度 | 沿 metrics.md 口径 | 面二 | 不改口径 |
 | | 分类质量门 | unknown+wrong_label+compound 合计＞30% 触降级；wrong_label＞10% 分类器 fail | 事件仓 | §2.2 协议 10 |
 | **M3 流动计量** | ticket cycle time | merge commit − 首次派发 | 面一+git | — |
 | | agent/空闲分桶 | 票周期内 agent 活动墙钟 vs 其余 | 面一时间线 | 空闲含人闸+排队，估算标注 |
 | **M4 趋势与摩擦** | 周趋势 | M1/M2 按 ISO 周分桶（UTC 存储、报表显式时区+iso_week_year，§5.7） | 事件仓 | — |
-| | 返工成本占比 | Σ quality_rework token / Σ 全部 token | 面一 | — |
+| | 返工成本占比 | Σ 质量性返工 token（quality_rework 且 secondary_cause∉{non_defect, upstream_sync, staged_delivery}）/ Σ 全部 token | 面一 | 剔除集同 M2 质量性返工率（classifier-v2 裁决 A 同口径） |
 | | 邻接拒绝 | dev→review 拒、review→dev 修、QA 拒转移计数（质量性拒因含 reviewer/qa/red_team/premerge 四 trigger_stage） | 面二 | — |
 | | 路由变更对照 | 仅对 **verified 变更点**（§5.2 锚齐全）输出；不足 2 点输出 `NOT_ENOUGH_CHANGE_POINTS` | 面一+锚 | 历史无锚数据只做描述性 model-mix |
 
@@ -198,7 +199,7 @@ trace→span→generation 模型。吸收：两层事件结构（派发≈trace�
 - ZCode `~/.zcode/harness-projects.json` = **registry adapter 输入之一**（导入机制层 `projects.json`），不是机制层全局注册表；
 - 采集开关（`stats_enabled` 等）入三级配置 host 层（19 号既有机制，不另发明配置面）。
 
-### 5.2 事件模型（身份公式闭合；正式 schema=stats-1 契约票交付，上下位规则见本节末）
+### 5.2 事件模型（身份公式闭合；正式 schema=stats-1 契约票交付（首个 schema_version=v1），上下位规则见本节末）
 
 两层 + 观测层：**dispatch event**（派发）→ **model-request event**（模型请求，N:1 归派发）；**observation event**（票据工件快照与派生重算观察，subtype 必填：`ticket_snapshot` / `derived`）。
 
@@ -207,6 +208,7 @@ trace→span→generation 模型。吸收：两层事件结构（派发≈trace�
 ```text
 entity_id = source_instance_id + adapter_id + source_primary_key
   # source_primary_key 生成：sqlite=表内主键；append-only JSONL=文件相对路径+行号（文件不可变故行号稳定）
+  # 连接符=':'；解析=自左两刀（source_instance_id=UUIDv4 无冒号、adapter_id 禁冒号，pk 可含冒号）——gap-1 回灌 2026-10-08
 
 dispatch / model-request：
   event_id = entity_id + ':' + source_revision
@@ -225,7 +227,7 @@ observation（subtype 必填）：
 
 dispatch 必带：role/variant、project_id、归因级（§2.3）、状态机值、墙钟、attempt_kind/trigger_stage+secondary_cause、`classifier_version`、路由锚组。
 
-**状态机与源状态映射（v4 补）**：规范七态 `observed_running / terminal_completed / terminal_failed / terminal_cancelled / stale_orphan / missing_child / unknown`。源→规范映射表（stats-1 契约票交付冻结）：sqlite `completed/error/cancelled`→对应 terminal 态；metadata `completed/failed/running`→对应态；`missing_child`（定义：childSessionId 引用不存在于源，**无论时长**——引用完整性错误）与 `stale_orphan`（定义：running 且超 72h 无 child 会话与 token，**时钟字段=collect 时刻 UTC，测试经 `--clock` 注入**）互斥。**计数细则**：stale_orphan 计派发、不计失败、不计墙钟；missing_child 计入失败率；terminal_cancelled 单列、不入失败率与 rerun 分母；unknown 只计数不入任何率；rerun 率分母=terminal_completed+terminal_failed。
+**状态机与源状态映射（v4 补）**：规范七态 `observed_running / terminal_completed / terminal_failed / terminal_cancelled / stale_orphan / missing_child / unknown`。源→规范映射表（stats-1 契约票交付冻结）：sqlite `completed/error/cancelled`→对应 terminal 态；metadata `completed/failed/running`→对应态；`missing_child`（定义：childSessionId 引用不存在于源，**无论时长**——引用完整性错误）与 `stale_orphan`（定义：running 且超 72h 无 child 会话与 token，**时钟字段=collect 时刻 UTC，测试经 `--clock` 注入**）互斥。**判据二分（gap-2 回灌 2026-10-08，stats-1 冻结已三方认可）**：按记录自身生命周期 claim——终态记录（completed/failed）+childSessionId 悬空=missing_child（"无论时长"限定词作用于本分支）；running 悬空/缺失 child：≤72h=observed_running 宽限，＞72h 无 child 无 token=stale_orphan（时长判据仅存本分支）。append-only 源（Kimi/Codex）行 **ingest 即终态映射**（行不可变无迁移、open-set 不适用——映射表归契约件 state-mapping.md，stats-3-gap-2 回灌 2026-10-10）；duration 补写子句适用 adapter_type=mutable-row，append-only 行 duration 不可观=null（O-34 细化，stats-3-gap-6 回灌 2026-10-10）。**计数细则**：stale_orphan 计派发、不计失败、不计墙钟；missing_child 计入失败率（**失败率分母=terminal_completed+terminal_failed+missing_child**，gap-5① 回灌 2026-10-08）；terminal_cancelled 单列、不入失败率与 rerun 分母；unknown 只计数不入任何率；rerun 率分母=terminal_completed+terminal_failed。
 
 **双面一致性校验（v4 补）**：verify 输出票据 developer-attempt 行 vs 归因派发事件 vs developer/developer-rerun 变体序列三方对账（missing ticket row / orphan dispatch / duplicate attempt / non-monotonic attempt / attempt=1-but-infra-failure / one-row-multi-attempt / variant-kind 冲突）；差异率超阈（默认 5%）→ M2 **fail-loud**，不得静默"回退面一推数"（面一可见派发、不可判 attempt 序号与拒因）。D7' childSessionId 未落地前 pilot 可跑，但低置信 join 不得当已闭合的票级成本归因。
 
@@ -251,9 +253,9 @@ dispatch 必带：role/variant、project_id、归因级（§2.3）、状态机�
 6. **crash 验收清单（F1–F6+E1–E4，等价持久化终态注入）**——power-loss 以"每个 fsync/rename 后可观察到的等价持久化终态"枚举注入（终态注入声明，非过程模拟）：
 
    - **F1** segment.tmp 写前；**F2** segment.tmp 截断；**F3** segment rename 后 manifest 前；**F4** segment manifest fsync 后 cursor tmp 写前；**F5** cursor tmp fsync 后 rename 前；**F6** cursor rename 后父目录 fsync 前——**拆 F6a（rename 持久化保留）/F6b（rename 丢失）双终态**；
-   - **E1** stale lock / PID 复用：lock 记录=`PID+心跳时间+process-start token`（v4 补 token，使复用判定可测）；fixture 注入 process-liveness/process-start oracle，非等待真实复用；**E2** cursor 损坏四型分别编号断言：E2a 空 / E2b 截断 JSON / E2c 坏校验 / E2d 指向不存在 segment；**E3** rebuild 中途——rebuild 协议：写入 `generation-N` 新目录→校验→**原子切换代指针**→旧代保留至 validate 通过后清理（"中途"崩溃=旧代完整可回退）；**E4** compaction 交叉——compaction 取同一排它锁；report 固定 generation 快照（读代指针指向的 manifest）；旧 segment 仅当 **`segment_end_cursor ≤ compaction_watermark`** 才可删；
+   - **E1** stale lock / PID 复用：lock 记录=`PID+心跳时间+process-start token`（v4 补 token，使复用判定可测）；fixture 注入 process-liveness/process-start oracle，非等待真实复用；**E2** cursor 损坏四型分别编号断言：E2a 空 / E2b 截断 JSON / E2c 坏校验 / E2d 指向不存在 segment；**E3** rebuild 中途——rebuild 协议：写入 `generation-N` 新目录→校验→**原子切换代指针**→旧代保留至 validate 通过后清理（"中途"崩溃=旧代完整可回退）；**E4** compaction 交叉——compaction 取同一排它锁；report 固定 generation 快照（读代指针指向的 manifest）；旧 segment 仅当 **`segment_end_cursor ≤ compaction_watermark`** 才可删，且不在任一 report manifest 的 segment_shas 引用集内（**segment 级引用保护**，gap-6① 回灌 2026-10-08；被删集=水位下集合−引用保护集）；
    - **注入契约（stats-1 契约票冻结，v4 定要求）**：named failpoint API（`--failpoint <F1..F6|E1..E4[:sub]> --failpoint-mode once --failpoint-state <dir> --clock <frozen> --process-liveness-oracle <fixture> --process-start-token <fixture>`）；每 failpoint 冻结：注入点（动作前/后）、一次触发语义、预期退出码、注入后应存在文件、重跑后 canonical event/segment/cursor 预期；平台不支持项=**SKIP 留痕**（非绿非红，验收清单注明 Windows/Linux 支持矩阵）；
-7. **一致快照**：优先 ro 事务直连（含 timeout 重试）；回退 **`node:sqlite.backup()`（Online Backup API，D9'）**——ro 直连间歇性失败已两次实录（§2.4），双路径为必备；副本入随机私有 TEMP 子目录，try/finally 删除，**删除失败→exit≠0 + 下次启动扫描清理**；
+7. **一致快照**：优先 ro 事务直连（含 timeout 重试）；回退 **`node:sqlite.backup()`（Online Backup API，D9'）**——ro 直连间歇性失败已两次实录（§2.4），双路径为必备；副本入随机私有 TEMP 子目录，try/finally 删除，**删除失败→exit≠0 + 下次启动扫描清理**；零写入证据域=读取面（宿主 daemon 持续写入的源全树字节恒等结构性不可达，按读取面声明留痕，stats-3-gap-4 回灌 2026-10-10）；
 8. **并发**：单机排它锁（locks/）；report 只读 closed segments（经 generation 快照）；report/collect/compaction 并发矩阵=stats-4 ⑦。
 
 ### 5.5 事件仓生命周期与 manifest 分层（v4 分层）
@@ -264,8 +266,8 @@ dispatch 必带：role/variant、project_id、归因级（§2.3）、状态机�
 |---|---|---|---|
 | ① | **segment manifest** | events/ 内每 segment 的 closed 判定+SHA（恢复与 cursor 重建的依据） | 随 segment 永久（compaction 按 E4 水位） |
 | ② | **bundle manifest** | `snapshots/<bundle_id>/manifest.json`——冻结四源（字段=§5.8 全集） | **被 report 引用的 bundle 不删（引用计数）；未被引用的保留最近 3 份** |
-| ③ | **report manifest** | 引用 `bundle_id` + classifier_version + derivation selection policy + revision watermark + 事件 segment SHA + 时区/参数 | 随 report 文件永久 |
-| ④ | cursor 状态 | cursors/——可从 ① 重建（E2） | 唯一提交点产物 |
+| ③ | **report manifest** | 引用 `bundle_id` + classifier_version + derivation selection policy + revision watermark（RFC3339 UTC 时点，gap-5② 回灌 2026-10-08）+ 事件 segment SHA + 时区/参数 | 随 report 文件永久 |
+| ④ | cursor 状态 | cursors/（携带 payload_sha256 完整性校验：canonical=去信封键后键递归字典序无空白 JSON 的 SHA-256——gap-3 回灌 2026-10-08）——可从 ① 重建（E2） | 唯一提交点产物 |
 
 retention 默认**永久保留**（计量元数据 ≈300B/请求行，年十万行≈30MB）+ 手动 compaction（E4 协议）；仓损坏→quarantine 后 `rebuild --from-source`（幂等，E3 generation 协议）。
 
@@ -309,7 +311,7 @@ eligible repair episode 定义：attempt_kind=quality_rework + 归因∈{EXPLICI
 | B9 | **closure matrix=七子项全范围**（00 索引 B9 原文）：①injectAgentsMd 待核（02 状态注核对，归属 02）②skills 锚点包来源待核（16 §3，归属 16）③每 5 票计数域 ④无 metrics 行计票 ⑤修复票计票 ⑥唯一计数源 ⑦第 10 票复盘触发者与时机；③–⑦由 stats 定义并机判，①② stats 只登记闭合状态不代核；**七项全绿才删 B9 行** |
 | archiver 卡 | SOP metrics 代录改引 stats 快照；新增"季度效能报告"步骤（角色卡变更走 dogfood 票+变体重铸链） |
 | OPT-2 路由 | M4 路由对照=反馈闭环；路由锚自上线记录（§5.2） |
-| 宪法 4a 步 | D7'：运行记录行补 childSessionId——独立 dogfood 票，不阻塞 stats-1…5 |
+| 宪法 4a 步 | D7'：运行记录行补 childSessionId——独立 dogfood 票，不阻塞 stats-1…5；**已落地（2026-10-10 merge 5eda96e：执行会话标识代录义务+反查法+宿主中立 host:n/a）** |
 | B5 check-env | D9' 版本校验（Node ≥22.16）登记为该票联动项 |
 
 ## 8. 分期工单（验收全部机械化）
@@ -317,15 +319,15 @@ eligible repair episode 定义：attempt_kind=quality_rework + 归因∈{EXPLICI
 | 票 | 内容 | 验收标准（机械可判） |
 |---|---|---|
 | stats-1 | **契约冻结票（schema/contract freeze）——本票不实现生产 collect、不进入 stats-2** | 交付物九件：①**obligation inventory**（正文 MUST 逐条编号 O-xx：规范行/事件类型/JSON Pointer/required/nullability/validator rule/正负 fixture ID）②事件/游标/segment/四层 manifest schema（§5.5）③`validate-schema`：三层验证（JSON Schema 结构+跨字段+跨事件：身份唯一性/revision 单调/终态字段约束）④**状态映射表**（sqlite/metadata 源状态→七态，含 missing_child vs stale_orphan 判据）⑤**F/E failpoint 注入契约**（§5.4-6 全参数+每 failpoint 预期表+F6a/b、E2a-d 子型+平台 SKIP 矩阵）⑥pilot bundle schema 与过滤谓词（§5.8 含 metadata eligible）⑦held-out 分类器验收协议（§2.2-11 数据集隔离）⑧**§9 全约束→后续票 traceability matrix**（零漂移证明）⑨schema 上下位五条逐项验收条目。验收：正/负 fixture 全绿（每负例对应 validator rule 且 exit≠0）；受控命名检查：指标分层标题恰 M1–M4（正则断言），`L1–L4` 出现仅限**五处白名单语境**（§0/§4/§7/本条/附录）附判定清单；§9 裁决逐条落文 |
-| stats-2 | ZCode adapter **bounded pilot**（§5.8 边界内，冻结 bundle 上开发） | ①同 bundle collect×2 → 事件数与 segment SHA 恒等；②running→terminal fixture：二次 collect 后 token/duration 非空且不重计；③unknown source 面：删列+**版本越界+model/status/role 分维 unknown>5%+schema fingerprint 变化**各一 fixture → 皆 exit≠0+cursor 冻结+零写入；④`.venv` 排除与大小写归一 fixture；⑤TEMP 残留=0（删除失败→exit≠0+启动清扫）；⑥F1–F6（含 F6a/b）+E1–E4（含 E2a-d）按契约注入逐项收敛；⑦bundle manifest 内 eligible metadata 总数与 role×status 聚合，collect 前后恒等（不写活库常数）；⑧状态机每值 ≥1 fixture（含 missing_child/stale_orphan+72h `--clock` 注入）+状态映射表逐行断言；⑨源行数/max-id 回退 fixture→fail loud；⑩双面一致性对账（§5.2）输出七类差异，超阈 fail-loud；⑪forbidden 字段负例（allowlist 拒绝且不落事件）；⑫bundle 引用计数保留 fixture（被 report 引用的 bundle 经 prune/清理尝试后仍在，§5.5-②——聚焦确认 P3 备注 2026-10-01 收口） |
-| stats-3 | Kimi/Codex adapter + 票据/git miner + join + attempt 分类器（§2.2 协议实现） | ①host feature matrix 全格 VERIFIED/UNVERIFIED（含 adapter_type）；②Kimi usage→五路映射 fixture（reasoning=N/A 断言）；③Codex 父子 join：可得则归因，不可得→子代理成本标 unknown 不入角色桶；④归因 golden set（≥20 派发人工标注）出 precision/coverage；CANDIDATE 零入票级指标断言；⑤**分类器数据集隔离**：development_regression_set（36 例）逐例回归全绿不计 precision；held_out_acceptance_set（≥20 例新抽、与词典制定隔离）报告三率且过 §2.2-10 双门；classifier_version+derivation_revision 落事件断言；⑥AITrader2 pilot 时段票五级归因分布+三率报告 |
+| stats-2 | ZCode adapter **bounded pilot**（§5.8 边界内，冻结 bundle 上开发） | ①同 bundle collect×2 → 事件数与 segment SHA 恒等；②running→terminal fixture：二次 collect 后 token/duration 非空且不重计；③unknown source 面：删列+**版本越界+model/status/role 分维 unknown>5%+schema fingerprint 变化**各一 fixture → 皆 exit≠0+cursor 冻结+零写入；④`.venv` 排除与大小写归一 fixture；⑤TEMP 残留=0（删除失败→exit≠0+启动清扫）；⑥F1–F6（含 F6a/b）+E1–E4（含 E2a-d）按契约注入逐项收敛；⑦bundle manifest 内 eligible metadata 总数与 role×status 聚合，collect 前后恒等（不写活库常数）；⑧状态机每值 ≥1 fixture（含 missing_child/stale_orphan+72h `--clock` 注入）+状态映射表逐行断言；⑨源行数/max-id 回退 fixture→fail loud（max-id 经 audit 侧车承载——bundle 面无源 max-id 字段，stats-2-gap-3 回灌 2026-10-10）；⑩双面一致性对账（§5.2）输出七类差异，超阈 fail-loud；⑪forbidden 字段负例（allowlist 拒绝且不落事件）；⑫bundle 引用计数保留 fixture（被 report 引用的 bundle 经 prune/清理尝试后仍在，§5.5-②——聚焦确认 P3 备注 2026-10-01 收口） |
+| stats-3 | Kimi/Codex adapter + 票据/git miner + join + attempt 分类器（§2.2 协议实现） | ①host feature matrix 全格 VERIFIED/UNVERIFIED（含 adapter_type）；②Kimi usage→五路映射 fixture（reasoning=N/A 断言）；③Codex 父子 join：可得则归因，不可得→子代理成本标 unknown 不入角色桶；④归因 golden set（≥20 派发人工标注）出 precision/coverage；CANDIDATE 零入票级指标断言；⑤**分类器数据集隔离**：development_regression_set（36 例）逐例回归全绿不计 precision；held_out_acceptance_set（≥20 例新抽、与词典制定隔离）报告三率且过 §2.2-10 双门；classifier_version+derivation_revision 落事件断言；⑥AITrader2 pilot 时段票五级归因分布+三率报告；⑦observation 载荷（snapshot/derivation 容器内部）字段级 allowlist 逐字段过方案门冻结（gap-4 回灌挂靠，闭合归本票） |
 | stats-4 | report/verify 子命令 | ①同快照重跑 report → canonical JSON 字节恒等；②默认 stdout 零落盘；--out 仅白名单；③三 pass 指标分列输出；④verify 偏差超阈 exit≠0；⑤B3 脱敏检测对 report 产物零命中；⑥ACL 异常目录→exit≠0；⑦report/collect/compaction generation 并发矩阵 fixture；⑧UTC/ISO 跨年周桶 fixture（年末周归 week-year 断言） |
 | stats-5 | M3–M4 + 路由对照 + archiver 卡改版 + B9 销账 | ①仅 verified 变更点出对照，不足 2 点输出 NOT_ENOUGH_CHANGE_POINTS（exit 0）；②每个对照点带 repo commit/local hash/卡 hash；③B9 七子项 matrix 全绿后删行（①②闭合证明由 02/16 权威面出具）；④窗口混票剔除规则实现前冻结入 spec 附录 |
 | stats-6a（可选） | $ 估算 | LiteLLM 快照锁 revision+版本化；订阅模型 N/A 标注 fixture；跨模型合计列强制禁用 |
 | stats-6b（可选） | diagrams 趋势图 | 沿用本仓 diagrams 管线约束（图源 docs/diagrams、产物公开仓） |
 | stats-6c（blocked） | 多机聚合 | D6' 扩批前 blocked；前置=host identity/clock-skew/去重协议票 |
 
-## 9. 决策记录（均已获用户批准；批准记录=2026-09-30/10-01 Zcode_T1 会话用户显式指令"批准"×3、"同意推荐，不做任何映射"）
+## 9. 决策记录（均已获用户批准；批准记录=2026-09-30/10-01 内部仓工作会话用户显式指令"批准"×3、"同意推荐，不做任何映射"）
 
 | # | 决策 | 裁决 |
 |---|---|---|

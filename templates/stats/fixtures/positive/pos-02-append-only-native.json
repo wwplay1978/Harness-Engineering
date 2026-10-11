@@ -1,0 +1,50 @@
+{
+  "fixture_kind": "event-corpus",
+  "description": "append-only adapter（Codex rollout 原型）：行不可变=source_revision 恒 1；原生面无派发事件=parent_entity_id null（X03 只约束非 null 面）；usage 缺路=null（N/A 不补零）；模型 ID 大小写分裂归一化保留原值",
+  "events": [
+    {
+      "schema_version": "v1",
+      "event_kind": "model-request",
+      "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:codex-rollout:2026/09/25/rollout-sess-77-a.jsonl#42:1",
+      "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:codex-rollout:2026/09/25/rollout-sess-77-a.jsonl#42",
+      "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+      "adapter_id": "codex-rollout",
+      "adapter_type": "append-only",
+      "source_primary_key": "2026/09/25/rollout-sess-77-a.jsonl#42",
+      "collected_at": "2026-09-26T00:10:00Z",
+      "source_revision": 1,
+      "parent_entity_id": null,
+      "model": "glm-5.3-flash",
+      "model_original": "GLM-5.3-Flash",
+      "status": "completed",
+      "state": "terminal_completed",
+      "started_at": "2026-09-25T14:03:11Z",
+      "duration_ms": 61800,
+      "time_to_first_token_ms": 940,
+      "retry_count": 0,
+      "usage": { "input": 7420, "output": 918, "reasoning": null, "cache_read": 45210, "cache_write": 8100 }
+    },
+    {
+      "schema_version": "v1",
+      "event_kind": "model-request",
+      "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:codex-rollout:2026/09/25/rollout-sess-77-a.jsonl#108:1",
+      "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:codex-rollout:2026/09/25/rollout-sess-77-a.jsonl#108",
+      "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+      "adapter_id": "codex-rollout",
+      "adapter_type": "append-only",
+      "source_primary_key": "2026/09/25/rollout-sess-77-a.jsonl#108",
+      "collected_at": "2026-09-26T00:10:00Z",
+      "source_revision": 1,
+      "parent_entity_id": null,
+      "model": "glm-5.3-flash",
+      "model_original": "glm-5.3-flash",
+      "status": "running",
+      "state": "observed_running",
+      "started_at": "2026-09-26T00:04:00Z",
+      "duration_ms": null,
+      "time_to_first_token_ms": null,
+      "retry_count": 0,
+      "usage": { "input": null, "output": null, "reasoning": null, "cache_read": null, "cache_write": null }
+    }
+  ]
+}

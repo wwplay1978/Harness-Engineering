@@ -1,0 +1,15 @@
+{
+  "fixture_kind": "report-manifest",
+  "description": "结构层：report manifest 缺 revision_watermark",
+  "manifest_kind": "report-manifest",
+  "report_id": "report-neg",
+  "generated_at": "2026-09-25T02:30:00Z",
+  "bundle_id": "bundle-neg",
+  "classifier_version": "clf-v0.1.0",
+  "derivation_selection_policy": "latest-valid;manual>auto",
+  "segment_shas": [
+    "9f1c4a2b77e0d3c5b8a1f6249d0e7c3a5b8f2d4e6a9c0b3d7e5f1a2c4b6d8e0f"
+  ],
+  "timezone": "UTC",
+  "params": {}
+}

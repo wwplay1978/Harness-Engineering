@@ -1,0 +1,183 @@
+{
+  "schema_id": "harness-stats-event-schema",
+  "schema_version": "v1",
+  "spec_anchor": "docs/22 v4 §5.2（@4c4d242）；schema 上下位规则见 §5.2 行 234 ①-⑤——本文件只细化、不改写正文语义",
+  "description": "事件仓三类事件 schema v1（dispatch / model-request / observation）。fixture 外形：{fixture_kind:'event-corpus', events:[…]}。校验器按 event_kind 判别选子 schema；observation 再按 observation_subtype 判别。自定义注记键 rule=违规时上报的 validator rule ID（义务对账见 obligations.md）。",
+  "timestamp_note": "全部时间戳=RFC3339 UTC 规范形（Z 后缀、秒位必填、毫秒可选；+00:00 偏移写法非规范形，拒收）——22 §5.7 行 278『事件存 UTC』的 schema 细化。VR-S14=字形+语义（2026-10-07 审查轮收紧，traceability.md H6 登记）：pattern 验字形后追加历法范围校验（月 01-12、日 01-按月天数含闰年、时 00-23、分/秒 00-59）——本注记适用于全部 schema 文件中携带 rule=VR-S14 的时间戳节点",
+  "fixture_envelope": {
+    "rule": "VR-S28",
+    "type": "object",
+    "required": ["fixture_kind", "events"],
+    "properties": {
+      "fixture_kind": { "type": "string", "const": "event-corpus" },
+      "description": { "type": "string" },
+      "events": { "type": "array", "minItems": 1, "items": { "type": "object" } }
+    },
+    "additionalProperties": false
+  },
+  "discriminator": "event_kind",
+  "common_properties": {
+    "schema_version": { "type": "string", "const": "v1", "rule": "VR-S01", "description": "22 §5.2 行 201 正式 schema=stats-1 契约票交付；const v1=契约自定义（正文无行冻结 schema_version，gap-5-③）" },
+    "event_kind": { "type": "string", "enum": ["dispatch", "model-request", "observation"], "rule": "VR-S03", "description": "22 §5.2 行 203 两层+观测层" },
+    "event_id": { "type": "string", "minLength": 1, "description": "身份公式见 VR-F02/F03/F04（跨字段层复核）" },
+    "entity_id": { "type": "string", "minLength": 1, "description": "= source_instance_id:adapter_id:source_primary_key（分隔符为本票细化，gap-1；跨字段层 VR-F01 复核）" },
+    "source_instance_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", "rule": "VR-S02", "description": "22 §5.7 行 278：首启生成 UUIDv4 持久化" },
+    "adapter_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$", "rule": "VR-S19", "description": "禁冒号（身份公式自左两刀解析的前提；22 §5.3 行 238 adapter 声明）" },
+    "adapter_type": { "type": "string", "enum": ["mutable-row", "append-only"], "rule": "VR-S18", "description": "22 §5.2 行 209 / §5.3 行 238：决定 source_revision 语义（递增 vs 恒 1）" },
+    "source_primary_key": { "type": "string", "minLength": 1, "description": "22 §5.2 行 209-210：sqlite=表内主键；append-only JSONL=文件相对路径+行号（内部格式=adapter 契约，stats-2/3 冻结）" },
+    "collected_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "采集时刻（UTC）" }
+  },
+  "event_schemas": {
+    "dispatch": {
+      "rule": "VR-S05",
+      "description": "22 §5.2 行 226 dispatch 必带清单：role/variant、project_id、归因级、状态机值、墙钟、attempt_kind/trigger_stage+secondary_cause、classifier_version、路由锚组",
+      "required": ["source_revision", "role", "variant", "project_id", "ticket_slug", "attribution", "state", "created_at", "completed_at", "wall_clock_ms", "attempt_kind", "trigger_stage", "secondary_cause", "classifier_version", "route_anchor"],
+      "properties": {
+        "source_revision": { "type": "integer", "minimum": 1, "description": "mutable-row=allowlist 变化递增；append-only=恒 1（VR-F05 复核）" },
+        "role": { "type": "string", "minLength": 1, "description": "22 §2.1：agent 列去 zcode- 前缀；非机制角色归 other（枚举白名单=adapter known_enum_values 版化，不在 schema 硬编码）" },
+        "variant": { "type": "string", "description": "空串=base 变体；rerun 等变体名" },
+        "project_id": { "type": "string", "minLength": 1, "description": "22 §5.7 行 278 稳定身份（路径仅别名）" },
+        "ticket_slug": { "type": ["string", "null"], "pattern": "^[a-z0-9][a-z0-9-]{0,63}$", "description": "attribution 上三级必非 null（VR-F08）；CANDIDATE/UNATTRIBUTED 可 null" },
+        "attribution": { "type": "string", "enum": ["EXPLICIT", "DIRECT", "CANDIDATE", "MANUAL_RECONCILED", "UNATTRIBUTED"], "rule": "VR-S11", "description": "22 §2.3 五级；CANDIDATE 永不入票级指标" },
+        "state": { "type": "string", "enum": ["observed_running", "terminal_completed", "terminal_failed", "terminal_cancelled", "stale_orphan", "missing_child", "unknown"], "rule": "VR-S12", "description": "22 §5.2 行 228 状态机七态；源映射见 state-mapping.md" },
+        "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "派发 createdAt" },
+        "completed_at": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "终态约束见 VR-F06" },
+        "wall_clock_ms": { "type": ["integer", "null"], "minimum": 0, "description": "墙钟=completedAt−createdAt（VR-F07 复核）；stale_orphan 双 null 冻结（不计墙钟的计数细则承载）" },
+        "attempt_kind": { "type": "string", "enum": ["initial", "quality_rework", "infrastructure_retry", "cancellation_retry", "evidence_refresh", "unknown", "compound_unparseable"], "rule": "VR-S09", "description": "22 §2.2 行 58 七值；组合约束（gap-6② 裁 A 回灌 2026-10-08）：attempt_kind=initial ⇒ trigger_stage=unknown，其余组合不设约束（VR-F11 跨字段复核）" },
+        "trigger_stage": { "type": "string", "enum": ["reviewer", "qa", "red_team", "premerge", "environment", "user", "unknown"], "rule": "VR-S10", "description": "22 §2.2 行 59 七值；attempt_kind=initial 时必为 unknown（VR-F11；guard=两维均过 enum 结构校验后才执行组合判定）" },
+        "secondary_cause": { "type": "string", "description": "22 §2.2-7 多因并存不折叠；单因=空串" },
+        "classifier_version": { "type": "string", "minLength": 1, "description": "22 §2.2-9 分类器版本入事件" },
+        "route_anchor": {
+          "type": "object",
+          "rule": "VR-S13",
+          "description": "22 §5.2 行 232 路由锚组；历史无锚=各字段字符串值 unknown（只做描述性分组，不得声称为路由决策前后对照）",
+          "required": ["effective_model", "route_hash", "repo_models_config_commit", "local_override_hash", "generated_role_card_hash", "host_version", "collector_version"],
+          "properties": {
+            "effective_model": { "type": "string", "minLength": 1 },
+            "route_hash": { "type": "string", "minLength": 1 },
+            "repo_models_config_commit": { "type": "string", "minLength": 1 },
+            "local_override_hash": { "type": "string", "minLength": 1 },
+            "generated_role_card_hash": { "type": "string", "minLength": 1 },
+            "host_version": { "type": "string", "minLength": 1 },
+            "collector_version": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "model-request": {
+      "rule": "VR-S06",
+      "description": "22 §5.2 行 203 模型请求事件（N:1 归派发；墙钟与模型请求时长分口径）",
+      "required": ["source_revision", "parent_entity_id", "model", "model_original", "status", "state", "started_at", "duration_ms", "time_to_first_token_ms", "retry_count", "usage"],
+      "properties": {
+        "source_revision": { "type": "integer", "minimum": 1 },
+        "parent_entity_id": { "type": ["string", "null"], "minLength": 1, "description": "归属派发的 dispatch entity_id；null=原生面无派发事件（Codex/Kimi，22 §5.2 行 203/§8 stats-3）；非 null 时跨事件层 VR-X03 复核解析" },
+        "model": { "type": "string", "minLength": 1, "description": "归一化后模型 ID（大小写分裂合并）" },
+        "model_original": { "type": "string", "minLength": 1, "description": "原值备查（22 §2.1 已知噪声注记）" },
+        "status": { "type": "string", "minLength": 1, "description": "源状态原值（sqlite status 列）；映射见 state-mapping.md" },
+        "state": { "type": "string", "enum": ["observed_running", "terminal_completed", "terminal_failed", "terminal_cancelled", "stale_orphan", "missing_child", "unknown"], "rule": "VR-S12" },
+        "started_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "行内状态机原地补写而 started_at 不变（22 §5.4-1）" },
+        "duration_ms": { "type": ["integer", "null"], "minimum": 0, "description": "模型请求时长（与派发墙钟分口径）；terminal_completed/failed 必非 null（VR-F09——duration 补写子句适用 adapter_type=mutable-row：O-34 细化，append-only 行时长不可观=null 合法）" },
+        "time_to_first_token_ms": { "type": ["integer", "null"], "minimum": 0 },
+        "retry_count": { "type": "integer", "minimum": 0 },
+        "usage": {
+          "type": "object",
+          "rule": "VR-S17",
+          "description": "D1' usage-vector 五路：input/output/reasoning/cache-read/cache-write 分列；宿主缺路=null（N/A 不补零）；禁跨模型求和单值（report 侧口径）",
+          "required": ["input", "output", "reasoning", "cache_read", "cache_write"],
+          "properties": {
+            "input": { "type": ["integer", "null"], "minimum": 0, "rule": "VR-S17" },
+            "output": { "type": ["integer", "null"], "minimum": 0, "rule": "VR-S17" },
+            "reasoning": { "type": ["integer", "null"], "minimum": 0, "rule": "VR-S17" },
+            "cache_read": { "type": ["integer", "null"], "minimum": 0, "rule": "VR-S17" },
+            "cache_write": { "type": ["integer", "null"], "minimum": 0, "rule": "VR-S17" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "observation": {
+      "rule": "VR-S04",
+      "description": "22 §5.2 行 203/215：观测层，subtype 必填；天然 event-sourced 按 event_id 追加（行 224）",
+      "discriminator": "observation_subtype",
+      "required": ["observation_subtype"],
+      "properties": {
+        "observation_subtype": { "type": "string", "enum": ["ticket_snapshot", "derived"], "rule": "VR-S04" }
+      },
+      "subschemas": {
+        "ticket_snapshot": {
+          "rule": "VR-S07",
+          "description": "22 §5.2 行 216：event_id = entity_id:obs:source_hash8（源文件内容 hash 短码）",
+          "required": ["ticket_slug", "source_hash8", "snapshot"],
+          "properties": {
+            "ticket_slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,64}$" },
+            "source_hash8": { "type": "string", "pattern": "^[0-9a-f]{8}$", "rule": "VR-S15", "description": "源文件内容 SHA-256 前 8 位小写 hex" },
+            "snapshot": {
+              "type": "object",
+              "rule": "VR-S29",
+              "description": "stats-3 阶段一冻结（stats-1-gap-4 闭合；票面附件 A 批准基线 2026-10-09）：票据工件快照载荷字段级 allowlist——逐运行记录行快照（结构列照录+拒因工件清单+源引用）。新增字段须过追加方案门。",
+              "required": ["attempt_column_raw", "attempt_no", "role_column_raw", "result_column_raw", "date_column_raw", "note_column_raw", "review_artifacts", "source_refs"],
+              "properties": {
+                "attempt_column_raw": { "type": "string", "description": "attempt 列原值照录（rN/数字/非数值）" },
+                "attempt_no": { "type": ["integer", "null"], "minimum": 1, "description": "预处理规范化序号（rN 前缀剥离；非数值列=null——不作结构信号，22 §2.2-1）" },
+                "role_column_raw": { "type": "string", "description": "角色列原值照录" },
+                "result_column_raw": { "type": "string", "description": "结果列原值照录（不据此分类——parser 契约 §1）" },
+                "date_column_raw": { "type": "string", "description": "日期列原值照录" },
+                "note_column_raw": { "type": "string", "description": "备注列原值照录（显式声明匹配列）" },
+                "review_artifacts": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "该 slug 的拒因工件文件名清单（bundle reviews 冻结面；空数组=无）" },
+                "source_refs": {
+                  "type": "object",
+                  "required": ["tickets_path", "line_range"],
+                  "properties": {
+                    "tickets_path": { "type": "string", "minLength": 1, "description": "票文件在冻结 bundle 内的相对路径（tickets/<slug>.md）" },
+                    "line_range": { "type": "string", "pattern": "^[0-9]+-[0-9]+$", "description": "该行在票文件中的行号区间（1-based，start-end）" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "derived": {
+          "rule": "VR-S08",
+          "description": "22 §5.2 行 217-218：event_id = entity_id:drv:derivation_revision；携带 classifier_version；不冒充 source_revision；历史派生只进 audit/history 禁入 M2 分子分母（行 221）",
+          "required": ["derivation_revision", "classifier_version", "derivation_origin", "derivation"],
+          "properties": {
+            "derivation_revision": { "type": "integer", "minimum": 1, "rule": "VR-S16" },
+            "classifier_version": { "type": "string", "minLength": 1, "description": "派生观察自身的分类器版本（缺失/空=VR-S08 必带集违规）" },
+            "derivation_origin": { "type": "string", "enum": ["auto", "manual"], "rule": "VR-S08", "description": "M2 selection policy 优先级载体：manual＞auto（22 §5.2 行 221）；人工更正=MANUAL_RECONCILED 派生（§2.2-8）" },
+            "derivation": {
+              "type": "object",
+              "rule": "VR-S30",
+              "description": "stats-3 阶段一冻结（gap-4 闭合；附件 A 批准基线）：派生结论载荷字段级 allowlist——attempt 分类结论（人工性由 derivation_origin 承载，归因者/依据/源 hash 由 reconcile 输入工件归档承载，不入事件载荷）。新增字段须过追加方案门。",
+              "required": ["attempt_kind", "trigger_stage", "secondary_cause", "primary_signal_level", "signal_evidence", "decided_at"],
+              "properties": {
+                "attempt_kind": { "type": "string", "enum": ["initial", "quality_rework", "infrastructure_retry", "cancellation_retry", "evidence_refresh", "unknown", "compound_unparseable"], "description": "22 §2.2 行 58 七值（与 dispatch 同枚举）" },
+                "trigger_stage": { "type": "string", "enum": ["reviewer", "qa", "red_team", "premerge", "environment", "user", "unknown"], "description": "22 §2.2 行 59 七值；initial ⇒ unknown（分类器生成侧执行 gap-6② 组合纪律）" },
+                "secondary_cause": { "type": ["string", "null"], "enum": ["non_defect", "spec_face", "user_directed", "upstream_sync", "staged_delivery", null], "description": "22 §2.2-7 多因并存不折叠；枚举=附件 A 冻结+classifier-v2 裁决 A 扩枚举（2026-10-11：upstream_sync=上游合并驱动复跑 H09/staged_delivery=分段新交付 H16）；词典 secondary 行映射；单因/无=null" },
+                "primary_signal_level": { "type": "string", "enum": ["explicit", "structural", "dictionary", "none"], "description": "22 §2.2-2 信号优先级的判据级（①显式声明/②结构信号/③词典/④无信号）；manual 事件恒=explicit（人工声明=最高级信号，与 M2 manual＞auto 同构——classifier-dictionary.md §0 冻结）" },
+                "signal_evidence": {
+                  "type": "object",
+                  "required": ["matched_phrase", "structural_basis"],
+                  "properties": {
+                    "matched_phrase": { "type": ["string", "null"], "description": "命中短语原文（declaration/dictionary 命中时；无=null）" },
+                    "structural_basis": { "type": ["string", "null"], "description": "结构依据描述（结构信号级）；manual 事件承载 reconcile basis 依据文本" }
+                  },
+                  "additionalProperties": false
+                },
+                "decided_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "判定时刻（RFC3339 UTC；O-14 载荷时间字段扩面）" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
