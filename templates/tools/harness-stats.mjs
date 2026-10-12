@@ -27,7 +27,6 @@ const USAGE = '用法：node harness-stats.mjs validate-schema <fixture 文件 |
 const [sub, target] = process.argv.slice(2);   // argv[0]=node argv[1]=脚本
 if (sub !== 'validate-schema') {
   // stats-2 子命令分发（validate-schema 以外的运行时契约面）
-  if (sub && !target && !process.argv.slice(3).length) { console.error(USAGE); process.exit(2); }
   const { runStats2 } = await import('./stats2/cli.mjs');
   process.exit(await runStats2(process.argv.slice(2)));
 }
