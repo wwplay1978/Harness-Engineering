@@ -38,7 +38,8 @@
         "variant": { "type": "string", "description": "空串=base 变体；rerun 等变体名" },
         "project_id": { "type": "string", "minLength": 1, "description": "22 §5.7 行 278 稳定身份（路径仅别名）" },
         "ticket_slug": { "type": ["string", "null"], "pattern": "^[a-z0-9][a-z0-9-]{0,63}$", "description": "attribution 上三级必非 null（VR-F08）；CANDIDATE/UNATTRIBUTED 可 null" },
-        "attribution": { "type": "string", "enum": ["EXPLICIT", "DIRECT", "CANDIDATE", "MANUAL_RECONCILED", "UNATTRIBUTED"], "rule": "VR-S11", "description": "22 §2.3 五级；CANDIDATE 永不入票级指标" },
+        "attribution": { "type": "string", "enum": ["EXPLICIT", "DIRECT", "CANDIDATE", "MANUAL_RECONCILED", "UNATTRIBUTED"], "rule": "VR-S11", "description": "22 §2.3 五级；CANDIDATE 永不入票级指标（本值=collect 侧单源初步判定〔仅 cwd 面〕——EXPLICIT join=report 消费侧实现，attribution-explicit-closure 裁决记录）" },
+        "child_session_id": { "type": ["string", "null"], "rule": "VR-F31", "description": "attribution-explicit-closure r2（22:90 EXPLICIT 定义「票据运行记录行含 childSessionId」的 dispatch 侧承载；对象域=ZCode dispatch——kimi/codex adapter 无 dispatch 源型，r1「null 如实」措辞作废）：= metadata childSessionId 直取（collect 侧 meta.childSessionId ?? null）。optional=存量事件无字段兼容（mutable-row contentKey schema 驱动——追加自动翻转内容键→revision+1，首次升级 collect 后幂等）；report 侧 EXPLICIT join 键（dispatch.child_session_id ∈ 票 ledger 行快照 execution_session.session_id 集）" },
         "state": { "type": "string", "enum": ["observed_running", "terminal_completed", "terminal_failed", "terminal_cancelled", "stale_orphan", "missing_child", "unknown"], "rule": "VR-S12", "description": "22 §5.2 行 228 状态机七态；源映射见 state-mapping.md" },
         "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "派发 createdAt" },
         "completed_at": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "终态约束见 VR-F06" },
@@ -126,6 +127,18 @@
                 "result_column_raw": { "type": "string", "description": "结果列原值照录（不据此分类——parser 契约 §1）" },
                 "date_column_raw": { "type": "string", "description": "日期列原值照录" },
                 "note_column_raw": { "type": "string", "description": "备注列原值照录（显式声明匹配列）" },
+                "execution_session": {
+                  "type": "object",
+                  "rule": "VR-S33",
+                  "description": "attribution-explicit-closure r2（票面草案 rule ID VR-S31 与 O-44 reconcile 规则撞号——裁决改号 VR-S33，登记 docs/changes/attribution-explicit-closure.md）：执行会话标识列三值直通（parser.mjs parseSessionCell 键名原名——禁重命名映射，P3-1）；optional=存量快照无字段兼容（mine dedupe=票文件 hash，存量不自动升级——票面已裁事实，唯一自然升级路径=票文件再变更后重 mine）。内部三键全 required（空对象非法）+additionalProperties:false；session_id=EXPLICIT join 键有界（maxLength 128+可打印字符 pattern，P3-2）；列缺席形={session_id:null,session_host_na:false,session_host_marker:null}",
+                  "required": ["session_id", "session_host_na", "session_host_marker"],
+                  "properties": {
+                    "session_id": { "type": ["string", "null"], "maxLength": 128, "pattern": "^[\\u0020-\\u007E]+$", "description": "真实会话标识（EXPLICIT join 锚——非空时=ledger 行 session_id 集成员）；null=空/host:n/a/host:标记/列缺席" },
+                    "session_host_na": { "type": "boolean", "description": "host:n/a 判据（该行无会话标识——归因上限 DIRECT 不升 EXPLICIT）" },
+                    "session_host_marker": { "type": ["string", "null"], "description": "宿主标记形态原值（host:xxx）；null=非标记形态" }
+                  },
+                  "additionalProperties": false
+                },
                 "review_artifacts": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "该 slug 的拒因工件文件名清单（bundle reviews 冻结面；空数组=无）" },
                 "source_refs": {
                   "type": "object",

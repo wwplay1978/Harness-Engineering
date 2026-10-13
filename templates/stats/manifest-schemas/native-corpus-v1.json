@@ -352,6 +352,20 @@
           }
         },
         "additionalProperties": false
+      },
+      "ticket_merges": {
+        "type": "array",
+        "description": "stats-5 M3 取数面（P1-1(a)）：票级 dogfood merge 观察——git log --grep ^merge: ticket <slug> 取 merge commit oid+committer 时戳；无匹配票不入清单（n/a 如实）。可选字段（additive——历史 corpus 无此字段兼容；report-manifest generation 同型先例）。",
+        "items": {
+          "type": "object",
+          "required": ["slug", "merge_oid", "merge_ts"],
+          "properties": {
+            "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+            "merge_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+            "merge_ts": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" }
+          },
+          "additionalProperties": false
+        }
       }
     },
     "additionalProperties": false

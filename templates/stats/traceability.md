@@ -3,6 +3,7 @@
 > 依据：docs/22 v4 @4c4d242 §9（行 328-343：D1'–D10' 裁决 + 硬约束清单——逐条验收映射=stats-1 交付的 traceability matrix）；§8 各票引用本文件。行号锚定同 obligations.md。
 > 本文件承载票面交付物⑧（§9 全约束→后续票 traceability matrix + D1'–D10' 逐条落文）与⑨（schema 上下位五条逐项验收条目）+ 验收 5 的受控命名判定清单。
 > 计数同步（2026-10-08 stats-2 阶段一契约修订原子批）：义务 39→**41**（新增 O-40=VR-F11 组合 sanity、O-41=VR-F12 role_status_counts）、负例 40→**42**（neg-VR-F11/neg-VR-F12）、正例 8 不变；docs/22 gap-6② 组合注记与契约面同提交（P0-3 裁决）。
+> 字段同步（2026-10-12 stats-5 票级 merge 观察面批）：bundle manifest 可选字段 ticket_merges 扩（pilot-bundle-schema/manifest-schemas/bundle-manifest-v1/native-corpus-v1 三 schema 同步，additive 可选——create-zcode-pilot 逐 slug+create-native-corpus 通用扫描两制作面；义务/正负例计数不变）。
 
 ## 1. D1'–D10' 决策落文矩阵（§9 行 330-341 逐条）
 

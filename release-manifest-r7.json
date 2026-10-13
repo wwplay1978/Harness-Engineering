@@ -1,0 +1,126 @@
+[
+  {
+    "path": "docs/00-index.md",
+    "sha256": "5a4d6c813fef84bb35b3a29aaf098bc59702daaf1a874a4fdb6d49ea3d9d05b9"
+  },
+  {
+    "path": "docs/22-effectiveness-statistics.md",
+    "sha256": "c80235f616d6d51100168fcad796afd94214e4d7a939bb5496671e9e347921ec"
+  },
+  {
+    "path": "docs/23-harness-stats-usage.md",
+    "sha256": "452641f743a64f02d9a4879df4638bd4858ae6673c0ac32c37fc38b5bc967a0f"
+  },
+  {
+    "path": "templates/stats/b9-closure-criteria.md",
+    "sha256": "bcc1c3e7ee2265a4ee99bc372af1bbd76b3ae06e733319c8306739011b27eeec"
+  },
+  {
+    "path": "templates/stats/classifier-acceptance.md",
+    "sha256": "69d335946cccd92b89ffc36d17dd99434fa0a59a14b387ebaa8c377da4cd7614"
+  },
+  {
+    "path": "templates/stats/event-schema-v1.json",
+    "sha256": "3869eb965e4a16d544a8121db07ee044d50f239d228c5459a9f363343972d064"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F31-child-session-id-type.json",
+    "sha256": "9ebf6338f8b14b4c03e20f53dabdfa5ab5ee1ece680e9e7e4217d963a574fe1c"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S33-execution-session-empty-object.json",
+    "sha256": "0ad1db9860b11a1fbe9628bde3a427b70495ebb71fb34fc4b78a73bbf62616c8"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S33-execution-session-extra-key.json",
+    "sha256": "69f7c1b748adc9cb2defc6f359f9044b4f2f11d789f9757aafef6e4e00ea573f"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S33-execution-session-session-id-oversize.json",
+    "sha256": "5ec8a3f7502743162efff1c193676589cdcd314744a3338dc6e9e588376d0a30"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S33-execution-session-type.json",
+    "sha256": "53a149bf78c167c9c36d2bca789d4348594778a46f2e2007010d53e20ea1a763"
+  },
+  {
+    "path": "templates/stats/fixtures/positive/pos-14-ticket-snapshot-execution-session.json",
+    "sha256": "2647b097a19326a3bcef14a1536eec339e3c92c9fedd4d9393118911941a7525"
+  },
+  {
+    "path": "templates/stats/fixtures/positive/pos-15-dispatch-child-session-id.json",
+    "sha256": "6729671fda296348b6b2566c354eb00ec10babd594a3ad89574dfe60b1200185"
+  },
+  {
+    "path": "templates/stats/manifest-schemas/bundle-manifest-v1.json",
+    "sha256": "b67baebe3d876ee5b0b3a45a2bf63c58595fe84897020bcb3a2150eca022dd78"
+  },
+  {
+    "path": "templates/stats/manifest-schemas/native-corpus-v1.json",
+    "sha256": "60f7c6c854f9ca38110e93615959e61a6d476837e667e334d608bc4418fcfe77"
+  },
+  {
+    "path": "templates/stats/obligations.md",
+    "sha256": "834d04236a282d287e8fed788f42420d0f5ab64998c380170d90c6ae196f2589"
+  },
+  {
+    "path": "templates/stats/pilot-bundle-schema.json",
+    "sha256": "a6df9d53357a9b5aae407dcc016ce5ec896e5dddef1f5d77f0e5e8fd56fa3b6f"
+  },
+  {
+    "path": "templates/stats/traceability.md",
+    "sha256": "232f7d790154818e2c5d489cfd64c0923eee786a1c73c657f8c85ee827cda880"
+  },
+  {
+    "path": "templates/stats/week-bucket-rules.md",
+    "sha256": "c501224163a3e927128908d5d9cdeb853ad1c736c03faf68a38a5a82ec1a3a4a"
+  },
+  {
+    "path": "templates/tools/b3-redact-check.mjs",
+    "sha256": "418c9edb7396f6741efe8ec13761341fb8344fc242ba11e2c99e5e55775d1bb9"
+  },
+  {
+    "path": "templates/tools/harness-stats.mjs",
+    "sha256": "e13047a6b4d9a930715874e73e82925f14171a814d5da2e984b2e65d42cbfdcf"
+  },
+  {
+    "path": "templates/tools/stats2/cli.mjs",
+    "sha256": "5d599fed59896fec28056093a87307a2e6c8d51fc655caf8a45e0ca13d6ac3aa"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-b9matrix.mjs",
+    "sha256": "1c20f5e56a26f190eaf429d0c1b3e1e80827e03f7a6b066186728a746363b143"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-bundle.mjs",
+    "sha256": "81785f65cb57be10a39d47dc61edf400aeb40a062f7419bda872a4e7ab22e8be"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-lifecycle.mjs",
+    "sha256": "b0d9f9d1e7da5012437021b7fdd8fbf21eae40107d59e2b559e89c22c475807a"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-mine.mjs",
+    "sha256": "2d77cd8ecbd2ddf8b8f6cce8d612b35eb31e7c2d86aba3918892a3dfc27af2e0"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-native.mjs",
+    "sha256": "9d0e6780e597156ff26aabaaea0773b70760496a6aefa2bb64abf045d2253848"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-report.mjs",
+    "sha256": "ec67d33459e37623fd928a06503c18d3cfd50b2a503c90dbb16478a4a71374c5"
+  },
+  {
+    "path": "templates/tools/stats2/contract-validator.mjs",
+    "sha256": "01dea60ffb1e3476324175669e00b42046b3912abe920f5e110a9708e0977dd6"
+  },
+  {
+    "path": "templates/tools/stats2/project.mjs",
+    "sha256": "941bb54bc9be7555ea0eac9739049132d3e2027a39e584da23711ab3c13b4135"
+  },
+  {
+    "path": "templates/tools/stats2/zcode-source.mjs",
+    "sha256": "e4f27970c7023b68d156890042a2d5d47c3ce8c4c845598244a187b929e6e6d8"
+  }
+]

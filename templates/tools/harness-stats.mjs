@@ -17,7 +17,7 @@
 //   ① 结构层 VR-Sxx：自研最小 JSON Schema 子集校验器（schema 节点 rule 注记=违规上报的规则 ID）；
 //   ② 跨字段层 VR-Fxx：身份公式/终态字段约束/墙钟公式/token 补写前提/eligible 计数自洽/cursor 校验和/组合 sanity（VR-F11）/role_status_counts（VR-F12）；
 //   ③ 跨事件层 VR-Xxx：event_id 唯一 / source_revision 单调 / 归派发解析 / derivation_revision 单调。
-// 规则语义与规范锚见 templates/stats/obligations.md（41 条 O-xx——stats-2 阶段一契约批新增 O-40/O-41）。
+// 规则语义与规范锚见 templates/stats/obligations.md（48 条 O-xx——stats-2 阶段一契约批新增 O-40/O-41）。
 import { existsSync, readdirSync, statSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateFixture, runSuite, loadJson } from './stats2/contract-validator.mjs';

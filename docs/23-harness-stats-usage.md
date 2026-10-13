@@ -1,6 +1,6 @@
 # harness-stats 使用指南（效能统计系统·使用者手册）
 
-> 读者：消费项目使用者（AITrader2/web2api 等已装六角色 harness 的项目）。版本：round-6（2026-10-12）。规范全文见 [22-effectiveness-statistics.md](22-effectiveness-statistics.md)（设计者视角）；本册只讲怎么用。
+> 读者：消费项目使用者（AITrader2/web2api 等已装六角色 harness 的项目）。版本：round-7（2026-10-13）。规范全文见 [22-effectiveness-statistics.md](22-effectiveness-statistics.md)（设计者视角）；本册只讲怎么用。
 > 工具位置：规范仓标准位 `~/.agents/Harness-Engineering/templates/tools/harness-stats.mjs`（本机标准位已随 round-6 就位；其他机器 `git pull` 公开仓即得）。**零项目级安装**——工具与事件仓全在机器级，按需调用。
 
 ## 1. 前置
@@ -18,7 +18,7 @@ $T = "$HOME\.agents\Harness-Engineering\templates\tools\harness-stats.mjs"
 node $T init
 
 # ② 冻结采集快照（ZCode 派发面；--project-dir 指向消费项目仓根）
-node $T bundle create-zcode-pilot --project-dir C:\Forex\Project\<你的项目>
+node $T bundle create-zcode-pilot --project-dir C:\path\to\<你的项目>
 
 # ③ 采集入仓 → 挖矿物化
 node $T collect --bundle <上一步输出的 bundle id>
@@ -43,7 +43,8 @@ Kimi/Codex 原生面：`bundle create-native-corpus`（参数同形）→ `colle
 | `reconcile --input <文件>` | 人工归因回灌（内容寻址归档） |
 | `validate` | 双面一致性校验 |
 | `verify --bundle <id>` | 票据×派发三方对账（含 orphan drift；差异率>5% exit≠0） |
-| `report` | M1/M2 报告（本册 §4） |
+| `report` | M1–M4 报告（本册 §4） |
+| `b9-matrix --project-dir <根> [--out]` | B9 关闭矩阵七子项机判报告（判据冻结件为唯一依据，红项不改退出码；`--out` 不带值——工件自动命名 `b9-closure-matrix-<ISO>Z.json` 落事件仓 `reports/`，append 禁覆写） |
 | `compact` / `prune` | 段合并 / 旧代清理（引用保护在役——report 引用的段永不被删） |
 | `rebuild --from-source --bundle <id>` | 自源重建 |
 | `migrate-audit` | 存量审计迁移 |
@@ -53,13 +54,17 @@ Kimi/Codex 原生面：`bundle create-native-corpus`（参数同形）→ `colle
 
 ## 4. report 输出解读
 
-真实样例（本机 2026-10-12）：
+真实样例（本机 2026-10-12；[M3]/[M4] 行=沙盒合成仓实跑 2026-10-13——同门红态）：
 
 ```
 report（all-store）generation=1 closed_segments=8 events=19815 watermark=2026-10-10T01:48:33Z
 [M1] 派发 498（失败 16，失败率 0.0325）墙钟 439789000ms 模型时长 522784496ms retry 760
 [M2] 分类质量门 red（版本差） auto 面 blocked-classifier-gate-red
 [M2] 人工归因子集 entities=23 tickets=4
+[M3] 周期时间 blocked（merge 锚物化面停该子面呈报——详见 --json reason）· agent/空闲 active 17400000ms / idle 36000000ms（estimation）
+[M4] 周趋势 2026-W38 █*  2026-W39 █*
+[M4] 返工成本占比 blocked（门红态分子源受阻——非 0） · 邻接拒绝 blocked（门红态分子源受阻——非 0）
+[M4] 路由对照 NOT_ENOUGH_CHANGE_POINTS（verified 0/8 派发全锚 0——锚缺失统计见 --json）
 ```
 
 - **[M1] 运行计量**：完整可用——派发次数/失败率/累计墙钟/模型时长/retry（按模型五路分列见 --json）。
@@ -87,10 +92,10 @@ node "$HOME\.agents\Harness-Engineering\templates\tools\b3-redact-check.mjs" 文
 
 事件仓纯本地（`~/.agents/harness-stats`，零上传零遥测）；采集只读快照冻结；report 默认 stdout 零落盘；对外共享前用 B3 门。
 
-## 8. 已知边界（2026-10-12）
+## 8. 已知边界（2026-10-13）
 
 - M2 auto 面数字：滚动重验批双门通过前维持 blocked（预计随后续票台账行累积触发）；
-- M3（流动）/M4（趋势）：未交付（stats-5）；
+- M3（流动）/M4（趋势）：M3 流动/M4 趋势已交付（stats-5）——M3-1 ticket cycle time 停摆子面 blocked（merge 锚物化面归后续票）；路由对照恒 NOT_ENOUGH_CHANGE_POINTS（锚采集面归后续票——诚实态非缺陷）；
 - `heldout-*`/`pilot-report` 子命令：分类器开发/验收面，非使用者面。
 
 ## 9. 排障

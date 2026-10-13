@@ -83,6 +83,10 @@ function rowObservations({ manifest, dir, slug, rows, reviewFiles, sid, nowIso }
       snapshot: {
         attempt_column_raw: row.attempt_raw, attempt_no: row.attempt_no, role_column_raw: row.role,
         result_column_raw: row.result, date_column_raw: row.date, note_column_raw: row.note,
+        // VR-S33（attribution-explicit-closure r2）：执行会话标识三值直通（parser 原名——P3-1 禁映射）。
+        // 存量语义（票面已裁事实）：dedupe=event_id 含票文件 hash——存量快照不自动升级，唯一自然
+        // 升级路径=票文件再变更后重 mine（新 hash→新 event）；全量回填不做（VR-F03 冻结）。
+        execution_session: { session_id: row.session_id, session_host_na: row.session_host_na, session_host_marker: row.session_host_marker },
         review_artifacts: artifacts,
         source_refs: { tickets_path: `tickets/${slug}.md`, line_range: `${row.line}-${row.line}` },
       },

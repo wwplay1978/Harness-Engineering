@@ -16,6 +16,7 @@ import {
   loadNativeAudit, writeNativeAudit, nativeAuditPath, sectionFilesDigest,
   KIMI_TYPE_ALLOWLIST, readJsonlLines, rowTimestamp, toIsoDay,
 } from './native-source.mjs';
+import { scanAllTicketMerges } from './cmd-bundle.mjs';
 
 const PILOT = {
   from: '2026-09-01T00:00:00Z', until: '2026-10-01T00:00:00Z',
@@ -283,7 +284,7 @@ export async function cmdBundleNativeCorpus(opts) {
   return exitCode === EXIT.OK ? EXIT.OK : exitCode;
 }
 
-async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexHome, projectId, projNorm, nowIso }) {
+async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexHome, projectDir, projectId, projNorm, nowIso }) {
   // 零写入证据·前（证据域=本工段实际读取面——kimi=全树；codex=sessions 子树。作用域声明见 evidence.policy：
   // ~/.codex 根下 logs_2.sqlite{-wal,-shm} 为 Codex 后台 daemon 持续写入面（2026-10-09 12s 对照窗实测，
   // 本工具未运行仍变化）——不在本工段读取面内，逐秒变化令全树 digest 恒等结构性不可达成；stats-3-gap-4）
@@ -311,6 +312,11 @@ async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexH
     window: [PILOT.from, PILOT.until],
   });
   const corpusId = `native-${projectId}-202609-${sha256Hex(idInput).slice(0, 8)}`;
+  // stats-5 M3 取数面：票级 merge 观察（项目仓 git 面）。git 面不可得（非 git 仓/git 不可用）→
+  // 空清单+stdout 注记如实（native corpus 契约不因 merge 观察强制 git 依赖——观察面缺席≠冻结失败）
+  let nativeTicketMerges = [];
+  try { nativeTicketMerges = scanAllTicketMerges(projectDir); }
+  catch (e) { console.log(`[STATS5] ticket merge 观察不可得（${String(e.message).split('\n')[0]}）——manifest.ticket_merges=[]（n/a 如实）`); }
   const manifest = {
     manifest_kind: 'native-corpus', corpus_id: corpusId,
     created_at: nowIso, observed_at: nowIso, project_id: projectId,
@@ -335,6 +341,9 @@ async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexH
       eligible_predicate: PILOT.codexPredicate,
       eligible_files: codex.eligible.map(stripInternal),
     },
+    // stats-5 M3 取数面（P1-1(a)）：票级 dogfood merge 观察（通用扫描——全史 `merge: ticket ` subject 解析；
+    // 可选字段 additive，历史 corpus 无字段兼容；reused 运行零覆写沿既有语义；git 面缺席=空清单如实）
+    ticket_merges: nativeTicketMerges,
   };
   const errs = validateFixture({ fixture_kind: 'native-corpus', ...manifest });
   if (errs.length) throw new Error(`native-corpus manifest 契约验证失败：\n${errs.map(e => `  ${e.rule} ${e.pointer}——${e.message}`).join('\n')}`);

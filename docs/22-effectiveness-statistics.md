@@ -1,7 +1,7 @@
 # 22 · 效能统计系统（跨项目遥测 × 效能度量，v4）
 
 > 定位：为六角色 harness 增加机制层统计能力——在所有在册项目上自动回答三问：**每类角色实际用了什么模型、累计跑了多久；质量性返工（quality rework）花了多少（次数/时长/token）；两者随时间的变化趋势**。产出服务于 OPT-2 路由反馈（docs/09/11）、13 号指标复盘门与"内部摩擦成本"核算。
-> 身份与状态：**A 类机制规范 · 已采纳（v4；2026-10-01 转正——§10 聚焦确认通过：六项核对点全过、36 例回归集 36/36 绿，P3 备注已补 stats-2 ⑫ 收口）**。审查链：v0 首轮「须重大修订」(P0×4) → v1 二轮「修 P1 后可采纳」(P1×9) → v2 终审「需再修」(P1×4) → v3 第四轮全面轮「需再修」(P1×7/P2×2，held-out 实弹，报告 [reviews/codex-22-v3-fullaudit-2026-10-01.md](reviews/codex-22-v3-fullaudit-2026-10-01.md)) → v4 回灌其 R1–R7 最小残余清单（变更映射见附录）。前序报告：[首轮](reviews/codex-22-proposal-audit-2026-09-30.md)、[二轮](reviews/codex-22-v1-reaudit-2026-09-30.md)、[终审](reviews/codex-22-v2-final-2026-09-30.md)。D1'–D10' 已获用户批准（§9）；v4 修订与转正经用户 2026-10-01 批准。
+> 身份与状态：**A 类机制规范 · 已采纳（v4；2026-10-01 转正——§10 聚焦确认通过：六项核对点全过、36 例回归集 36/36 绿（现 38 例），P3 备注已补 stats-2 ⑫ 收口）**。审查链：v0 首轮「须重大修订」(P0×4) → v1 二轮「修 P1 后可采纳」(P1×9) → v2 终审「需再修」(P1×4) → v3 第四轮全面轮「需再修」(P1×7/P2×2，held-out 实弹，报告 [reviews/codex-22-v3-fullaudit-2026-10-01.md](reviews/codex-22-v3-fullaudit-2026-10-01.md)) → v4 回灌其 R1–R7 最小残余清单（变更映射见附录）。前序报告：[首轮](reviews/codex-22-proposal-audit-2026-09-30.md)、[二轮](reviews/codex-22-v1-reaudit-2026-09-30.md)、[终审](reviews/codex-22-v2-final-2026-09-30.md)。D1'–D10' 已获用户批准（§9）；v4 修订与转正经用户 2026-10-01 批准。
 > 分层口径（沿 21 §0.3）：指标体系/事件仓 schema/采集协议=机制层 portable-contract；各宿主采集器（含版本探针）=宿主适配层 host-bound；本机数字=落地实例（I:，谓词与快照口径见 §2.4）。
 > 写作：2026-09-30 v0→v1→v2 → 2026-10-01 v3→v4（R1–R7 回灌）→ 2026-10-08 gap-1..6 回灌批（七处句级修订+stats-3 验收⑦；裁决记录=docs/changes/stats-1-gap-*.md）→ 2026-10-10 gap 回灌批二（八处 22 句级+state-mapping M5 注记+D7' 落地注记；stats-1-gap-4/6②、stats-2-gap-1..4、stats-3-gap-1..6 共 12 件闭合，gap-7 维持挂起归分类器 v2 票）→ 2026-10-11 classifier-v2 裁决 A（§4 三行同口径：质量性返工率分子/返工花费/M4 返工成本占比均剔 secondary_cause∈{non_defect, upstream_sync, staged_delivery}；分母=merged 票不变，「质量性返工票」由分子定义承载；历史 secondary=null 不回溯、前向生效（自 classifier 2.0.0 起派生标注）——趋势断裂声明：口径变更前后质量性返工率/返工花费/M4 返工成本占比不可直接对比，断裂声明同步入 formal v4 新工件）。修订记录只追加。
 
@@ -9,7 +9,7 @@
 
 **不新增 hook、不建常驻服务、不写任何项目仓**——「宿主本地日志离线挖矿（面一）+ 票据/git 工件挖掘（面二）」双面采集，聚合为一个用户域事件仓 + 一条报告 CLI（`harness-stats.mjs`）。
 
-四轮审查确认"攻击不动"并保留：离线挖矿；用户域单仓；双面分工；实际模型取运行时真值；墙钟与模型请求时长分口径；cache token 分路；默认不出本机；五路 vector；Node ≥22.16 原生备份；M1–M4；路由锚与历史降级；D10' 不迁移。修复链：首轮四 P0（更名/分类学/upsert 协议/路由锚）→ 二轮九 P1（三层身份/crash 协议/备份链/判定协议/pilot 边界/三仓注记/B9 七子项/上下位/五路）→ 终审四 P1（revision 三类/F–E 重整/bundle/initial 规则）→ 第四轮七 P1（**身份公式闭合+M2 读取语义、attempt 协议条件化+分类质量门+数据集隔离、failpoint 注入契约、metadata 谓词、stats-1 契约化、三面零漂移、状态映射**——本版收敛）。
+四轮审查确认"攻击不动"并保留：离线挖矿；用户域单仓；双面分工；实际模型取运行时真值；墙钟与模型请求时长分口径；cache token 分路；默认不出本机；五路 vector；Node ≥22.16 原生备份（2026-10-12 D9′ 改裁退役——见 §9）；M1–M4；路由锚与历史降级；D10' 不迁移。修复链：首轮四 P0（更名/分类学/upsert 协议/路由锚）→ 二轮九 P1（三层身份/crash 协议/备份链/判定协议/pilot 边界/三仓注记/B9 七子项/上下位/五路）→ 终审四 P1（revision 三类/F–E 重整/bundle/initial 规则）→ 第四轮七 P1（**身份公式闭合+M2 读取语义、attempt 协议条件化+分类质量门+数据集隔离、failpoint 注入契约、metadata 谓词、stats-1 契约化、三面零漂移、状态映射**——本版收敛）。
 
 ## 1. 目标与非目标
 
@@ -81,7 +81,7 @@ trigger_stage: reviewer | qa | red_team | premerge | environment | user | unknow
 8. **人工更正**=MANUAL_RECONCILED observation 事件（带归因者/依据/源 hash，§2.3），不改写原事件；
 9. **分类器版本**（`classifier_version`）入事件；历史不自动重分类——重分类=新 `derivation_revision` 的派生观察事件（§5.2）；
 10. **分类质量门（v4 改）**：某时段**不可接受结果合计（unknown+wrong_label+compound_unparseable 占比）＞30%** → `HISTORICAL_CLASSIFICATION_LOW_COVERAGE`，趋势标"已识别下限"；**wrong_label 单独 ＞10% → 分类器 fail（红）**——只看 unknown 会放走高置信错误（第四轮 held-out 实证：unknown 18.75%+确定性错误/粒度错误 12.5%=31.25% 合计触门而 unknown 单看低于 30%）；
-11. **数据集隔离（防循环验证）**：`development_regression_set`（终审 20 例+第四轮 held-out 16 例=36 例，只做逐例回归防退化，**不计入 precision 验收**）；`held_out_acceptance_set`（本协议冻结后新抽 ≥20 例，样本不得参与词典/规则制定，报告 unknown_rate/wrong_label_rate/compound_rate 三率）。
+11. **数据集隔离（防循环验证）**：`development_regression_set`（终审 20 例+第四轮 held-out 16 例+增补 C 系 2 例=**38 例（20+16+2，可增不可改）**，只做逐例回归防退化，**不计入 precision 验收**）；`held_out_acceptance_set`（本协议冻结后新抽 ≥20 例，样本不得参与词典/规则制定，报告 unknown_rate/wrong_label_rate/compound_rate 三率）——**滚动重验批（净新行 ≥10 触发）双门通过前 M2 维持红**（滚动重验协议=classifier-acceptance §1 v1.1 引用，不在此重复定义）。
 
 ### 2.3 归因键与置信度（五级）
 
@@ -109,7 +109,7 @@ trigger_stage: reviewer | qa | red_team | premerge | environment | user | unknow
 | Codex rollout 318 → **321** | sessions/ 递归计数 | 首轮 → 2026-09-30T23:57:14+08:00 | 活库增长照实双录 |
 | Kimi 230 份 wire / 173 含 usage.record / 5,225 条 | 按 type 过滤 | 首轮复核轮 | — |
 | `.venv` 噪声 46 | `session.path LIKE '%.venv%'` 计数 | v0 上午——**历史近似快照**（ro 复测失败未重取，见下行） | AITrader2 pyeventbt |
-| ro 直连失败 | python `mode=ro` URI | **两次**：v0 会话；2026-09-30T23:57:14+08:00（同型 `OperationalError`） | **间歇性现象实录**（疑与在用写入/WAL 锁窗口相关）——§5.4 双路径实证必要；今后取证一律落工件 |
+| ro 直连失败 | python `mode=ro` URI | **两次**：v0 会话；2026-09-30T23:57:14+08:00（同型 `OperationalError`） | **间歇性现象实录**（疑与在用写入/WAL 锁窗口相关）——§5.4 双路径实证必要（§5.4 双路径已随 D9′ 2026-10-12 改裁退役，ro 直连间歇失败实录保留为历史证据）；今后取证一律落工件 |
 | attempt 列 rN 形态 | 票据运行记录 attempt 列抽查 | 2026-10-01（四轮 held-out） | phase1-fill-rerun-window/reactive-runner 等写 `r1/r2`——§2.2 预处理规范化的依据 |
 | worktree 形态 | `git worktree list` | v0 | 当前实例符合约定（n=1 活跃副 worktree，不作"稳定"宣称） |
 
@@ -194,7 +194,7 @@ trace→span→generation 模型。吸收：两层事件结构（派发≈trace�
 ### 5.1 组件与位置
 
 - 工具：`templates/tools/harness-stats.mjs`，分发位 **`~/.agents/Harness-Engineering/templates/tools/`**（机制层，与 pre-merge-check 同位，SYNC 数组加一行）；
-- **运行时契约（D9'）**：**Node ≥22.16**——依赖原生 `node:sqlite`（22.5.0 引入）及其 `backup()` Online Backup API（22.16.0 加入），零第三方依赖；check-env 补该工具版本下限校验（B5 票联动项）；
+- **运行时契约（D9'）**：**Node ≥22.16**——node:sqlite DatabaseSync 消费面基线（TEMP 封闭副本只读打开），零第三方依赖；check-env 补该工具版本下限校验（B5 票联动项）——原「因其 backup() API」论据随 2026-10-12 D9′ 改裁退役（见 §9）；
 - 数据/配置位：`~/.agents/harness-stats/{events, reports, snapshots, cursors, locks, quarantine, config.json, projects.json}`；目录创建时校验仅当前用户可访问（ACL，§6）；
 - ZCode `~/.zcode/harness-projects.json` = **registry adapter 输入之一**（导入机制层 `projects.json`），不是机制层全局注册表；
 - 采集开关（`stats_enabled` 等）入三级配置 host 层（19 号既有机制，不另发明配置面）。
@@ -255,7 +255,7 @@ dispatch 必带：role/variant、project_id、归因级（§2.3）、状态机�
    - **F1** segment.tmp 写前；**F2** segment.tmp 截断；**F3** segment rename 后 manifest 前；**F4** segment manifest fsync 后 cursor tmp 写前；**F5** cursor tmp fsync 后 rename 前；**F6** cursor rename 后父目录 fsync 前——**拆 F6a（rename 持久化保留）/F6b（rename 丢失）双终态**；
    - **E1** stale lock / PID 复用：lock 记录=`PID+心跳时间+process-start token`（v4 补 token，使复用判定可测）；fixture 注入 process-liveness/process-start oracle，非等待真实复用；**E2** cursor 损坏四型分别编号断言：E2a 空 / E2b 截断 JSON / E2c 坏校验 / E2d 指向不存在 segment；**E3** rebuild 中途——rebuild 协议：写入 `generation-N` 新目录→校验→**原子切换代指针**→旧代保留至 validate 通过后清理（"中途"崩溃=旧代完整可回退）；**E4** compaction 交叉——compaction 取同一排它锁；report 固定 generation 快照（读代指针指向的 manifest）；旧 segment 仅当 **`segment_end_cursor ≤ compaction_watermark`** 才可删，且不在任一 report manifest 的 segment_shas 引用集内（**segment 级引用保护**，gap-6① 回灌 2026-10-08；被删集=水位下集合−引用保护集）；
    - **注入契约（stats-1 契约票冻结，v4 定要求）**：named failpoint API（`--failpoint <F1..F6|E1..E4[:sub]> --failpoint-mode once --failpoint-state <dir> --clock <frozen> --process-liveness-oracle <fixture> --process-start-token <fixture>`）；每 failpoint 冻结：注入点（动作前/后）、一次触发语义、预期退出码、注入后应存在文件、重跑后 canonical event/segment/cursor 预期；平台不支持项=**SKIP 留痕**（非绿非红，验收清单注明 Windows/Linux 支持矩阵）；
-7. **一致快照**：优先 ro 事务直连（含 timeout 重试）；回退 **`node:sqlite.backup()`（Online Backup API，D9'）**——ro 直连间歇性失败已两次实录（§2.4），双路径为必备；副本入随机私有 TEMP 子目录，try/finally 删除，**删除失败→exit≠0 + 下次启动扫描清理**；零写入证据域=读取面（宿主 daemon 持续写入的源全树字节恒等结构性不可达，按读取面声明留痕，stats-3-gap-4 回灌 2026-10-10）；
+7. **一致快照**：纯文件复制协议（snapshotCopySource）——复制前源快照→受管 TEMP 分块复制（副本摘要流式随算）→复制后源快照+副本摘要**三方恒等**（copy==before==after，逐文件 sha256+size_bytes；mtime 不参与副本比对）→不满足丢弃重试（尝试恰 3 次仍不稳→fail-loud「源不稳定」）；副本完整性另经 PRAGMA quick_check 在 TEMP 副本上独立核验。ro 直连与 `node:sqlite.backup()`（Online Backup）路径**退役**（2026-10-09 三审改道：任何 SQLite 打开〔含 ro/backup〕在 WAL 库产边车=零写入违例）；副本入随机私有 TEMP 子目录，try/finally 删除，删除失败→exit≠0+下次启动扫描清理；零写入证据域=读取面（stats-3-gap-4 回灌 2026-10-10 不变）。
 8. **并发**：单机排它锁（locks/）；report 只读 closed segments（经 generation 快照）；report/collect/compaction 并发矩阵=stats-4 ⑦。
 
 ### 5.5 事件仓生命周期与 manifest 分层（v4 分层）
@@ -285,7 +285,7 @@ retention 默认**永久保留**（计量元数据 ≈300B/请求行，年十万
 |---|---|
 | 项目 | AITrader2（project_id 冻结入 bundle manifest） |
 | 时段 | 2026-09-01T00:00Z 至 2026-10-01T00:00Z（**UTC 半开区间**；SQLite 侧时间字段=model_usage.started_at，metadata 侧=createdAt，均在 manifest 声明） |
-| 源 | **pilot bundle（多源冻结，manifest=§5.5-②）**：①SQLite Online Backup 整库副本（SHA+行数+observed_at+eligible 范围谓词原文）②metadata corpus（见下）③docs/tickets 与 docs/reviews（pilot 时段在档票 slug 清单+目录+hash）④git HEAD |
+| 源 | **pilot bundle（多源冻结，manifest=§5.5-②）**：①纯文件复制协议整库副本（snapshotCopySource）（SHA+行数+observed_at+eligible 范围谓词原文）②metadata corpus（见下）③docs/tickets 与 docs/reviews（pilot 时段在档票 slug 清单+目录+hash）④git HEAD |
 | **metadata eligible 谓词（v4 冻结）** | `project 判定（cwd/workspaceRoot 归属 AITrader2，规范化 project_id 匹配）AND createdAt ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)`；manifest 记：corpus root / 全量扫描数 / eligible 数 / 排除数+原因聚合 / project 判定字段与规范化值 / 时间字段与区间原文 / 逐 eligible 文件（相对路径+hash+size+createdAt+childSessionId）——**全机 599 份不得整批冻结** |
 | 数据面 | 整库快照中匹配冻结范围谓词的全部 **eligible rows**；metadata 按 eligible 谓词清单冻结 |
 | 事件保留 | 保留（进正式事件仓） |
@@ -320,7 +320,7 @@ eligible repair episode 定义：attempt_kind=quality_rework + 归因∈{EXPLICI
 |---|---|---|
 | stats-1 | **契约冻结票（schema/contract freeze）——本票不实现生产 collect、不进入 stats-2** | 交付物九件：①**obligation inventory**（正文 MUST 逐条编号 O-xx：规范行/事件类型/JSON Pointer/required/nullability/validator rule/正负 fixture ID）②事件/游标/segment/四层 manifest schema（§5.5）③`validate-schema`：三层验证（JSON Schema 结构+跨字段+跨事件：身份唯一性/revision 单调/终态字段约束）④**状态映射表**（sqlite/metadata 源状态→七态，含 missing_child vs stale_orphan 判据）⑤**F/E failpoint 注入契约**（§5.4-6 全参数+每 failpoint 预期表+F6a/b、E2a-d 子型+平台 SKIP 矩阵）⑥pilot bundle schema 与过滤谓词（§5.8 含 metadata eligible）⑦held-out 分类器验收协议（§2.2-11 数据集隔离）⑧**§9 全约束→后续票 traceability matrix**（零漂移证明）⑨schema 上下位五条逐项验收条目。验收：正/负 fixture 全绿（每负例对应 validator rule 且 exit≠0）；受控命名检查：指标分层标题恰 M1–M4（正则断言），`L1–L4` 出现仅限**五处白名单语境**（§0/§4/§7/本条/附录）附判定清单；§9 裁决逐条落文 |
 | stats-2 | ZCode adapter **bounded pilot**（§5.8 边界内，冻结 bundle 上开发） | ①同 bundle collect×2 → 事件数与 segment SHA 恒等；②running→terminal fixture：二次 collect 后 token/duration 非空且不重计；③unknown source 面：删列+**版本越界+model/status/role 分维 unknown>5%+schema fingerprint 变化**各一 fixture → 皆 exit≠0+cursor 冻结+零写入；④`.venv` 排除与大小写归一 fixture；⑤TEMP 残留=0（删除失败→exit≠0+启动清扫）；⑥F1–F6（含 F6a/b）+E1–E4（含 E2a-d）按契约注入逐项收敛；⑦bundle manifest 内 eligible metadata 总数与 role×status 聚合，collect 前后恒等（不写活库常数）；⑧状态机每值 ≥1 fixture（含 missing_child/stale_orphan+72h `--clock` 注入）+状态映射表逐行断言；⑨源行数/max-id 回退 fixture→fail loud（max-id 经 audit 侧车承载——bundle 面无源 max-id 字段，stats-2-gap-3 回灌 2026-10-10）；⑩双面一致性对账（§5.2）输出七类差异，超阈 fail-loud；⑪forbidden 字段负例（allowlist 拒绝且不落事件）；⑫bundle 引用计数保留 fixture（被 report 引用的 bundle 经 prune/清理尝试后仍在，§5.5-②——聚焦确认 P3 备注 2026-10-01 收口） |
-| stats-3 | Kimi/Codex adapter + 票据/git miner + join + attempt 分类器（§2.2 协议实现） | ①host feature matrix 全格 VERIFIED/UNVERIFIED（含 adapter_type）；②Kimi usage→五路映射 fixture（reasoning=N/A 断言）；③Codex 父子 join：可得则归因，不可得→子代理成本标 unknown 不入角色桶；④归因 golden set（≥20 派发人工标注）出 precision/coverage；CANDIDATE 零入票级指标断言；⑤**分类器数据集隔离**：development_regression_set（36 例）逐例回归全绿不计 precision；held_out_acceptance_set（≥20 例新抽、与词典制定隔离）报告三率且过 §2.2-10 双门；classifier_version+derivation_revision 落事件断言；⑥AITrader2 pilot 时段票五级归因分布+三率报告；⑦observation 载荷（snapshot/derivation 容器内部）字段级 allowlist 逐字段过方案门冻结（gap-4 回灌挂靠，闭合归本票） |
+| stats-3 | Kimi/Codex adapter + 票据/git miner + join + attempt 分类器（§2.2 协议实现） | ①host feature matrix 全格 VERIFIED/UNVERIFIED（含 adapter_type）；②Kimi usage→五路映射 fixture（reasoning=N/A 断言）；③Codex 父子 join：可得则归因，不可得→子代理成本标 unknown 不入角色桶；④归因 golden set（≥20 派发人工标注）出 precision/coverage；CANDIDATE 零入票级指标断言；⑤**分类器数据集隔离**：development_regression_set（36 例）（现 38 例）逐例回归全绿不计 precision；held_out_acceptance_set（≥20 例新抽、与词典制定隔离）报告三率且过 §2.2-10 双门；classifier_version+derivation_revision 落事件断言；⑥AITrader2 pilot 时段票五级归因分布+三率报告；⑦observation 载荷（snapshot/derivation 容器内部）字段级 allowlist 逐字段过方案门冻结（gap-4 回灌挂靠，闭合归本票） |
 | stats-4 | report/verify 子命令 | ①同快照重跑 report → canonical JSON 字节恒等；②默认 stdout 零落盘；--out 仅白名单；③三 pass 指标分列输出；④verify 偏差超阈 exit≠0；⑤B3 脱敏检测对 report 产物零命中；⑥ACL 异常目录→exit≠0；⑦report/collect/compaction generation 并发矩阵 fixture；⑧UTC/ISO 跨年周桶 fixture（年末周归 week-year 断言） |
 | stats-5 | M3–M4 + 路由对照 + archiver 卡改版 + B9 销账 | ①仅 verified 变更点出对照，不足 2 点输出 NOT_ENOUGH_CHANGE_POINTS（exit 0）；②每个对照点带 repo commit/local hash/卡 hash；③B9 七子项 matrix 全绿后删行（①②闭合证明由 02/16 权威面出具）；④窗口混票剔除规则实现前冻结入 spec 附录 |
 | stats-6a（可选） | $ 估算 | LiteLLM 快照锁 revision+版本化；订阅模型 N/A 标注 fixture；跨模型合计列强制禁用 |
@@ -339,14 +339,14 @@ eligible repair episode 定义：attempt_kind=quality_rework + 归因∈{EXPLICI
 | D6' | 出域 | 默认不出本机 + 默认脱敏；多机聚合=stats-6c 另批 |
 | D7' | 运行记录增强 | 采纳 childSessionId 入运行记录行——独立 dogfood 票，不阻塞 stats-1…5 |
 | D8' | stats-6 拆票 | 6a/6b/6c 独立验收，6c 在 D6' 扩批前 blocked |
-| D9' | SQLite 备份实现路径 | **Node ≥22.16 + 原生 `node:sqlite.backup()`**（零第三方依赖；check-env 版本校验=B5 联动） |
+| D9' | SQLite 备份实现路径 | **Node ≥22.16 + 原生 `node:sqlite.backup()`**（零第三方依赖；check-env 版本校验=B5 联动）2026-10-12 改裁（snapshot-aba-hardening）：备份实现路径=纯文件复制协议+三方摘要恒等——原裁 Online Backup 因零写入红线退役，本票回灌归档。 |
 | D10' | 历史 metrics 迁移 | **不做任何映射**：三仓旧列口径注记存档；历史 pass 以事件仓回填按 04 三定义重算为准 |
 
 **规范内定硬约束**（冻结于 §5 正文；逐条验收映射=stats-1 交付的 traceability matrix，§8 各票引用）：三层身份公式×三类 revision、M2 derivation 读取语义（policy 钉定+最新有效+人工优先+历史仅 audit）、唯一 commit point+F/E 清单与注入契约、版本探针 fail-loud（分维度）、状态机七态+源映射+计数细则+双面一致性 fail-loud、UTC+iso_week_year、字段 allowlist+forbidden 负例、四层 manifest 分层与 bundle 引用计数、retention 永久+compaction 水位、源回退检测、排它锁+generation 快照读、report stdout 默认、pilot bundle eligible 谓词、分类质量双门+数据集隔离、schema 上下位五条。
 
 ## 10. 聚焦确认记录（2026-10-01 已完成，通过）
 
-六项核对点全过：①§5.2 身份公式三类闭合+M2 读取语义；②§5.4 F/E 子型（F6a/b、E2a-d）+注入契约+E1 锁 token+E4 水位语义；③§5.5 四层 manifest 分层与 §5.8 metadata eligible 谓词；④§2.2 协议重排——**36 例回归集逐例复跑 36/36 绿**（四轮 held-out 暴露的 5 处不可接受结果全部由 v4 规则正确处理：3×rN 预处理规范化、1×条件式 initial、1×聚合行 compound_unparseable）；⑤§8 stats-1 契约票九交付物与 R6 新验收条目落位；⑥§2.4 observed_at 复核（含第四轮新增行）。唯一 P3 备注（retention/bundle 引用计数无独立验收）已补 **stats-2 ⑫** 收口。同日用户批准转正；后续=stats-1 契约冻结票（§8）。确认锚点：docs/22 v4 SHA-256=`41f60c38…8991` @2026-10-01T01:04+08:00。
+六项核对点全过：①§5.2 身份公式三类闭合+M2 读取语义；②§5.4 F/E 子型（F6a/b、E2a-d）+注入契约+E1 锁 token+E4 水位语义；③§5.5 四层 manifest 分层与 §5.8 metadata eligible 谓词；④§2.2 协议重排——**36 例回归集逐例复跑 36/36 绿**（现 38 例）（四轮 held-out 暴露的 5 处不可接受结果全部由 v4 规则正确处理：3×rN 预处理规范化、1×条件式 initial、1×聚合行 compound_unparseable）；⑤§8 stats-1 契约票九交付物与 R6 新验收条目落位；⑥§2.4 observed_at 复核（含第四轮新增行）。唯一 P3 备注（retention/bundle 引用计数无独立验收）已补 **stats-2 ⑫** 收口。同日用户批准转正；后续=stats-1 契约冻结票（§8）。确认锚点：docs/22 v4 SHA-256=`41f60c38…8991` @2026-10-01T01:04+08:00。
 
 ## 附：变更映射
 
@@ -357,7 +357,7 @@ eligible repair episode 定义：attempt_kind=quality_rework + 归因∈{EXPLICI
 | 第四轮发现 | v4 落点 |
 |---|---|
 | R1/P1-1 身份公式与 M2 读取语义 | §5.2 身份公式逐类闭合（含 source_primary_key 生成规则、observation subtype、derivation_revision 单调）+ M2 读取语义段（policy/最新有效/人工优先/历史仅 audit） |
-| R2/P1-2 attempt 协议 | §2.2 重排：预处理 rN 规范化（§2.4 增证据行）、统一优先级序（消除规则 1/5 冲突）、initial 条件式（反例正例化）、聚合行 compound_unparseable、双门（合计>30% 降级+wrong>10% fail）、数据集隔离（36 例回归集/held-out 新抽） |
+| R2/P1-2 attempt 协议 | §2.2 重排：预处理 rN 规范化（§2.4 增证据行）、统一优先级序（消除规则 1/5 冲突）、initial 条件式（反例正例化）、聚合行 compound_unparseable、双门（合计>30% 降级+wrong>10% fail）、数据集隔离（36 例回归集（现 38 例）/held-out 新抽） |
 | R3/P1-3 failpoint 契约 | §5.4-6：named failpoint API+每 failpoint 预期表要求、F6a/b、E2a-d、E1 锁记录+process-start token、E4 segment_end_cursor≤水位、平台 SKIP 矩阵；stats-1 交付物⑤ |
 | R4/P1-4 bundle metadata 谓词 | §5.8 metadata eligible 谓词冻结+manifest 字段全集；§5.5 四层 manifest 分层（P2-1 一并）+bundle 引用计数保留 |
 | R5/P1-5 stats-1 粒度 | §8 stats-1 契约票化（九交付物：obligation inventory/三层 validate/状态映射/…）；L1–L4 白名单五处（纳入 §4 合法说明）；schema 上下位逐项验收 |

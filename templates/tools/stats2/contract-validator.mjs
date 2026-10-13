@@ -58,6 +58,8 @@ function validateNode(value, schema, pointer, errors, objRule) {
   if (typeof value === 'string') {
     if (schema.pattern && !new RegExp(schema.pattern).test(value)) return fail(`值 ${JSON.stringify(value)} 不匹配 ${schema.pattern}`);
     if (schema.minLength !== undefined && value.length < schema.minLength) return fail(`长度 ${value.length} < ${schema.minLength}`);
+    // maxLength（attribution-explicit-closure r2：VR-S33 execution_session.session_id join 键有界——P3-2）
+    if (schema.maxLength !== undefined && value.length > schema.maxLength) return fail(`长度 ${value.length} > ${schema.maxLength}`);
     if (rule === 'VR-S14') {
       const sem = timestampSemanticError(value);
       if (sem) return fail(`时间戳语义越界：${JSON.stringify(value)}（${sem}；VR-S14=字形+语义）`);

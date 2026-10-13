@@ -205,6 +205,10 @@ export function projectBundleEvents({ storeRoot, bundleId, sid, nowIso, nowMs, o
       source_instance_id: sid, adapter_id: ZCODE_ADAPTER_ID, adapter_type: ZCODE_ADAPTER_TYPE,
       source_primary_key: m.rel, collected_at: nowIso, source_revision: 1,
       role, variant, project_id: projNorm, ticket_slug, attribution, state,
+      // VR-F31（attribution-explicit-closure r2）：child 会话标识直取——report 侧 EXPLICIT join 键；
+      // mutable-row contentKey schema 驱动（追加自动翻转内容键→存量实体首次 collect revision+1，其后幂等）；
+      // 红队修复轮 P3-2：守卫对齐 cmd-bundle 形（typeof==='string' && truthy——空串两 collector 同形 null）
+      child_session_id: (typeof meta.childSessionId === 'string' && meta.childSessionId) ? meta.childSessionId : null,
       created_at: createdAt, completed_at: completedAt,
       wall_clock_ms: completedAt != null ? Date.parse(completedAt) - Date.parse(createdAt) : null,
       attempt_kind: UNCLASSIFIED.attempt_kind, trigger_stage: UNCLASSIFIED.trigger_stage,

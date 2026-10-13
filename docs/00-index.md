@@ -61,7 +61,7 @@
 | B7 | **sync-harness 真只读模式**：--check 现状写 harness-projects.json / harness-config-state.json 与"默认只读"自述不符——改内存计算+显式 --refresh-state | 二轮审查 P1-8 |
 | B8 | **current-state 面**：机器可生成的轻量状态报告（内部 HEAD/公开 HEAD/待发布差异/部署模板 hash/local 备份态/backlog/复盘票号），补"00+git log 答不了部署与发布状态"的缺口 | 二轮审查 P1-10 |
 | B9 | **散落待核项收编**：injectAgentsMd 待核（02 状态注）、skills 锚点包获取来源待核（16 §3）、13 号"每 5 票"计数域定义（单仓/全体系、无 metrics 行的票怎么计）。**三轮 P2-C2 增强：须定义修复票计票规则（gen-variant-dedup 曾被折叠进原行更正注不计票——已补独立行；规则=修复票照常计票、以更正注与原票关联）、metrics 是否唯一计数源、谁在第 10 票合并时触发复盘门** | 二轮 P2-1/P2-2 + 三轮 P2-C2 |
-| B10 | **archiver 卡清理命令回灌**：SOP 第 8 步补现场实证形态——`git gtr rm <branch> --delete-branch --yes` + 残留核验（worktree list / branch --list）+ 已合并分支 `git branch -d` 补删 + 逐步退出码入归档证据（角色卡模板变更，走 dogfood 票） | 二轮审查 P1-9（两单归档现场适配未回灌） |
+| B10 | **archiver 卡清理命令回灌**：SOP 第 9 步补现场实证形态——`git gtr rm <branch> --delete-branch --yes` + 残留核验（worktree list / branch --list）+ 已合并分支 `git branch -d` 补删 + 逐步退出码入归档证据（角色卡模板变更，走 dogfood 票） | 二轮审查 P1-9（两单归档现场适配未回灌） |
 
 （Codex 身份审查的其余开放项以 [21 号 §8](21-memory-system-analysis.md) 为准跟踪。）
 

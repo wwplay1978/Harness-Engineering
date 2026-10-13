@@ -55,7 +55,7 @@ export function openReadOnly(dbPath, { retries = 5, baseDelayMs = 100 } = {}) {
 // 根因：node:sqlite DatabaseSync readOnly:true 在 WAL 库上仍创建 -shm/-wal 边车且 close 后残留；
 // 旧 bundle 制作经 ro 直开活源 → 静默 WAL 源首跑自造边车（零写入违例）→ 第二跑"洗白"。
 // 重构：bundle 制作改**纯文件复制协议**（snapshotCopySource）——源侧零 SQLite 打开，
-// 任何边车/写入在本工具侧结构性不可能；不稳窗口由「复制前后源摘要恒等」有界重试收敛。
+// 任何边车/写入在本工具侧结构性不可能；不稳窗口由「三方摘要恒等」（copy==before==after，P0-1 ABA 收紧 2026-10-12）有界重试收敛。
 const COPY_CHUNK_BYTES = 64 * 1024 * 1024;   // 分块复制粒度（长复制内部分块间可刷锁心跳——P0-2）
 
 /** 单文件摘要观测（{sha256,size_bytes,mtime_ms}——复制稳定性与零写入证据的共用原子）。 */
@@ -77,22 +77,29 @@ function readFileBytes(p) {
   return Buffer.concat(chunks);
 }
 
-/** 分块复制（P0-2：长复制分块间回调 onChunk——锁持有方借以周期刷心跳）；落盘后 fsync。 */
+/** 分块复制（P0-2：长复制分块间回调 onChunk——锁持有方借以周期刷心跳）；写失败/短写 fail-loud（全写断言——P2-1）；fsync 归调用方/终产物协议面（本函数不含 fsyncSync）。
+ *  snapshot-aba-hardening 交付物 2：副本摘要**流式随算**（incremental sha256 随每块写盘更新）——
+ *  省一次全读且哈希计算天然落在心跳窗口内（既有 3 遍全读的心跳缺口不因该票放大）；
+ *  返回 {sha256,size_bytes}=本次落盘字节的摘要观测（供 snapshotCopySource 三方恒等比对）。 */
 export function copyFileChunked(src, dst, { onChunk = null, chunkBytes = COPY_CHUNK_BYTES } = {}) {
   const st = statSync(src);
   const inFd = openSync(src, 'r');
   const outFd = openSync(dst, 'w');
+  const hash = createHash('sha256');
   try {
     const buf = Buffer.alloc(Math.min(chunkBytes, Math.max(st.size, 1)));
     let copied = 0;
     for (;;) {
       const n = readSync(inFd, buf, 0, buf.length, null);
       if (n <= 0) break;
-      writeSync(outFd, buf, 0, n);
+      const w = writeSync(outFd, buf, 0, n);   // P2-1：短写 fail-loud——否则 hash 算的是读缓冲而非落盘字节，恒等证据可为假
+      if (w !== n) throw new Error(`短写：${basename(src)} 期望写入 ${n} 实得 ${w}`);
+      hash.update(buf.subarray(0, n));
       copied += n;
       if (onChunk) onChunk(copied, st.size);
     }
     if (copied !== st.size) throw new Error(`复制字节数不符：${basename(src)} 期望 ${st.size} 实得 ${copied}`);
+    return { sha256: hash.digest('hex'), size_bytes: copied };
   } finally {
     closeSync(inFd); closeSync(outFd);
   }
@@ -118,13 +125,18 @@ function ensureDiskSpace(destDir, neededBytes) {
 /**
  * 源快照复制协议（P0-1 三审重构核心；bundle 制作的唯一源 sqlite 接触位——纯文件复制，零 SQLite 打开）：
  *   ①对 db.sqlite+存在的 -wal 计 {sha256,size,mtime} 快照 → ②磁盘空间预检 → 复制到受管 TEMP
- *   （含既有 -wal 伴随物——WAL 内容未并回时缺它即丢已提交事务）→ ③复制后重算源摘要，
- *   任一变化 → 丢弃副本+有界重试（maxAttempts≥3）；仍不稳 → fail-loud「源不稳定」
- *   → ④返回稳定副本路径+本次观测快照（checkpoint/integrity/行数由调用方在 TEMP 副本上执行）。
+ *   （含既有 -wal 伴随物——WAL 内容未并回时缺它即丢已提交事务）→ ③复制后重算源摘要+副本摘要（流式随算），
+ *   三方恒等 copy==before==after（逐文件 sha256+size_bytes；mtime 不参与副本比对）不满足
+ *   → 丢弃副本+有界重试（maxAttempts≥3）；仍不稳 → fail-loud「源不稳定」（无退避=有意设计——方向保守失败）
+ *   → ④返回稳定副本路径+本次观测快照+副本摘要（checkpoint/integrity/行数由调用方在 TEMP 副本上执行）。
+ * onBeforeCopy(attempt)：before 快照后、首次读源前的注入位（仅测试 fixture 使用——构造 ABA：写 B 态库后由 onAfterCopy 写回 A）。
  * onAfterCopy(attempt)：复制完成与稳定性判定之间的注入位（仅测试 fixture 使用——模拟复制窗内源变化）。
- * @returns {{copyPath: string, attempts: number, sourceSnapshot: object}}
+ * chunkBytes 透传 copyFileChunked（测试可缩块造多块窗口）。
+ * @returns {{copyPath: string, attempts: number, sourceSnapshot: object, copyDigests: object}}
+ *   copyDigests=副本逐文件 {sha256,size_bytes}，本函数内部 pre-checkpoint 计算并随返回值带出（与源可比）；
+ *   与 manifest.sqlite 的 post-checkpoint copySha 设计即不等：前者=快照一致性证据，后者=终产物内容寻址。
  */
-export function snapshotCopySource(dbPath, destDir, { maxAttempts = 3, onAfterCopy = null, onChunk = null } = {}) {
+export function snapshotCopySource(dbPath, destDir, { maxAttempts = 3, onBeforeCopy = null, onAfterCopy = null, onChunk = null, chunkBytes = COPY_CHUNK_BYTES } = {}) {
   const walPath = `${dbPath}-wal`;
   const files = [dbPath, walPath];
   const snap = () => Object.fromEntries(files.filter(existsSync).map(p => [basename(p), fileSnapshot(p)]));
@@ -133,19 +145,29 @@ export function snapshotCopySource(dbPath, destDir, { maxAttempts = 3, onAfterCo
   const copyPath = join(destDir, 'db.sqlite');
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const before = snap();
-    copyFileChunked(dbPath, copyPath, { onChunk });
+    if (onBeforeCopy) onBeforeCopy(attempt);   // 注入位（仅测试 fixture）：before 快照后、首次读源前——ABA 注入窗（snapshot-aba-hardening 交付物 4）
+    const dbCopy = copyFileChunked(dbPath, copyPath, { onChunk, chunkBytes });
     const copyWal = `${copyPath}-wal`;
-    if (existsSync(walPath)) copyFileChunked(walPath, copyWal, { onChunk });
+    let walCopy = null;
+    if (existsSync(walPath)) walCopy = copyFileChunked(walPath, copyWal, { onChunk, chunkBytes });
     else rmSync(copyWal, { force: true });   // 上次尝试的残留副本边车不得混入本次
     if (onAfterCopy) onAfterCopy(attempt);
     const after = snap();
+    const copyDigests = { [basename(dbPath)]: { sha256: dbCopy.sha256, size_bytes: dbCopy.size_bytes } };   // 副本摘要=流式随算（pre-checkpoint 字节）
+    if (walCopy) copyDigests[basename(walPath)] = { sha256: walCopy.sha256, size_bytes: walCopy.size_bytes };
+    // 三方摘要恒等（snapshot-aba-hardening 交付物 1）：逐文件（db+在场 -wal）
+    // copy.{sha256,size_bytes} == before.{sha256,size_bytes} == after.{sha256,size_bytes}
+    // （mtime 不参与副本比对——副本 mtime 恒异于源；源侧 before/after 观测仍含 mtime 不变）。
+    // ABA（源在复制窗内 A→B→A）下 copy=B 而 before==after==A → 检出丢弃重试
+    // （旧协议仅比源侧 before==after——接受 B 副本而证据声明 A=伪一致）。
     // P3-9（四审，Kimi P3-1）残余风险评估=已评估不处置：「写后摘要比对」是毫秒级窗口上的观测，
     // after 快照与 return 之间源仍可变化（TOCTOU 残余）——无写者协作的文件复制协议无法归零该窗。
     // 不处置依据：①副本完整性由步骤④ PRAGMA quick_check 在 TEMP 副本上独立核验（截断/页损坏 fail-loud）；
-    // ②bundle 身份=sourceSnapshot 内容寻址（摘要入 manifest），漂移只影响「取到哪一刻的源」，不产生伪一致；
+    // ②（撤回，snapshot-aba-hardening）原论据「漂移只影响取到哪一刻的源，不产生伪一致」被 ABA 反例推翻
+    //   ——源 A→B→A 时旧协议接受 B 副本而证据声明 A；三方摘要恒等后该论据不再需要；
     // ③活源高频写入场景本就应以静默期制作 bundle（票面使用前提）。归零须源侧写者协作，超出本工具边界。
-    if (canonEq(before, after)) return { copyPath, attempts: attempt, sourceSnapshot: before };
-    // 源在复制窗内变化 → 副本不可信：丢弃后重试
+    if (canonEq(before, after) && digestsEq(copyDigests, before)) return { copyPath, attempts: attempt, sourceSnapshot: before, copyDigests };
+    // 源在复制窗内变化或副本≠源（ABA/撕裂）→ 副本不可信：丢弃后重试
     rmSync(copyPath, { force: true });
     rmSync(copyWal, { force: true });
   }
@@ -155,6 +177,14 @@ export function snapshotCopySource(dbPath, destDir, { maxAttempts = 3, onAfterCo
   );
 }
 function canonEq(a, b) { return JSON.stringify(a) === JSON.stringify(b); }   // 快照对象=固定键集，JSON 序即 canonical
+/** 副本摘要 vs 源快照的逐文件恒等（snapshot-aba-hardening 交付物 1）：仅比 {sha256,size_bytes}
+ *  ——mtime 不参与副本比对（副本 mtime 恒异于源）；键集不等（-wal 出现/消失于复制窗）亦判不稳。 */
+function digestsEq(copyDigests, before) {
+  const keys = Object.keys(before);
+  return keys.length === Object.keys(copyDigests).length
+    && keys.every(k => copyDigests[k] != null && copyDigests[k].sha256 === before[k].sha256
+      && copyDigests[k].size_bytes === before[k].size_bytes);
+}
 
 /** 复制 db 文件（连同既有 -wal 伴随物——WAL 内容未并回时缺它即丢已提交事务）到目标目录，返回副本路径。 */
 export function copyDbIntoDir(dbPath, destDir, { onChunk = null } = {}) {

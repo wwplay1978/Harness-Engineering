@@ -2,7 +2,13 @@
 // 用法：node b3-redact-check.mjs <工件路径…>
 // 输出：stdout JSON {files:[{path,hits:[{pattern,excerpt_sha8}]}], total_hits}（files=有命中的文件，argv 序）
 // 退出码：0 无命中 / 1 有命中 / 2 用法错（缺参/路径不存在/不可读/**非 utf8 可解码形态**——P2-3：
-//   UTF-16LE/BE BOM 探测命中 → exit 2，检测器读不了的形态不得报干净）
+//   UTF-16LE/BE BOM 探测命中 → exit 2；票 C P1-3 扩族：严格 UTF-8 解码（fatal）失败（截断多字节/
+//   孤立续字节/代理形）→ exit 2；解码通过但原始字节含 NUL(0x00)（BOM-less UTF-16/32 的 ASCII 面经
+//   解码后呈 NUL 间隔形；二进制面）→ exit 2——检测器读不了的形态不得报干净）
+// 显式非目标（票 C P1-3 头注声明）：percent 编码/base64/Unicode 分隔符变体等**载荷形**不在检测面——
+//   本检测器承诺面=字面明文泄漏形的命中扫描；编码载荷超出检测意图，不属「不得报干净」契约范围。
+//   同族非目标（红队 P3-4）：BOM-less UTF-16/32 **全非 ASCII 载荷形**（每字符低字节≠0 且高字节<0x80 的
+//   纯 CJK 片段——双闸均不触发）亦不在检测面；NUL 闸的 UTF-16/32 检出域=ASCII 面。
 // 检测族（票面 P2-4/P2-6 冻结+红队修复轮二 P2-2 扩族）：字面盘符/根路径形+大小写不敏感+分隔符变体
 //   （C:\Users\、c:\users\、C:/Users/、混合分隔符——驱动器族统一标签 'C:\Users\'；/home/、/Users/
 //   大小写不敏感）+ 真实用户名子串；~/ 展开形=白名单合法形，不入检测族。
@@ -55,7 +61,20 @@ function scanFile(path, username) {
     console.error(`ENCODING_UNSUPPORTED：${path} 为 UTF-16BE（BOM FE FF）——检测器读不了的形态不得报干净（转存 UTF-8 后复检）\n${USAGE}`);
     process.exit(2);
   }
-  const text = buf.toString('utf8');
+  // 票 C P1-3 ①：严格 UTF-8 解码（fatal）——非法序列不得经 U+FFFD 替换静默扫描（修前 toString
+  // 替换后照常检测=对读不了的形态报干净）
+  let text;
+  try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+  catch (e) {
+    console.error(`ENCODING_UNSUPPORTED：${path} 非 UTF-8 可解码形态（严格解码失败：${e.message}）——检测器读不了的形态不得报干净（转存 UTF-8 后复检）\n${USAGE}`);
+    process.exit(2);
+  }
+  // 票 C P1-3 ②：NUL 字节面——严格解码通过但原始字节含 0x00。BOM-less UTF-16/32 的 ASCII 载荷每字符
+  // 间一 0x00（解码合法但检测族永不命中=假绿面）；二进制面同判。BOM 探测（上方）仅覆盖带 BOM 形态。
+  if (buf.includes(0)) {
+    console.error(`ENCODING_UNSUPPORTED：${path} 含 NUL(0x00) 字节（BOM-less UTF-16/32 或二进制形态）——检测器读不了的形态不得报干净（转存 UTF-8 后复检）\n${USAGE}`);
+    process.exit(2);
+  }
   const hits = [];
   // 驱动器族先行（更特异）：记录覆盖区间——posix /Users/ 族在同区间不重复计（C:/Users/ 一处命中一次）
   const covered = [];

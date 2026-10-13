@@ -77,7 +77,21 @@
         },
         "additionalProperties": false
       },
-      "git_head": { "type": "string", "pattern": "^[0-9a-f]{40}$", "description": "源④：git HEAD commit（40 位 hex）" }
+      "git_head": { "type": "string", "pattern": "^[0-9a-f]{40}$", "description": "源④：git HEAD commit（40 位 hex）" },
+      "ticket_merges": {
+        "type": "array",
+        "description": "stats-5 M3 取数面（P1-1(a) 裁断）：票级 dogfood merge 观察——git log --grep ^merge: ticket <slug> --format=%H+%cI 取该票 merge commit oid+committer 时戳；无匹配票（非 dogfood merge 形态）不入清单=n/a 如实（覆盖率披露归 report 面）。可选字段（additive——历史 bundle 无此字段兼容，report-manifest generation 同型先例；字段修订与 pilot-bundle-schema.json 同步）。",
+        "items": {
+          "type": "object",
+          "required": ["slug", "merge_oid", "merge_ts"],
+          "properties": {
+            "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+            "merge_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+            "merge_ts": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "merge commit committer 时戳（RFC3339 UTC 规范形）" }
+          },
+          "additionalProperties": false
+        }
+      }
     },
     "additionalProperties": false
   }

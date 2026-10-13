@@ -1,0 +1,72 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "attribution-explicit-closure r2：ticket_snapshot.execution_session 三值直通两形（O-47/VR-S33）——真实会话标识（EXPLICIT join 锚）+列缺席形（{session_id:null,session_host_na:false,session_host_marker:null}）；键名=parser 原名直通（P3-1 禁映射）",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131:obs:ab12cd34",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L131",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/demo-ticket.md#L131",
+   "collected_at": "2026-09-22T10:05:00Z",
+   "observation_subtype": "ticket_snapshot",
+   "ticket_slug": "demo-ticket",
+   "source_hash8": "ab12cd34",
+   "snapshot": {
+    "attempt_column_raw": "r2",
+    "attempt_no": 2,
+    "role_column_raw": "developer-rerun",
+    "result_column_raw": "通过",
+    "date_column_raw": "2026-09-22",
+    "note_column_raw": "复审 request changes 修复轮",
+    "execution_session": {
+     "session_id": "sess-0009-a1b2",
+     "session_host_na": false,
+     "session_host_marker": null
+    },
+    "review_artifacts": [
+     "demo-ticket-r2-review.md"
+    ],
+    "source_refs": {
+     "tickets_path": "tickets/demo-ticket.md",
+     "line_range": "131-131"
+    }
+   }
+  },
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L132:obs:ab12cd34",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/demo-ticket.md#L132",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/demo-ticket.md#L132",
+   "collected_at": "2026-09-22T10:05:00Z",
+   "observation_subtype": "ticket_snapshot",
+   "ticket_slug": "demo-ticket",
+   "source_hash8": "ab12cd34",
+   "snapshot": {
+    "attempt_column_raw": "3",
+    "attempt_no": 3,
+    "role_column_raw": "developer",
+    "result_column_raw": "通过",
+    "date_column_raw": "2026-09-23",
+    "note_column_raw": "红队修复轮",
+    "execution_session": {
+     "session_id": null,
+     "session_host_na": false,
+     "session_host_marker": null
+    },
+    "review_artifacts": [],
+    "source_refs": {
+     "tickets_path": "tickets/demo-ticket.md",
+     "line_range": "132-132"
+    }
+   }
+  }
+ ]
+}

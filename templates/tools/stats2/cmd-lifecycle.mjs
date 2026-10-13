@@ -57,16 +57,40 @@ function listReportArtifacts(reportsDir) {
   return out;
 }
 
-/** 引用承载形态族（**文件名级**识别——仅供解析失败时的红线分档）：report manifest（*.manifest.json）
- *  与 pilot-eval 评估工件（pilot-eval-*.json）。
- *  P2-4 裁断：解析失败红线收窄至「可能贡献引用集的形态」——族内解析失败仍 fail-loud（引用面不可判定）；
- *  族外形态（verify-watermark/report 体等非引用承载面）解析异常 → WARN 不锁死维护命令（append 永存工件
- *  累积损坏不得令 compact/prune 永久红）。裁断理由：fail-loud 在此是保守绊线而非保护本体——保护来自
- *  「可解析工件的引用集贡献」，损坏工件无论红线与否都不贡献引用；伪装改名绕过绊线不削弱保护，仅放弃
- *  对已损坏文件的挡停（其引用本就不可判定且不因挡停而恢复）。可解析工件的**内容级**识别
- *  （manifest_kind/artifact_kind）不受文件名族影响——内容识别恒优先、恒严格。 */
-const REFERENCE_BEARING_FAMILY = [/^pilot-eval-.*\.json$/, /\.manifest\.json$/];
+/** 引用承载形态族（**文件名级**识别）：report manifest（*.manifest.json）与 pilot-eval 评估工件
+ *  （pilot-eval-*.json）。双重防线：①族内解析失败仍 fail-loud（引用面不可判定）；②族内解析成功但
+ *  承载 kind 缺失/不匹配 → fail-loud（票 C P0-3：修复前 kind 不匹配即静默跳过——伪装改名/半写工件
+ *  可令保护集悄悄漏掉该文件的引用贡献；引用承载族文件名=保留名，工件须自证身份）。
+ *  P2-4 裁断：族外形态（verify-watermark/report 体等非引用承载面）解析异常 → WARN 不锁死维护命令
+ *  （append 永存工件累积损坏不得令 compact/prune 永久红）。裁断理由：fail-loud 在此是保守绊线而非
+ *  保护本体——保护来自「可解析工件的引用集贡献」，损坏工件无论红线与否都不贡献引用；伪装改名绕过
+ *  绊线不削弱保护，仅放弃对已损坏文件的挡停（其引用本就不可判定且不因挡停而恢复）。
+ *  内容级识别与文件名族的现行关系（票 C 对齐）：族内文件 kind 匹配是内容识别的**前置门槛**
+ *  （kind≠族身份=引用面不可判定红线）；族外形态按内容识别（可解析且携带 report-manifest/
+ *  pilot-evaluation-report 内容的照常入引用集——多保护一份无害）。 */
+const MANIFEST_JSON_NAME_RE = /\.manifest\.json$/;
+const PILOT_EVAL_NAME_RE = /(^|\/)pilot-eval-[^/]*\.json$/;
+const REFERENCE_BEARING_FAMILY = [PILOT_EVAL_NAME_RE, MANIFEST_JSON_NAME_RE];
 const isReferenceBearingName = (rel) => REFERENCE_BEARING_FAMILY.some(re => re.test(rel));
+
+/** 票 C P0-3（E4 kind fail-loud）：引用承载族 kind 门槛检查——族内命中而 kind 缺失/不匹配 →
+ *  refProblems（调用方 compact/prune 在任何变更前 fail-loud）。 */
+function referenceKindProblems(rel, j) {
+  const problems = [];
+  if (MANIFEST_JSON_NAME_RE.test(rel) && j?.manifest_kind !== 'report-manifest') {
+    problems.push(`report manifest kind 失配：${rel}（manifest_kind=${JSON.stringify(j?.manifest_kind ?? null)} ≠ report-manifest）——引用承载族文件须承载 report-manifest kind（P0-3）`);
+  }
+  if (PILOT_EVAL_NAME_RE.test(rel) && j?.artifact_kind !== 'pilot-evaluation-report') {
+    problems.push(`pilot-eval 工件 kind 失配：${rel}（artifact_kind=${JSON.stringify(j?.artifact_kind ?? null)} ≠ pilot-evaluation-report）——引用承载族文件须承载 pilot-evaluation-report kind（P0-3）`);
+  }
+  return problems;
+}
+
+// stats-5 红队修复轮三 P2-3：b9-closure-matrix 工件世代锚识别（文件名级——P3-5 钉死自动生成名）。
+// 仅 prune 消费其 generation（旧代清理保护面）；compact 无世代删除面——不入共享
+// REFERENCE_BEARING_FAMILY（P2-4 收窄原则：红线仅施于「对本文令有引用贡献的形态」）。
+const B9_MATRIX_NAME_RE = /(^|\/)b9-closure-matrix-[^/]*\.json$/;
+const isB9MatrixName = (rel) => B9_MATRIX_NAME_RE.test(rel);
 
 // ── P1-7（三审）：audit 一致性检查（validate 记 problems；compact/migrate 复用判定） ──
 /** 语料是否非空（events 或 cursor 在场）——audit 必须存在的门槛条件。 */
@@ -278,6 +302,8 @@ export async function cmdCompact(opts) {
           else console.error(`[WARN] reports/${art.rel} 解析失败（非引用承载形态族——不入引用集不锁死维护命令；P2-4 收窄）：${e.message}`);
           continue;
         }
+        // 票 C P0-3：引用承载族 kind 门槛——解析成功而 kind 缺失/不匹配 → fail-loud（禁静默跳过）
+        refProblems.push(...referenceKindProblems(art.rel, j));
         if (j && j.manifest_kind === 'report-manifest') {
           // report manifest：schema 不过=引用面不可信 → fail-loud（禁静默跳过；与 prune 同款实现）
           const errs = validateFixture({ fixture_kind: 'report-manifest', ...j });
@@ -414,6 +440,7 @@ export function cmdPrune(opts) {
     const referenced = new Set();
     const pilotEvalGenerations = new Set();   // stats-3 裁决①：pilot-eval 工件世代锚（防清理旧代令评估工件 events 面失锚）
     const reportManifestGenerations = new Set();   // stats-4 红队修复轮二 P1-1③：report manifest 世代锚（同标准旁增面）
+    const b9MatrixGenerations = new Set();   // stats-5 红队修复轮三 P2-3：b9-closure-matrix 工件世代锚（同款旁增面）
     const refProblems = [];
     let phase1Heartbeats = 0;   // QA 修复轮（P2-2 确定性化）：阶段一心跳计数入输出——时序无关断言替代 mtime 轮询
     const reportsDir = join(storeRoot, 'reports');
@@ -427,9 +454,12 @@ export function cmdPrune(opts) {
         try { j = JSON.parse(readFileSync(art.abs, 'utf8')); }
         catch (e) {
           if (isReferenceBearingName(art.rel)) refProblems.push(`report 工件解析失败：${art.rel}（${e.message}）——引用集不可判定（P1-8）`);
+          else if (isB9MatrixName(art.rel)) refProblems.push(`b9-closure-matrix 工件解析失败：${art.rel}（${e.message}）——世代引用面不可判定（stats-5 P2-3）`);
           else console.error(`[WARN] reports/${art.rel} 解析失败（非引用承载形态族——不入引用集不锁死维护命令；P2-4 收窄）：${e.message}`);
           continue;
         }
+        // 票 C P0-3：引用承载族 kind 门槛——解析成功而 kind 缺失/不匹配 → fail-loud（禁静默跳过）
+        refProblems.push(...referenceKindProblems(art.rel, j));
         if (j && j.manifest_kind === 'report-manifest') {
           // report manifest：schema 不过=引用面不可信 → fail-loud（禁静默跳过）
           const errs = validateFixture({ fixture_kind: 'report-manifest', ...j });
@@ -449,6 +479,17 @@ export function cmdPrune(opts) {
           } else {
             referenced.add(j.bundle_id);
             if (Number.isInteger(j.generation)) pilotEvalGenerations.add(j.generation);   // 世代锚一并保护（评估工件 generation 引用面）
+          }
+        }
+        // stats-5 红队修复轮三 P2-3：b9-closure-matrix 工件（文件名级识别——P3-5 钉死名）读语料
+        // （merged 票集）定着于其生成世代，prune 清理该代=发布票验时效的证据基失锚；读 generation 入
+        // 保护集（与 reportManifestGenerations 同款）。可解析但 generation 缺失/非整数=世代引用面
+        // 不可判定 → 同红线 fail-loud（pilot-eval bundle_id 同标准；静默跳过=保护承诺失守）。
+        if (isB9MatrixName(art.rel)) {
+          if (!Number.isInteger(j?.generation)) {
+            refProblems.push(`b9-closure-matrix 工件缺 generation：${art.rel}——世代引用面不可判定（stats-5 P2-3）`);
+          } else {
+            b9MatrixGenerations.add(j.generation);
           }
         }
         // 其他非 report-manifest 形态不入引用集：§5.5-② 保留语义
@@ -491,8 +532,9 @@ export function cmdPrune(opts) {
       for (const g of readdirSync(gensRoot).filter(d => /^gen-\d{4}$/.test(d))) {
         const n = parseInt(g.slice(4), 10);
         // stats-3 裁决①：pilot-eval 工件世代锚保护的旧代不清理（评估工件 generation 引用不失锚）；
-        // stats-4 红队修复轮二 P1-1③：report manifest 世代锚同标准旁增（manifest segment_shas 引用不失锚）
-        if (n < cur - 1 && !pilotEvalGenerations.has(n) && !reportManifestGenerations.has(n)) { rmSync(join(gensRoot, g), { recursive: true, force: true }); heartbeat(); removed.push(g); }
+        // stats-4 红队修复轮二 P1-1③：report manifest 世代锚同标准旁增（manifest segment_shas 引用不失锚）；
+        // stats-5 红队修复轮三 P2-3：b9-closure-matrix 世代锚同款旁增（工件证据代不失锚）
+        if (n < cur - 1 && !pilotEvalGenerations.has(n) && !reportManifestGenerations.has(n) && !b9MatrixGenerations.has(n)) { rmSync(join(gensRoot, g), { recursive: true, force: true }); heartbeat(); removed.push(g); }
       }
     }
     console.log(JSON.stringify({ command: 'prune', phase1_heartbeats: phase1Heartbeats, bundles_referenced_protected: protectedBundles, bundles_removed: removed.filter(x => !x.startsWith('gen-')), generations_removed: removed.filter(x => x.startsWith('gen-')) }, null, 2));

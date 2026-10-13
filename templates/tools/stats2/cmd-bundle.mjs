@@ -175,6 +175,54 @@ function gitHead(projectDir) {
   return String(r.stdout).trim();
 }
 
+// ── stats-5 M3 取数面（P1-1(a) 裁断）：票级 dogfood merge 观察（bundle manifest 可选字段 ticket_merges）──
+// 命令形态沿票面：git log --grep "^merge: ticket <slug>" --format=%H+%cI（cwd=项目仓根）取该票 merge
+// commit oid+committer 时戳；无匹配票（非 dogfood merge 形态）不入清单=n/a 如实（覆盖率披露归 report 面）。
+// 前缀防撞：grep 前缀命中后按 subject 精确解析 slug（`merge: ticket stats-5` 不得误吞 stats-5x）。
+const MERGE_SUBJECT_RE = /^merge: ticket ([a-z0-9][a-z0-9-]*)/;
+function parseMergeLine(line) {
+  const m = /^([0-9a-f]{40})\+(\S+)\+(.*)$/.exec(line.trim());
+  if (!m) return null;
+  const ms = Date.parse(m[2]);
+  if (!Number.isFinite(ms)) return null;
+  return { oid: m[1], ts: new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z'), subject: m[3].trim() };
+}
+function gitLogLines(projectDir, grep) {
+  const r = spawnSync('git', ['-C', projectDir, 'log', '--grep', grep, '--format=%H+%cI+%s'], { encoding: 'utf8' });
+  if (r.status !== 0) throw new Error(`git log（ticket merge 观察）失败（${projectDir}）：${String(r.stderr).slice(0, 120)}`);
+  return String(r.stdout).split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+/** 逐 slug merge 观察（git log 逆时序首条命中=该票最新 merge 锚；同 slug 多 merge 取最新）。 */
+export function collectTicketMerges(projectDir, slugs) {
+  const merges = [];
+  for (const slug of slugs) {
+    for (const line of gitLogLines(projectDir, `^merge: ticket ${slug}`)) {
+      const rec = parseMergeLine(line);
+      if (!rec) continue;
+      const subj = MERGE_SUBJECT_RE.exec(rec.subject);
+      if (!subj || subj[1] !== slug) continue;   // 前缀撞名（slug-xxx）——subject 精确匹配防线
+      merges.push({ slug, merge_oid: rec.oid, merge_ts: rec.ts });
+      break;
+    }
+  }
+  merges.sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+  return merges;
+}
+
+/** 通用扫描（create-native-corpus：无 slug_list 面——全史 `merge: ticket ` 命中按 subject 解析 slug）。 */
+export function scanAllTicketMerges(projectDir) {
+  const bySlug = new Map();
+  for (const line of gitLogLines(projectDir, '^merge: ticket ')) {
+    const rec = parseMergeLine(line);
+    if (!rec) continue;
+    const subj = MERGE_SUBJECT_RE.exec(rec.subject);
+    if (!subj) continue;
+    if (!bySlug.has(subj[1])) bySlug.set(subj[1], { slug: subj[1], merge_oid: rec.oid, merge_ts: rec.ts });   // 逆时序首见=最新
+  }
+  return [...bySlug.values()].sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+}
+
 /** 副本自包含化：checkpoint(TRUNCATE) 将 WAL 并回主文件，随后删 -wal/-shm 边车（副本=本工具私有文件）。 */
 function checkpointSelfcontained(copyPath) {
   const c = new DatabaseSync(copyPath);   // rw 打开（受管 TEMP 副本）以执行 checkpoint
@@ -256,7 +304,7 @@ function judgeZeroWrite(before, after, copyProtocol) {
   const dbDirVerdict = judgeDbDirEvidence(before.db_dir, after.db_dir);
   const evidence = {
     recorded_at: rfc3339(),
-    policy: '源侧零 SQLite 打开（P0-1 三审纯文件复制协议：snapshotCopySource 分块复制 db+(-wal) 至受管 TEMP，复制前后源摘要恒等有界重试）；零写入判定=db 目录与 agents 目录全树 rel→{sha256,size,mtime} 前后字节恒等（任何新增/消失/同名文件原子变化一律红——无白名单无归因通道；data_version 机制随直开路径退役 2026-10-09）',
+    policy: '源侧零 SQLite 打开（P0-1 三审纯文件复制协议：snapshotCopySource 分块复制 db+(-wal) 至受管 TEMP，复制后源快照+副本摘要三方恒等（copy==before==after 逐文件 sha256+size_bytes）有界重试）；零写入判定=db 目录与 agents 目录全树 rel→{sha256,size,mtime} 前后字节恒等（任何新增/消失/同名文件原子变化一律红——无白名单无归因通道；data_version 机制随直开路径退役 2026-10-09）',
     source_access: { protocol: 'pure-file-copy', sqlite_opens_on_source: 0, ...copyProtocol },
     db_dir: {
       file_count_before: Object.keys(before.db_dir.entries).length,
@@ -307,6 +355,10 @@ async function buildBundle({ storeRoot, tempDir, dbPath, agentsRoot, projectDir,
   const copyProtocol = {
     attempts: copy.attempts,
     source_snapshot_at_stable_copy: copy.sourceSnapshot,
+    // copy_digests==source_snapshot 恒等为设计不变量（逐文件 sha256+size_bytes），不等即证据矛盾——
+    // 审计口径=交叉核验两者恒等（方案门 P3-5）；与 manifest.sqlite sqlite_copy.sha256（post-checkpoint
+    // 终产物内容寻址）设计即不等：copy_digests=snapshotCopySource 内部 pre-checkpoint 副本字节（与源可比）。
+    copy_digests: copy.copyDigests,
     dest: '受管 TEMP staging（副本）',
   };
   const { evidence, problems, verdicts } = judgeZeroWrite(before, after, copyProtocol);
@@ -427,7 +479,10 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
   }
 
   // 5) git HEAD + bundle_id（内容寻址：sqlite 副本 SHA + eligible 文件集摘要 + tickets/reviews SHA + git HEAD）
+  //    stats-5：ticket_merges 观察 additive 落 manifest 但不入内容寻址输入（历史 bundle_id 稳定——同 id 复用
+  //    面 git_head 不变 ⟹ 历史不变 ⟹ merge 观察确定性，reused canonical 相等不破）
   const head = gitHead(projectDir);
+  const ticketMerges = collectTicketMerges(projectDir, tr.slugs);
   const idInput = canon({
     sqlite: copySha,
     metadata: corpus.eligible.map(f => [f.relative_path, f.sha256]),
@@ -475,6 +530,7 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
       sha256: tr.sha256,
     },
     git_head: head,
+    ticket_merges: ticketMerges,   // stats-5 M3 取数面：可选字段 additive（schema 同步三件——历史无字段兼容）
   };
 
   // 6) manifest 过同一 contract-validator（P1-1：生产产物无法绕过 validator）

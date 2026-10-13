@@ -3,7 +3,7 @@
 //   init [--register-project <名> --project-path <路径>]        仓初始化/项目注册
 //   bundle create-zcode-pilot                                    冻结 pilot bundle 制作（唯一真实源接触位）
 //   collect --bundle <id>                                        增量采集（§5.4 协议；failpoint API 见 failpoint-contract.md）
-//   validate | rebuild --from-source | compact | prune            仓生命周期（审查 P0-2）
+//   validate | rebuild --from-source --bundle <id> | compact | prune   仓生命周期（审查 P0-2）
 //   verify --bundle <id>                                          pilot 对账（⑩⑫ + 默认最小输出 allowlist）
 //   report [--project…] [--since/--until] [--json|--out]          常设 M1/M2 报告（stats-4；全仓 closed segments）
 // 全局参数：
@@ -65,9 +65,10 @@ export function parseArgs(argv, multiKeys = []) {
 
 const USAGE = `用法：node harness-stats.mjs <子命令> [参数]
 子命令：init | bundle create-zcode-pilot | bundle create-native-corpus | collect（--bundle <id> | --corpus <id>）
-        | mine | reconcile | validate | rebuild --from-source | compact | prune | verify | migrate-audit
+        | mine | reconcile | validate | rebuild --from-source --bundle <id> | compact | prune | verify | migrate-audit
         | heldout-sample | heldout-live-sample | heldout-live-classify | heldout-planner-final | golden-candidates | pilot-report
         | report [--project <id>…] [--since <RFC3339-UTC>] [--until <RFC3339-UTC>] [--json | --out <reports/ 相对名>]
+        | b9-matrix [--project-dir <项目仓根>] [--out]
 全局：--store-root <dir> --node-version-probe <ver> --clock <RFC3339-UTC> --source-instance-id <uuid>
       --zcode-home <dir> --project-dir <dir> --kimi-home <dir> --codex-home <dir>
 退出码：0 成功 / 1 fail-loud / 2 用法 / 60 UNSUPPORTED_SOURCE / 64 版本不足 / 65 ACL / 70 CRASH_INJECTED`;
@@ -190,6 +191,10 @@ export async function runStats2(argv) {
     case 'report': {
       const { cmdReport } = await import('./cmd-report.mjs');
       return cmdReport(opts);
+    }
+    case 'b9-matrix': {
+      const { cmdB9Matrix } = await import('./cmd-b9matrix.mjs');
+      return cmdB9Matrix(opts);
     }
     case 'migrate-audit': {
       const { cmdMigrateAudit } = await import('./cmd-lifecycle.mjs');
