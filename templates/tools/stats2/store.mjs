@@ -49,8 +49,35 @@ function sandboxedSpawnOpts() {
 /** 本进程唯一起始令牌（E1 复用判定/TEMP 所有权共用；进程生命周期内恒定）。 */
 export const PROCESS_START_TOKEN = randomUUID();
 
+// ── PS 探针 ETIMEDOUT 有界重试（acl-probe-hardening 微票）──────────────────
+// 根因：满载高并发下探针 spawnSync 偶发 ETIMEDOUT → ACL_UNVERIFIABLE 假红（exit 65
+// 语义正确但非 ACL 真实变化——hygiene-3 验收轮两目击）。区分 IO 瞬态与真实变化：
+// 同参有界重试（2 次×1s 间隔）——重试成功=瞬态消解；重试后仍超时=fail-loud 原样
+// （结果形直落既有失败处理，exit 65 语义不变；ACL 判定语义零改动——红线）。
+export const PS_PROBE_RETRY_MAX = 2;
+export const PS_PROBE_RETRY_DELAY_MS = 1_000;
+
+function isProbeTimedOut(r) {
+  return Boolean(r && r.error && r.error.code === 'ETIMEDOUT');
+}
+
+/** PS 探针统一 spawn 面：沙盒 opts + 显式 timeout（30s preflight / 20s harden——沿用
+ *  既有冻结值，不回落 Node 默认无界）+ ETIMEDOUT 形有界重试。
+ *  psSpawn/retryDelayMs 供测试注入（E1 oracle 同款选项注入风格）；默认=真实 spawnSync。 */
+function psProbe(psScript, timeoutMs, { psSpawn = spawnSync, retryDelayMs = PS_PROBE_RETRY_DELAY_MS } = {}) {
+  const run = () => psSpawn('powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', psScript],
+    { ...sandboxedSpawnOpts(), timeout: timeoutMs });
+  let r = run();
+  for (let n = 0; n < PS_PROBE_RETRY_MAX && isProbeTimedOut(r); n++) {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, retryDelayMs);   // 与锁路径同款主线程睡眠原语
+    r = run();   // 同参重试：仅 ETIMEDOUT 瞬态形；其他失败形零重试直落既有处理
+  }
+  return r;
+}
+
 // ── ACL preflight（Windows SDDL / Linux mode） ────────────────────
-function windowsAclVerdicts(paths) {
+function windowsAclVerdicts(paths, { psSpawn, retryDelayMs } = {}) {
   // 单次 PowerShell 调用批量取 SDDL（每路径一次 Get-Acl；输出 PATH:…/SDDL:… 成对行）
   const quoted = paths.map(p => `'${String(p).replaceAll("'", "''")}'`);
   const ps =
@@ -59,7 +86,7 @@ function windowsAclVerdicts(paths) {
     `@(${quoted.join(',')}) | ForEach-Object { 'PATH=' + $_; 'SDDL=' + (Get-Acl -LiteralPath $_).Sddl }`;
   let r;
   try {
-    r = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', ps], sandboxedSpawnOpts());
+    r = psProbe(ps, 30_000, { psSpawn, retryDelayMs });
   } catch (e) {
     return paths.map(p => ({ path: p, ok: false, reason: `ACL_UNVERIFIABLE：PowerShell 探针不可执行（${e.message}）` }));
   }
@@ -97,11 +124,12 @@ function linuxAclVerdict(path) {
   return { ok: true };
 }
 
-/** 批量 ACL 判定（任何持久化写入前调用；不满足即由调用方 exit≠0）。 */
-export function aclPreflightBatch(paths) {
+/** 批量 ACL 判定（任何持久化写入前调用；不满足即由调用方 exit≠0）。
+ *  opts（psSpawn/retryDelayMs）仅供测试注入探针重试面，产品路径不传。 */
+export function aclPreflightBatch(paths, opts = {}) {
   if (process.platform === 'win32') {
     const exists2 = paths.filter(existsSync);
-    const verdicts = windowsAclVerdicts(exists2);
+    const verdicts = windowsAclVerdicts(exists2, opts);
     const byPath = new Map(verdicts.map(v => [v.path, v]));
     return paths.map(p => byPath.get(p) ?? { path: p, ok: true, note: '不存在——创建后复核' });
   }
@@ -113,7 +141,7 @@ export function aclPreflight(path) { return aclPreflightBatch([path])[0]; }
 /** 新建目录的创建时加固（§5.1「目录创建时校验仅当前用户可访问」的执行面）：
  *  Windows=断继承+显式 DACL（当前用户/SYSTEM/Administrators 各 F，OI|CI）；Linux=chmod 0700。
  *  只作用于本工具新建的目录；已存在目录一律不动（宽权限=拒绝，见 preflight）。 */
-export function hardenNewDir(path) {
+export function hardenNewDir(path, { psSpawn, retryDelayMs } = {}) {
   if (process.platform === 'win32') {
     const ps =
       `$ErrorActionPreference='Stop';` +
@@ -125,7 +153,7 @@ export function hardenNewDir(path) {
       `foreach($n in @('NT AUTHORITY\\SYSTEM','BUILTIN\\Administrators')){` +
       `$acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule($n,'FullControl','ContainerInherit,ObjectInherit','None','Allow')))};` +
       `Set-Acl -LiteralPath '${String(path).replaceAll("'", "''")}' $acl`;
-    const r = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', ps], { ...sandboxedSpawnOpts(), timeout: 20_000 });
+    const r = psProbe(ps, 20_000, { psSpawn, retryDelayMs });
     if (r.status !== 0) return { ok: false, reason: `ACL_HARDEN_FAIL：新建目录 DACL 加固失败（${String(r.stderr || r.error || '').slice(0, 160)}）` };
     return { ok: true };
   }

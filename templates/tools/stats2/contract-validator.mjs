@@ -366,11 +366,31 @@ function crossEvent(fixture, errors) {
 }
 
 // ── fixture 验证入口（三层） ──────────────────────────────────────
+// P1-2 存量容读（anchor-hash-field-rename r2 门裁定）：事件语料校验遇 route_anchor 旧字段名
+// repo_models_config_commit 映射为 repo_models_config_hash——只读侧容错（collect/mine pre-commit 与
+// validate-schema 套件共用本单点），不修改存量文件；新名在场时旧名不映射（双键并存=allowlist 拒收）。
+const ROUTE_ANCHOR_RENAME_FROM = 'repo_models_config_commit';
+const ROUTE_ANCHOR_RENAME_TO = 'repo_models_config_hash';
+function aliasRouteAnchorRename(fixture) {
+  if (fixture?.fixture_kind !== 'event-corpus' || !Array.isArray(fixture.events)) return fixture;
+  let changed = false;
+  const events = fixture.events.map(e => {
+    const ra = e?.route_anchor;
+    if (!ra || typeof ra !== 'object' || Array.isArray(ra)) return e;
+    if (!(ROUTE_ANCHOR_RENAME_FROM in ra) || (ROUTE_ANCHOR_RENAME_TO in ra)) return e;
+    changed = true;
+    const { [ROUTE_ANCHOR_RENAME_FROM]: v, ...rest } = ra;
+    return { ...e, route_anchor: { ...rest, [ROUTE_ANCHOR_RENAME_TO]: v } };
+  });
+  return changed ? { ...fixture, events } : fixture;
+}
+
 function validateFixture(fixture) {
   const errors = [];
-  structural(fixture, errors);
-  crossField(fixture, errors);
-  crossEvent(fixture, errors);
+  const normalized = aliasRouteAnchorRename(fixture);
+  structural(normalized, errors);
+  crossField(normalized, errors);
+  crossEvent(normalized, errors);
   return errors;
 }
 

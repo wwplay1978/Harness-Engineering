@@ -340,13 +340,16 @@ export async function cmdVerify(opts) {
 
 /** §5.8 pilot 评估报告（产物面：eligible repair episode 数、分类三率、五级归因分布、orphan 归因缺口说明）。
  *  stats-2 无 attempt 分类器（全部 dispatch=unclassified-v0/unknown）——episode 计数与 wrong_label_rate
- *  按 §2.2-11 协议归 stats-3 分类器接入后回填；本工件如实记 NOT_IDENTIFIABLE 与可机械计算面。 */
-function buildPilotReport({ manifest, latestDispatches, participating, differences, ratio, orphanContext, corpusAttribution, generation }) {
+ *  按 §2.2-11 协议归 stats-3 分类器接入后回填；本工件如实记 NOT_IDENTIFIABLE 与可机械计算面。
+ *  effective-model-materialization r2（P1-1 哑弹双闸门修）：routeAnchorAvailable 的 effective_model 子条件
+ *  =modelSelection 载荷在场判定（`!== 'unknown'` 判据维持——真值化后语义可达，不再结构性恒 unknown）；
+ *  attempt_kind 子闸仍结构性拦截（归 stats-3 分类器票）——导出供组合用例直调（门裁定 P1-1(a)）。 */
+export function buildPilotReport({ manifest, latestDispatches, participating, differences, ratio, orphanContext, corpusAttribution, generation }) {
   const total = latestDispatches.length;
   const routeAnchorAvailable = (e) => {
     const a = e.route_anchor;
     return Boolean(a && typeof a === 'object'
-      && a.effective_model !== 'unknown' && a.route_hash !== 'unknown' && a.repo_models_config_commit !== 'unknown');
+      && a.effective_model !== 'unknown' && a.route_hash !== 'unknown' && a.repo_models_config_hash !== 'unknown');
   };
   const eligible = latestDispatches.filter(e =>
     e.attempt_kind === 'quality_rework'
@@ -363,10 +366,10 @@ function buildPilotReport({ manifest, latestDispatches, participating, differenc
     generation,
     eligible_repair_episodes: {
       count: eligible.length,
-      criteria: 'attempt_kind=quality_rework ∧ attribution∈{EXPLICIT,DIRECT,MANUAL_RECONCILED} ∧ 终态 ∧ 路由锚可得（§5.8）',
+      criteria: 'attempt_kind=quality_rework ∧ attribution∈{EXPLICIT,DIRECT,MANUAL_RECONCILED} ∧ 终态 ∧ 路由锚可得（§5.8——三条件拆分独立评；effective_model 子条件=modelSelection 载荷在场判定〔effective-model r2〕）',
       dispatch_entities_total: total,
       not_identifiable: total - eligible.length,
-      basis: 'stats-2 dispatch 恒为 attempt_kind=unknown/classifier_version=unclassified-v0（attempt 分类器归 stats-3）——episode 计数在分类器接入前结构性为 0，全部实体计 NOT_IDENTIFIABLE',
+      basis: '哑弹双闸门诊断（effective-model r2）：effective_model 子闸已随真值化可达（载荷在场≠unknown——routeAnchorAvailable 判据维持）；attempt_kind 子闸仍结构性拦截——stats-2 dispatch 恒 attempt_kind=unknown/classifier_version=unclassified-v0（attempt 分类器归 stats-3）→ 分类器接入前 episode 计数结构性为 0，全部实体计 NOT_IDENTIFIABLE',
     },
     classification_rates: {
       unknown_rate: total > 0 ? +(unknownCount / total).toFixed(4) : null,

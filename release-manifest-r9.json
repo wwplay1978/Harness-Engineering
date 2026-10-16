@@ -1,0 +1,122 @@
+[
+  {
+    "path": "templates/stats/event-schema-v1.json",
+    "sha256": "da721f5e8f24ac7c6d375743dad2afef4695c593dbdfa2aefe2406a56d508f07"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F01-entity-id-formula.json",
+    "sha256": "23eb6285e9ee9631a8e0c9ce219817a7e690757a02c7b78edd04369f1f92e426"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F02-event-id-revision.json",
+    "sha256": "3c1e6e4098d59f18badc5e34472f6ea49ca00b86ff6aa6933dc8ccdb8cab9c4f"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F06-terminal-fields.json",
+    "sha256": "0141fe214c0eb7d49e1442e656c92833b5eb48e0c94a378d7442eaf6964a1343"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F07-wall-clock-formula.json",
+    "sha256": "18dd2f51018be910a7d79d9d54e2eeb148a2151b4de99d38902d510f76e345dc"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F08-attribution-ticket-slug.json",
+    "sha256": "b622205311701099e85321e3586660e1dbe7db47b7f713c055c2e9bd9dc57ff6"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F11-initial-trigger-combination.json",
+    "sha256": "52dbf899df83e9718ecddc2e61c896cbd5ec3afc21cbb1a6917344fadcc51641"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F31-child-session-id-type.json",
+    "sha256": "6d356835d6e709f294b9d7b04667a06d1ad6ac870a451c2a4ebe1d3231b2d9d2"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S01-schema-version.json",
+    "sha256": "d4412fde7df24e5b51848f519357e80d677a9efe2980d074116a92e659e4212b"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S02-source-instance-id.json",
+    "sha256": "d40f43c1af4ba9e356da6e1a29818c536ebce2fb4478b619b02bcc2bcc8d3042"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S03-event-kind.json",
+    "sha256": "b399321daa49a01bda7a14fd036bd3774d90c1cab67d9658899165e516913b77"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S05-dispatch-required.json",
+    "sha256": "f2b6be2dc56d2f738242bd66b47b95fa3b5cd517d2ffa7be04d1568df21a212a"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S09-attempt-kind-enum.json",
+    "sha256": "47289469543410bbc7676f55b9e5eef039b9ded2a108aa89771275a8921f7d58"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S10-trigger-stage-enum.json",
+    "sha256": "e26422a916f3049a0a7ac847d77fd4f4f7d91cd82a16745c865f34b4622e523c"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S11-attribution-enum.json",
+    "sha256": "7e20caf009b2cf9d5883d58d0ecc8109d3a64fd55c366fcb25d2bc6ba42dc068"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S12-state-enum.json",
+    "sha256": "d977603c1c1cfa252077e0888780f0193635b1aa7c3da1f81484098ee6280e55"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S13-route-anchor-required.json",
+    "sha256": "e41cf59b54d5aa0f5164b866a87f82ec7c7197e4a3f76463cd694575a4c85535"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S14-timestamp-semantic.json",
+    "sha256": "ad266aaff420fc17b0340183c54b90315cd88db31975ea59432079829bac3b86"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S14-timestamp-utc.json",
+    "sha256": "4a9c31ab5c8b994939851c3b578c37ce96f5db022382199f7d28368a20fb2f55"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S18-adapter-type-enum.json",
+    "sha256": "dbed11664e23b382b9baf3e8e5bfa29fb387ff2ebc2602692b5e53a87f47b82e"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-X02-revision-monotonic.json",
+    "sha256": "6ae37b3c47e071e316cd4665ce0c822b53ccd7e386642acba843d91e3d7c7447"
+  },
+  {
+    "path": "templates/stats/fixtures/positive/pos-01-dispatch-mutable-row-chain.json",
+    "sha256": "23371208410afcc1eacc7c780c4fab10db5334079ff194e75d2770af50f3dab8"
+  },
+  {
+    "path": "templates/stats/fixtures/positive/pos-03-metadata-lifecycle-states.json",
+    "sha256": "fbc35eab610e1d3f33db9700925ab72eb1eb505763377f442db83c2bfc7a8892"
+  },
+  {
+    "path": "templates/stats/fixtures/positive/pos-15-dispatch-child-session-id.json",
+    "sha256": "9f8b208b8d34ced04a88fa0622135d9d023f8ff57c434cf98d82bc781f6ad5df"
+  },
+  {
+    "path": "templates/stats/obligations.md",
+    "sha256": "af133b288a0a48f90cf1964cf21f37eb5966973995d3354785e43c8c625ab28c"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-report.mjs",
+    "sha256": "cbda60c839448978a96e8774dcc99aaa6b6ecfc2506c170253063ee9736a083a"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-verify.mjs",
+    "sha256": "1fb80d830d136bf5ae2453659771db63de6b24273e0acceb14068ec0ad995716"
+  },
+  {
+    "path": "templates/tools/stats2/contract-validator.mjs",
+    "sha256": "dd919689a936c393d7b2117f3e7f2da6b7818e0285550a8ae98352b4c33a66a8"
+  },
+  {
+    "path": "templates/tools/stats2/project.mjs",
+    "sha256": "aea442d05144751bcba3d07d3665349da3f4eca0032c84198289f046a37ee9ce"
+  },
+  {
+    "path": "templates/tools/stats2/store.mjs",
+    "sha256": "cd04e655f62c4b75e4c8b46996b5f161274f1262bfac32014c5008202940ff72"
+  }
+]

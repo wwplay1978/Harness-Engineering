@@ -30,7 +30,7 @@
    "route_anchor": {
     "effective_model": "glm-5.3",
     "route_hash": "5f2a9c",
-    "repo_models_config_commit": "3c1d22ab99",
+    "repo_models_config_hash": "3c1d22ab99",
     "local_override_hash": "none",
     "generated_role_card_hash": "9d4e77aa",
     "host_version": "zcode-1.9.2",
@@ -65,7 +65,7 @@
    "route_anchor": {
     "effective_model": "glm-5.3",
     "route_hash": "5f2a9c",
-    "repo_models_config_commit": "3c1d22ab99",
+    "repo_models_config_hash": "3c1d22ab99",
     "local_override_hash": "none",
     "generated_role_card_hash": "9d4e77aa",
     "host_version": "zcode-1.9.2",

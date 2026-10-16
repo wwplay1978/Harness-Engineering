@@ -52,11 +52,11 @@
           "type": "object",
           "rule": "VR-S13",
           "description": "22 §5.2 行 232 路由锚组；历史无锚=各字段字符串值 unknown（只做描述性分组，不得声称为路由决策前后对照）",
-          "required": ["effective_model", "route_hash", "repo_models_config_commit", "local_override_hash", "generated_role_card_hash", "host_version", "collector_version"],
+          "required": ["effective_model", "route_hash", "repo_models_config_hash", "local_override_hash", "generated_role_card_hash", "host_version", "collector_version"],
           "properties": {
             "effective_model": { "type": "string", "minLength": 1 },
             "route_hash": { "type": "string", "minLength": 1 },
-            "repo_models_config_commit": { "type": "string", "minLength": 1 },
+            "repo_models_config_hash": { "type": "string", "minLength": 1 },
             "local_override_hash": { "type": "string", "minLength": 1 },
             "generated_role_card_hash": { "type": "string", "minLength": 1 },
             "host_version": { "type": "string", "minLength": 1 },

@@ -114,7 +114,7 @@ export function mapMetadataState(meta, { childInSource, childHasToken, nowMs, ch
 }
 
 const routeAnchor = () => ({
-  effective_model: 'unknown', route_hash: 'unknown', repo_models_config_commit: 'unknown',
+  effective_model: 'unknown', route_hash: 'unknown', repo_models_config_hash: 'unknown',
   local_override_hash: 'unknown', generated_role_card_hash: 'unknown',
   host_version: 'unknown', collector_version: COLLECTOR_VERSION,
 });
@@ -122,17 +122,30 @@ const routeAnchor = () => ({
 /** 卡锚键（P2-3）：role 含 variant——与 cmd-bundle freezeRouteAnchors 卡键同形（键粒度单源语义）。 */
 const cardKeyOf = (role, variant) => (variant ? `${role}-${variant}` : role);
 
+/** effective_model 载荷守卫投影（effective-model r2；P2-2/P2-3 门裁定）：两级缺席同判 'unknown'
+ *  （冻结面缺席=历史 bundle 存量不误升；字段缺席=载荷不在场）；守卫形沿 P3-2 先例
+ *  （typeof==='string' ∧ trim 非空 → normalizeModel 值）——空串/空白/非串不产生非 unknown 真值
+ *  （有效域=非空规范化串 ∪ {'unknown'}——防 verify 反转假通过）。 */
+function effectiveModelFor(freeze, meta) {
+  if (!freeze) return 'unknown';   // 两级缺席之一：冻结面缺席（历史 bundle）
+  const modelId = meta?.profileSnapshot?.modelSelection?.modelId;
+  return (typeof modelId === 'string' && modelId.trim() !== '') ? normalizeModel(modelId).model : 'unknown';
+}
+
 /** route_anchor 投影（route-anchor-collection r2）：七字段自 bundle 冻结面（manifest.route_anchor_freeze）填充——
- *  五真源（repo/local/卡映射/route_hash/host_version）+effective_model 恒 'unknown'（P1-5 裁定——schema 零改动，
- *  真值化归后续票先沙盒实证再回门）+collector_version 既有。冻结面缺席（历史 bundle）→ 既有 unknown 桩面
+ *  五真源（repo/local/卡映射/route_hash/host_version）+collector_version 既有。冻结面缺席（历史 bundle）→ 既有 unknown 桩面
  *  （存量兼容④：九月窗 dispatch 桩值不误升——翻转点由 report 侧双侧 verified 判据消解）。
- *  锚载体=投影直填不入 bundle_id（P2-4）；卡映射键缺席='absent'（P2-2：确定不在场）。 */
-function routeAnchorFor(freeze, role, variant) {
+ *  锚载体=投影直填不入 bundle_id（P2-4）；卡映射键缺席='absent'（P2-2：确定不在场）。
+ *  effective_model 真值化（effective-model-materialization r2）：dispatch 级取该 dispatch 自身
+ *  metadata.profileSnapshot.modelSelection.modelId（冻结面=bundle metadata 载荷直读，与 host_version 探针同形
+ *  ——非 manifest 冻结面新顶层；不走卡级映射——卡级=role 桌面态 vs dispatch 级=该次派发声明；
+ *  P2-1 语义=profile 派发时点声明模型，运行时 fallback/override 不可观——守卫见 effectiveModelFor）。 */
+function routeAnchorFor(freeze, role, variant, meta = null) {
   if (!freeze) return routeAnchor();
   return {
-    effective_model: 'unknown',
+    effective_model: effectiveModelFor(freeze, meta),
     route_hash: freeze.route_hash,
-    repo_models_config_commit: freeze.repo_models_config_hash,   // P1-4：承载文件内容 hash（字段名沿 schema 七字段）
+    repo_models_config_hash: freeze.repo_models_config_hash,   // P1-4：承载文件内容 hash（anchor-hash-field-rename 后事件面与冻结面同名直填）
     local_override_hash: freeze.local_override_hash,
     generated_role_card_hash: freeze.role_card_hashes?.[cardKeyOf(role, variant)] ?? 'absent',
     host_version: freeze.host_version,
@@ -234,7 +247,7 @@ export function projectBundleEvents({ storeRoot, bundleId, sid, nowIso, nowMs, o
       wall_clock_ms: completedAt != null ? Date.parse(completedAt) - Date.parse(createdAt) : null,
       attempt_kind: UNCLASSIFIED.attempt_kind, trigger_stage: UNCLASSIFIED.trigger_stage,
       secondary_cause: '', classifier_version: UNCLASSIFIED.classifier_version,
-      route_anchor: routeAnchorFor(manifest.route_anchor_freeze ?? null, role, variant),
+      route_anchor: routeAnchorFor(manifest.route_anchor_freeze ?? null, role, variant, meta),
     });
   }
   for (const r of emitUsage) {

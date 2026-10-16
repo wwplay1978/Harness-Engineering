@@ -550,10 +550,12 @@ function m4WeekTrend({ scoped, untruncated, gateBlocking, attrFaceMap, anchorFac
  *  P1-2 **双侧 verified**：前后锚组均非 unknown/absent 才入对照（桩→真翻转/absent↔hash=基线建立日非变更点）；
  *  P1-3 **窗粒度语义**：锚=bundle 制作时点只读快照（窗内变迁不可观；变更点时戳=后窗该键首派发）；
  *  P1-4 repo 锚=templates/models.config.json 内容 hash（规范仓真源指纹——不声称生效面，sync 滞后不可观）；
- *  P1-5 effective_model 恒 'unknown'（schema 零改动；真值化归后续票）。NOT_ENOUGH 判据维持 ≥2 verified 变更点。 */
+ *  P1-5→effective-model r2：effective_model=dispatch 级 metadata.modelSelection 声明真值（profile 派发时点声明
+ *  模型——非实际使用模型，运行时 fallback 不可观；两级缺席=unknown）；**锚组比较不含该字段**（双面语义保持
+ *  ——仅入 points before/after 展示）。NOT_ENOUGH 判据维持 ≥2 verified 变更点。 */
 function m4RouteComparison(scoped) {
   const UNKNOWN = 'unknown', ABSENT = 'absent';
-  const ANCHOR_KEYS = ['repo_models_config_commit', 'local_override_hash', 'generated_role_card_hash'];
+  const ANCHOR_KEYS = ['repo_models_config_hash', 'local_override_hash', 'generated_role_card_hash'];
   const disp = scoped.filter(e => e.event_kind === 'dispatch' && e.created_at)
     .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : a.entity_id < b.entity_id ? -1 : 1));
   const keyOf = (d) => (d.variant ? `${d.role}-${d.variant}` : d.role);   // P1-1/P2-3：键粒度=role 含 variant
@@ -561,13 +563,13 @@ function m4RouteComparison(scoped) {
   const verified = (g) => g.every(v => v !== UNKNOWN && v !== ABSENT);   // P2-2：absent（确定不在场）与 unknown（未观测）均非真锚
   const miss = {
     dispatches_total: disp.length,
-    repo_commit_unknown: 0, local_override_hash_unknown: 0, generated_role_card_hash_unknown: 0,
-    repo_commit_absent: 0, local_override_hash_absent: 0, generated_role_card_hash_absent: 0,
+    repo_hash_unknown: 0, local_override_hash_unknown: 0, generated_role_card_hash_unknown: 0,
+    repo_hash_absent: 0, local_override_hash_absent: 0, generated_role_card_hash_absent: 0,
     fully_anchored: 0,
   };
   for (const d of disp) {
     const g = groupOf(d);
-    if (g[0] === UNKNOWN) miss.repo_commit_unknown++; else if (g[0] === ABSENT) miss.repo_commit_absent++;
+    if (g[0] === UNKNOWN) miss.repo_hash_unknown++; else if (g[0] === ABSENT) miss.repo_hash_absent++;
     if (g[1] === UNKNOWN) miss.local_override_hash_unknown++; else if (g[1] === ABSENT) miss.local_override_hash_absent++;
     if (g[2] === UNKNOWN) miss.generated_role_card_hash_unknown++; else if (g[2] === ABSENT) miss.generated_role_card_hash_absent++;
     if (verified(g)) miss.fully_anchored++;
@@ -588,7 +590,7 @@ function m4RouteComparison(scoped) {
       if (!verified(pg) || !verified(cg)) continue;   // P1-2 双侧 verified：翻转/基线建立不入对照
       points.push({
         at: cur.created_at, key,
-        repo_commit: cg[0], local_hash: cg[1], card_hash: cg[2],
+        repo_hash: cg[0], local_hash: cg[1], card_hash: cg[2],
         effective_model_before: prev.route_anchor?.effective_model ?? null,
         effective_model_after: cur.route_anchor?.effective_model ?? null,
       });
@@ -601,7 +603,7 @@ function m4RouteComparison(scoped) {
     verified_change_points: points.length,
     points: ok ? points : [],
     anchor_missing: miss,
-    note: 'verified=同键（role 含 variant）相邻对照锚组双侧均非 unknown/absent（P1-1 同键比较消角色交替伪点；P1-2 桩→真翻转/absent↔hash=基线建立日非变更点）；锚=bundle 制作时点只读快照——窗粒度配置指纹（窗内变迁不可观，变更点时戳=后窗该键首派发——P1-3）；repo 锚=templates/models.config.json 内容 hash=规范仓真源指纹不声称生效面（sync 滞后不可观——P1-4）；effective_model 恒 unknown（P1-5）；锚采集面=route-anchor-collection r2',
+    note: 'verified=同键（role 含 variant）相邻对照锚组双侧均非 unknown/absent（P1-1 同键比较消角色交替伪点；P1-2 桩→真翻转/absent↔hash=基线建立日非变更点）；锚=bundle 制作时点只读快照——窗粒度配置指纹（窗内变迁不可观，变更点时戳=后窗该键首派发——P1-3）；repo 锚=templates/models.config.json 内容 hash=规范仓真源指纹不声称生效面（sync 滞后不可观——P1-4）；effective_model=dispatch 级 metadata.modelSelection 声明模型（profile 派发时点声明——非实际使用模型，运行时 fallback 不可观；冻结面/字段缺席→unknown——effective-model r2）；锚组比较不含 effective_model（仅入 points before/after 展示）；锚采集面=route-anchor-collection r2',
   };
 }
 
@@ -628,6 +630,8 @@ function summaryFace({ scoped, gateBlocking, internals, weekTrend }) {
   const text = weekTrend.weeks.map(w => `${w.week} ${bars[maxT === 0 ? 0 : Math.round((w.tickets / maxT) * (bars.length - 1))]}${w.partial ? '*' : ''}`).join('  ');
   return {
     role_model_month_matrix: matrix,
+    // P2-1（effective-model r2）语义注记：模型维=声明源——与 m1.models_by_adapter（model-request 实源）双源关系披露
+    role_model_month_matrix_note: '模型维=route_anchor.effective_model=dispatch 级 metadata.modelSelection（profile 派发时点**声明**模型——非实际使用模型，运行时 fallback/override 不可观；冻结面/字段缺席→unknown 桶；effective-model r2）；双源关系：实际服务模型观 m1.models_by_adapter（model-request 事件实源）——同报告两面对同一派发可给出不同模型属预期（声明面 vs 实源面）',
     quality_rework_tickets: qualityList,
     week_sparkline: { text, series: weekTrend.weeks.map(w => ({ week: w.week, tickets: w.tickets, dispatches: w.dispatches })), legend: '*=partial 周（WB-4）' },
   };
@@ -742,9 +746,9 @@ export async function cmdReport(opts) {
     dispatches_by_project: tally(dispatches, e => e.project_id ?? null),
     dispatches_by_day_utc: tally(dispatches.filter(e => e.created_at), e => String(e.created_at).slice(0, 10)),
     models_by_adapter: (() => {
-      // 票 C P2-3：zcode 行改实源——tally zcode-sqlite model-request 事件的实际 model
-      // （project.mjs 投影已载 model 字段），与 kimi/codex 行同源同法；弃 route_anchor.effective_model
-      // 桩值 tally（生产桩值恒 unknown——恒 unknown 桶无计量价值）。
+      // 票 C P2-3：zcode 行实源——tally zcode-sqlite model-request 事件的实际 model（project.mjs 投影已载
+      // model 字段），与 kimi/codex 行同源同法；不用 route_anchor.effective_model（effective-model r2 后=
+      // 声明源——与本面「实源」双源分工，声明面消费归 summary.role_model_month_matrix，双源关系入其 note）。
       const byAdapter = {};
       for (const adapter of ['zcode-sqlite', 'kimi-wire', 'codex-sessions']) {
         const t = tally(scoped.filter(e => e.event_kind === 'model-request' && e.adapter_id === adapter), e => e.model ?? null);
