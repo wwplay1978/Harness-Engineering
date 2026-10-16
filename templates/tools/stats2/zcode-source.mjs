@@ -98,7 +98,10 @@ export function copyFileChunked(src, dst, { onChunk = null, chunkBytes = COPY_CH
       copied += n;
       if (onChunk) onChunk(copied, st.size);
     }
-    if (copied !== st.size) throw new Error(`复制字节数不符：${basename(src)} 期望 ${st.size} 实得 ${copied}`);
+    if (copied !== st.size) throw Object.assign(
+      new Error(`复制字节数不符：${basename(src)} 期望 ${st.size} 实得 ${copied}`),
+      { code: 'COPY_SIZE_DRIFT' },   // stats-hygiene-2 交付物 1：源字节层面漂移标记——snapshotCopySource 捕获按「源不稳」重试
+    );
     return { sha256: hash.digest('hex'), size_bytes: copied };
   } finally {
     closeSync(inFd); closeSync(outFd);
@@ -143,14 +146,28 @@ export function snapshotCopySource(dbPath, destDir, { maxAttempts = 3, onBeforeC
   const needed = files.filter(existsSync).reduce((a, p) => a + statSync(p).size, 0);
   ensureDiskSpace(destDir, needed);
   const copyPath = join(destDir, 'db.sqlite');
+  let driftCause = null;   // stats-hygiene-2 交付物 1：末次 byte-guard 漂移错误（cause 链保留期望/实得字节）
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const before = snap();
     if (onBeforeCopy) onBeforeCopy(attempt);   // 注入位（仅测试 fixture）：before 快照后、首次读源前——ABA 注入窗（snapshot-aba-hardening 交付物 4）
-    const dbCopy = copyFileChunked(dbPath, copyPath, { onChunk, chunkBytes });
-    const copyWal = `${copyPath}-wal`;
-    let walCopy = null;
-    if (existsSync(walPath)) walCopy = copyFileChunked(walPath, copyWal, { onChunk, chunkBytes });
-    else rmSync(copyWal, { force: true });   // 上次尝试的残留副本边车不得混入本次
+    let dbCopy, walCopy = null;
+    try {
+      dbCopy = copyFileChunked(dbPath, copyPath, { onChunk, chunkBytes });
+      const copyWal = `${copyPath}-wal`;
+      if (existsSync(walPath)) walCopy = copyFileChunked(walPath, copyWal, { onChunk, chunkBytes });
+      else rmSync(copyWal, { force: true });   // 上次尝试的残留副本边车不得混入本次
+    } catch (e) {
+      // stats-hygiene-2 交付物 1（byte-guard 重试语义——2026-10-13 实测发现：1.1GB 活源活动期
+      // BUNDLE-FAIL「复制字节数不符」直接抛出未入重试环）：copyFileChunked 的 copied!==st.size
+      // （复制窗内源字节层面漂移——增长/收缩）与三方摘要不等同步判「源不稳」——丢弃该次尝试+
+      // 计入有界重试（耗尽→SOURCE_UNSTABLE fail-loud；期望/实得字节经 cause 链保留）。
+      // 其他错误（短写/IO/磁盘）不吞——立即 fail-loud（P2-1 全写断言面不因本环弱化）。
+      if (e.code !== 'COPY_SIZE_DRIFT') throw e;
+      driftCause = e;
+      rmSync(copyPath, { force: true });
+      rmSync(`${copyPath}-wal`, { force: true });
+      continue;
+    }
     if (onAfterCopy) onAfterCopy(attempt);
     const after = snap();
     const copyDigests = { [basename(dbPath)]: { sha256: dbCopy.sha256, size_bytes: dbCopy.size_bytes } };   // 副本摘要=流式随算（pre-checkpoint 字节）
@@ -169,11 +186,11 @@ export function snapshotCopySource(dbPath, destDir, { maxAttempts = 3, onBeforeC
     if (canonEq(before, after) && digestsEq(copyDigests, before)) return { copyPath, attempts: attempt, sourceSnapshot: before, copyDigests };
     // 源在复制窗内变化或副本≠源（ABA/撕裂）→ 副本不可信：丢弃后重试
     rmSync(copyPath, { force: true });
-    rmSync(copyWal, { force: true });
+    rmSync(`${copyPath}-wal`, { force: true });
   }
   throw Object.assign(
-    new Error(`SOURCE_UNSTABLE：源在复制窗口内持续变化（${maxAttempts} 次尝试摘要均不稳）——稍后源静默时重试（P0-1 纯文件复制协议）`),
-    { code: 'SOURCE_UNSTABLE' },
+    new Error(`SOURCE_UNSTABLE：源在复制窗口内持续变化（${maxAttempts} 次尝试均未取得稳定副本——摘要不等或字节漂移〔byte-guard〕）——稍后源静默时重试（P0-1 纯文件复制协议）`),
+    { code: 'SOURCE_UNSTABLE', ...(driftCause ? { cause: driftCause } : {}) },
   );
 }
 function canonEq(a, b) { return JSON.stringify(a) === JSON.stringify(b); }   // 快照对象=固定键集，JSON 序即 canonical

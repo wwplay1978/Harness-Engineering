@@ -105,6 +105,41 @@ function rowObservations({ manifest, dir, slug, rows, reviewFiles, sid, nowIso }
   return { snapshots, derivations };
 }
 
+/** merge-anchor-materialization r2（门终判 (a)）：bundle manifest ticket_merges → merge_anchor 锚事件。
+ *  event_id 复用 :obs: hash 模式（P1-1(ii)）：hash8=sha256(canon({merge_oid,merge_ts})) 前 8 位小写 hex——
+ *  内容寻址恒等（同锚同 event_id：幂等 upsert+多 bundle 顺序 mine 去重天然满足；slug 由 entity_id 承载
+ *  不入 hash）。entity=票级单实体 pk=tickets/<slug>.md#merge（多 merge=同实体多事件并存——消费面取
+ *  max merge_ts：P2-3/week-bucket-rules v1.1）。manifest 字段缺席（pre-stats-5 历史 bundle）=零锚事件。 */
+function anchorObservations({ manifest, sid, nowIso }) {
+  const anchors = [];
+  for (const tm of manifest.ticket_merges ?? []) {
+    const pk = `tickets/${tm.slug}.md#merge`;
+    const entityId = `${sid}:${MINER_ADAPTER_ID}:${pk}`;
+    const sourceHash8 = sha256Hex(canon({ merge_oid: tm.merge_oid, merge_ts: tm.merge_ts })).slice(0, 8);
+    anchors.push({
+      schema_version: 'v1', event_kind: 'observation', event_id: `${entityId}:obs:${sourceHash8}`,
+      entity_id: entityId, source_instance_id: sid, adapter_id: MINER_ADAPTER_ID, adapter_type: 'append-only',
+      source_primary_key: pk, collected_at: nowIso,
+      observation_subtype: 'merge_anchor', ticket_slug: tm.slug, merge_oid: tm.merge_oid, merge_ts: tm.merge_ts,
+    });
+  }
+  return anchors;
+}
+
+/** mine 的 audit 侧车 ticket_merges 绑定（P2-1②：stats-5 changes:30 挂起项闭合——锚源入 audit）。
+ *  三态机器可读：manifest_state=absent（字段缺席，pre-stats-5 bundle）/empty（在场合空清单——collect
+ *  扫描零命中）/hits（清单非空）；digest=清单 canonical SHA-256（内容绑定——锚源工件与 audit 绑定面）；
+ *  anchors_new/anchors_unchanged=本轮物化计数（清单非空而零新增=幂等轮/全部恒等去重——零命中轮可判）。 */
+function ticketMergesBinding(manifest, { anchorsNew, anchorsUnchanged }) {
+  const tm = manifest.ticket_merges;
+  return {
+    manifest_state: tm === undefined ? 'absent' : (Array.isArray(tm) && tm.length === 0 ? 'empty' : 'hits'),
+    manifest_count: tm === undefined ? null : tm.length,
+    manifest_digest: tm === undefined ? null : sha256Hex(canon(tm)),
+    anchors_new: anchorsNew, anchors_unchanged: anchorsUnchanged,
+  };
+}
+
 /** `mine --bundle <id>`：票据面观察事件采集（幂等：同源 hash 快照同 event_id；派生同内容不加 revision）。 */
 export async function cmdMine(opts) {
   const { storeRoot, flags, clock } = opts;
@@ -144,6 +179,7 @@ export async function cmdMine(opts) {
     const corpus = EE.loadCorpus(genDir, { adapterId: MINER_ADAPTER_ID });
     const allEventsUnfiltered = EE.loadCorpus(genDir).events;
     const existingSnapshotIds = new Set(corpus.events.filter(e => e.observation_subtype === 'ticket_snapshot').map(e => e.event_id));
+    const existingAnchorIds = new Set(corpus.events.filter(e => e.observation_subtype === 'merge_anchor').map(e => e.event_id));
     const maxRev = maxDerivationRevision(allEventsUnfiltered);
     const latestAuto = latestAutoDerivation(allEventsUnfiltered);
     const newEvents = [];
@@ -163,13 +199,21 @@ export async function cmdMine(opts) {
       d.event_id = `${d.entity_id}:drv:${d.derivation_revision}`;
       drvNew++; newEvents.push(d);
     }
+    // merge_anchor 锚物化（merge-anchor r2 P2-1①）：幂等=event_id 内容寻址恒等去重
+    // （同锚同 id——异 bundle/异时钟再 mine 不重灌；异 oid（revert+re-merge）=新事件并存）
+    let anchorNew = 0, anchorUnchanged = 0;
+    for (const a of anchorObservations({ manifest, sid, nowIso })) {
+      if (existingAnchorIds.has(a.event_id)) { anchorUnchanged++; continue; }
+      anchorNew++; newEvents.push(a);
+    }
     newEvents.sort((a, b) => a.event_id < b.event_id ? -1 : a.event_id > b.event_id ? 1 : 0);
 
-    // audit（miner 侧车：bundle 面 files_digest=tickets_reviews.sha256）
+    // audit（miner 侧车：bundle 面 files_digest=tickets_reviews.sha256；ticket_merges 绑定=merge-anchor r2 P2-1②）
     const observed = {
       corpus_id: `bundle:${manifest.bundle_id}`, files_digest: manifest.tickets_reviews.sha256,
       file_count: manifest.tickets_reviews.slug_list.length, generation: EE.currentGeneration(storeRoot),
       updated_at: nowIso,
+      ticket_merges_binding: ticketMergesBinding(manifest, { anchorsNew: anchorNew, anchorsUnchanged: anchorUnchanged }),
     };
     const aud = loadNativeAudit(storeRoot, MINER_ADAPTER_ID);
     if (aud.problems) { console.error(`AUDIT_CORRUPT：${aud.problems.join('；')}——fail-loud`); return EXIT.FAIL; }
@@ -181,7 +225,8 @@ export async function cmdMine(opts) {
     if (newEvents.length === 0) {
       writeNativeAudit(storeRoot, MINER_ADAPTER_ID, observed);
       console.log(JSON.stringify({ command: 'mine', bundle_id: manifest.bundle_id, noop: true,
-        snapshots_unchanged: snapUnchanged, derivations_unchanged: drvUnchanged, events_total: corpus.events.length }, null, 2));
+        snapshots_unchanged: snapUnchanged, derivations_unchanged: drvUnchanged,
+        anchors_unchanged: anchorUnchanged, events_total: corpus.events.length }, null, 2));
       return EXIT.OK;
     }
 
@@ -231,8 +276,9 @@ export async function cmdMine(opts) {
       command: 'mine', bundle_id: manifest.bundle_id, segment: seg.segId, segment_sha256: seg.sha256,
       snapshots_new: snapNew, snapshots_unchanged: snapUnchanged,
       derivations_new: drvNew, derivations_unchanged: drvUnchanged,
+      anchors_new: anchorNew, anchors_unchanged: anchorUnchanged,
       classifier_version: CLASSIFIER_VERSION, events_total: mergedEvents.length,
-      join_note: '派生事件挂行实体（tickets/<slug>.md#L<line>）；dispatch 级有效分类=report 侧按 slug+attempt 序 join（CANDIDATE 零入票级——VR-F08/S11）',
+      join_note: '派生事件挂行实体（tickets/<slug>.md#L<line>）；dispatch 级有效分类=report 侧按 slug+attempt 序 join（CANDIDATE 零入票级——VR-F08/S11）；merge_anchor=票级单实体（tickets/<slug>.md#merge——event_id 内容寻址幂等，多锚并存消费面取 max merge_ts）',
     }, null, 2));
     return EXIT.OK;
   } catch (e) {

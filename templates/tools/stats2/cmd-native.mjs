@@ -18,14 +18,10 @@ import {
 } from './native-source.mjs';
 import { scanAllTicketMerges } from './cmd-bundle.mjs';
 
-const PILOT = {
-  from: '2026-09-01T00:00:00Z', until: '2026-10-01T00:00:00Z',
-  interval: '[2026-09-01T00:00Z, 2026-10-01T00:00Z)',
-  bounds: '半开 [2026-09-01T00:00:00Z, 2026-10-01T00:00:00Z)',
-  kimiPredicate: 'project 判定（session_index.jsonl workDir 归属 AITrader2，规范化 project_id 匹配）AND 会话时间判定（首条 allowlist 行时戳 ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)；行时戳不可得时以文件 mtime 近似并在 time_field 注记 mtime-approx）',
-  codexPredicate: 'project 判定（rollout session_meta.payload.cwd 归属 AITrader2，规范化 project_id 匹配）AND 会话时间判定（session_meta 首行时戳 ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)；时戳不可得时以文件 mtime 近似并在 time_field 注记 mtime-approx）',
-};
-const FROM_MS = Date.parse(PILOT.from), UNTIL_MS = Date.parse(PILOT.until);
+// 冻结边界（pilot-window-parameterization：常量→缺省值派生——五冻结点统一自 --from/--until 派生，
+// 单源=pilot-window.mjs；缺省=九月窗行为字节级不变）
+import { parseWindowFlags, deriveWindow } from './pilot-window.mjs';
+const DEFAULT_WIN = deriveWindow();
 const normPath = p => String(p).replaceAll('\\', '/').replace(/\/+$/, '').toLowerCase();
 
 function projectBelongs(normCwd, projNorm) {
@@ -139,10 +135,10 @@ function kimiFirstAllowableTs(absPath) {
   return null;
 }
 
-function inWindow(ms) { return ms >= FROM_MS && ms < UNTIL_MS; }
+const inWindow = (ms, win) => ms >= win.fromMs && ms < win.untilMs;
 
-/** eligible 谓词执行（裁决⑧）：project 判定（workDir→注册表）AND 会话时间判定（首行时戳；mtime 近似注记）。 */
-export function scanKimi(kimiRoot, projNorm) {
+/** eligible 谓词执行（裁决⑧；窗=pilot-window 派生对象，缺省=九月窗）：project 判定（workDir→注册表）AND 会话时间判定（首行时戳；mtime 近似注记）。 */
+export function scanKimi(kimiRoot, projNorm, win = DEFAULT_WIN) {
   const eligible = [], excluded = [];
   const index = loadKimiSessionIndex(kimiRoot);   // 全局索引会话级 join（真实源形态）
   const bump = (reason) => { const e = excluded.find(x => x.reason === reason); if (e) e.count++; else excluded.push({ reason, count: 1 }); };
@@ -160,9 +156,9 @@ export function scanKimi(kimiRoot, projNorm) {
     if (first == null) {
       const mtime = Math.trunc(statSync(abs).mtimeMs);
       first = toIsoDay(mtime); last = first; timeField = 'mtime-approx（行时戳不可得，以文件 mtime 近似）'; approx++;
-      if (!inWindow(mtime)) { bump('会话时间判定不中（mtime 近似）'); continue; }
+      if (!inWindow(mtime, win)) { bump('会话时间判定不中（mtime 近似）'); continue; }
     } else {
-      if (!inWindow(Date.parse(first))) { bump('会话时间判定不中（首条 allowlist 行时戳区间外）'); continue; }
+      if (!inWindow(Date.parse(first), win)) { bump('会话时间判定不中（首条 allowlist 行时戳区间外）'); continue; }
       // last=文件内最后一条 allowlist 行时戳
       const lines = readJsonlLines(abs, '', { allowlistTypes: KIMI_TYPE_ALLOWLIST });
       for (let i = lines.length - 1; i >= 0; i--) { const ts = rowTimestamp(lines[i].row); if (ts) { last = ts; break; } }
@@ -178,8 +174,8 @@ export function scanKimi(kimiRoot, projNorm) {
   return { total_scanned: files.length, eligible, excluded, approx, time_field: approx > 0 ? '首条 allowlist 行时戳（部分会话 mtime-approx——见逐文件注记）' : '首条 allowlist 行时戳' };
 }
 
-/** Codex eligible 谓词执行：session_meta.payload.cwd 归属 AND 首行时戳窗。 */
-export function scanCodex(sessionsRoot, projNorm) {
+/** Codex eligible 谓词执行（窗=pilot-window 派生对象，缺省=九月窗）：session_meta.payload.cwd 归属 AND 首行时戳窗。 */
+export function scanCodex(sessionsRoot, projNorm, win = DEFAULT_WIN) {
   const eligible = [], excluded = [];
   const bump = (reason) => { const e = excluded.find(x => x.reason === reason); if (e) e.count++; else excluded.push({ reason, count: 1 }); };
   const files = walkFiles(sessionsRoot, n => n.endsWith('.jsonl'));
@@ -204,8 +200,8 @@ export function scanCodex(sessionsRoot, projNorm) {
     if (first == null) {
       const mtime = Math.trunc(statSync(abs).mtimeMs);
       first = toIsoDay(mtime); last = first; timeField = 'mtime-approx（时戳不可得，以文件 mtime 近似）'; approx++;
-      if (!inWindow(mtime)) { bump('会话时间判定不中（mtime 近似）'); continue; }
-    } else if (!inWindow(Date.parse(first))) {
+      if (!inWindow(mtime, win)) { bump('会话时间判定不中（mtime 近似）'); continue; }
+    } else if (!inWindow(Date.parse(first), win)) {
       bump('会话时间判定不中（首行时戳区间外）'); continue;
     }
     const st = statSync(abs);
@@ -229,6 +225,10 @@ export async function cmdBundleNativeCorpus(opts) {
   const codexHome = flags['codex-home'] ?? join(homedir(), '.codex');
   if (clock) console.log(`[AUDIT] --clock=${clock}（native corpus 冻结；created_at/observed_at 冻结于该时钟——P2-1 使用必记）`);
   const nowIso = clock ?? rfc3339();
+  // 窗口参数（pilot-window-parameterization：--from/--until 可选缺省九月窗；越界三拒收先于任何持久化写入——零副作用）
+  const winParsed = parseWindowFlags(flags, nowIso);
+  if (winParsed.error) { console.error(`USAGE（窗口）：${winParsed.error}`); return EXIT.USAGE; }
+  const win = deriveWindow(winParsed);
 
   const checks = ensureStoreLayout(storeRoot);
   const failed = checks.find(c => !c.ok);
@@ -256,7 +256,7 @@ export async function cmdBundleNativeCorpus(opts) {
   try {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        result = await buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexHome, projectDir, projectId, projNorm, nowIso });
+        result = await buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexHome, projectDir, projectId, projNorm, nowIso, win });
       } catch (e) { buildError = e; break; }
       if (result.ok) break;
       if (attempt < maxAttempts) console.error(`[NATIVE-CORPUS-RETRY] 源在冻结窗口内变化（第 ${attempt}/${maxAttempts} 次）——丢弃 staging 重试`);
@@ -284,15 +284,15 @@ export async function cmdBundleNativeCorpus(opts) {
   return exitCode === EXIT.OK ? EXIT.OK : exitCode;
 }
 
-async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexHome, projectDir, projectId, projNorm, nowIso }) {
+async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexHome, projectDir, projectId, projNorm, nowIso, win }) {
   // 零写入证据·前（证据域=本工段实际读取面——kimi=全树；codex=sessions 子树。作用域声明见 evidence.policy：
   // ~/.codex 根下 logs_2.sqlite{-wal,-shm} 为 Codex 后台 daemon 持续写入面（2026-10-09 12s 对照窗实测，
   // 本工具未运行仍变化）——不在本工段读取面内，逐秒变化令全树 digest 恒等结构性不可达成；stats-3-gap-4）
   const before = { kimi: treeDigest(kimiHome), codex: treeDigest(join(codexHome, 'sessions')) };
   const staging = join(tempDir, `corpus-${attempt}`);
   mkdirSync(staging, { recursive: true });
-  const kimi = scanKimi(kimiHome, projNorm);
-  const codex = scanCodex(join(codexHome, 'sessions'), projNorm);
+  const kimi = scanKimi(kimiHome, projNorm, win);
+  const codex = scanCodex(join(codexHome, 'sessions'), projNorm, win);
   // eligible 物理拷贝（TEMP 中转）
   for (const f of kimi.eligible) {
     const dst = join(staging, 'kimi', f.relative_path);
@@ -309,9 +309,10 @@ async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexH
   const idInput = canon({
     kimi: kimi.eligible.map(f => [f.relative_path, f.sha256]),
     codex: codex.eligible.map(f => [f.relative_path, f.sha256]),
-    window: [PILOT.from, PILOT.until],
+    window: [win.from, win.until],
   });
-  const corpusId = `native-${projectId}-202609-${sha256Hex(idInput).slice(0, 8)}`;
+  // 窗 token=from 的 UTC 年月（单 token 派生规则——pilot-window-parameterization P1-2；缺省 202609 同形）
+  const corpusId = `native-${projectId}-${win.token}-${sha256Hex(idInput).slice(0, 8)}`;
   // stats-5 M3 取数面：票级 merge 观察（项目仓 git 面）。git 面不可得（非 git 仓/git 不可用）→
   // 空清单+stdout 注记如实（native corpus 契约不因 merge 观察强制 git 依赖——观察面缺席≠冻结失败）
   let nativeTicketMerges = [];
@@ -320,15 +321,15 @@ async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexH
   const manifest = {
     manifest_kind: 'native-corpus', corpus_id: corpusId,
     created_at: nowIso, observed_at: nowIso, project_id: projectId,
-    time_range: { from: PILOT.from, until: PILOT.until, bounds: PILOT.bounds },
+    time_range: { from: win.from, until: win.until, bounds: win.bounds },
     kimi: {
       adapter_id: KIMI_ADAPTER_ID, adapter_type: 'append-only',
       source_root: String(kimiHome).replaceAll('\\', '/'),
       total_scanned: kimi.total_scanned, eligible_count: kimi.eligible.length,
       excluded: kimi.excluded.sort((a, b) => a.reason < b.reason ? -1 : 1),
       workdir_field: 'session_index.jsonl workDir（会话目录级 join）',
-      time_field: kimi.time_field, time_interval: PILOT.interval,
-      eligible_predicate: PILOT.kimiPredicate,
+      time_field: kimi.time_field, time_interval: win.interval,
+      eligible_predicate: win.kimiPredicate,
       eligible_files: kimi.eligible.map(stripInternal),
     },
     codex: {
@@ -337,8 +338,8 @@ async function buildNativeCorpus({ storeRoot, tempDir, attempt, kimiHome, codexH
       total_scanned: codex.total_scanned, eligible_count: codex.eligible.length,
       excluded: codex.excluded.sort((a, b) => a.reason < b.reason ? -1 : 1),
       workdir_field: 'rollout session_meta.payload.cwd',
-      time_field: codex.time_field, time_interval: PILOT.interval,
-      eligible_predicate: PILOT.codexPredicate,
+      time_field: codex.time_field, time_interval: win.interval,
+      eligible_predicate: win.codexPredicate,
       eligible_files: codex.eligible.map(stripInternal),
     },
     // stats-5 M3 取数面（P1-1(a)）：票级 dogfood merge 观察（通用扫描——全史 `merge: ticket ` subject 解析；

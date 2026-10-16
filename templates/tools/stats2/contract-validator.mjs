@@ -4,6 +4,8 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, basename } from 'node:path';
+// 窗口语义约束（VR-S25/S26 解钉后）与生成器共用省秒形派生——双时格式单源（pilot-window.mjs 零依赖纯函数）
+import { shortWindowForm } from './pilot-window.mjs';
 
 const STATS_DIR = join(import.meta.dirname, '..', '..', 'stats'); // stats2/ → templates/stats/
 
@@ -156,6 +158,35 @@ function crossField(fixture, errors) {
         }
       }
     }
+    // VR-S32 窗口语义约束（pilot-window-parameterization r3 解钉 2026-10-13：const 窗值→语义约束——
+    // 与 VR-S25 同形态：窗值不再钉九月字面；保留 RFC3339 规范形（结构层 pattern）+from<until
+    // +bounds/两源 time_interval 照实派生+两源谓词按窗照实记录。双时格式单源（shortWindowForm）
+    {
+      const tr = fixture.time_range;
+      if (tr && typeof tr.from === 'string' && typeof tr.until === 'string'
+        && (!Number.isFinite(Date.parse(tr.from)) || !Number.isFinite(Date.parse(tr.until)))) {
+        errors.push({ rule: 'VR-S32', pointer: '/time_range/from', message: '窗值非有效 RFC3339 日历时点（pattern 只查数字形状——99 时/2 月 30 日类须历法校验；review P2 修）' });
+      } else if (tr && typeof tr.from === 'string' && typeof tr.until === 'string') {
+        if (Date.parse(tr.from) >= Date.parse(tr.until)) {
+          errors.push({ rule: 'VR-S32', pointer: '/time_range/from', message: `窗口语义违例：from(${tr.from}) ≥ until(${tr.until})——半开区间须 from < until` });
+        } else {
+          const wantBounds = `半开 [${tr.from}, ${tr.until})`;
+          if (tr.bounds !== wantBounds) {
+            errors.push({ rule: 'VR-S32', pointer: '/time_range/bounds', message: `bounds 须照实派生自窗值：期望 ${JSON.stringify(wantBounds)}，实得 ${JSON.stringify(tr.bounds)}` });
+          }
+          const wantInterval = `[${shortWindowForm(tr.from)}, ${shortWindowForm(tr.until)})`;
+          for (const src of ['kimi', 'codex']) {
+            const s = fixture[src];
+            if (s && typeof s.time_interval === 'string' && s.time_interval !== wantInterval) {
+              errors.push({ rule: 'VR-S32', pointer: `/${src}/time_interval`, message: `time_interval 须照实派生自窗值（省秒形）：期望 ${JSON.stringify(wantInterval)}，实得 ${JSON.stringify(s.time_interval)}` });
+            }
+            if (s && typeof s.eligible_predicate === 'string' && !s.eligible_predicate.includes(wantInterval)) {
+              errors.push({ rule: 'VR-S32', pointer: `/${src}/eligible_predicate`, message: `eligible_predicate 须按窗生成照实记录：须含实际窗区间 ${JSON.stringify(wantInterval)}，实得 ${JSON.stringify(s.eligible_predicate.slice(0, 60))}…` });
+            }
+          }
+        }
+      }
+    }
     return;
   }
   if (fixture.fixture_kind === 'bundle-manifest' || fixture.fixture_kind === 'pilot-bundle') {
@@ -184,6 +215,32 @@ function crossField(fixture, errors) {
       }
       if (problems.length) errors.push({ rule: 'VR-F12', pointer: '/metadata_corpus/role_status_counts', message: problems.join('；') });
     }
+    // VR-S25/VR-S26 窗口语义约束（pilot-window-parameterization 2026-10-13 解钉：const 窗值→语义约束——
+    // 窗值不再钉九月字面；保留 RFC3339 规范形（结构层 pattern）+from<until+bounds/time_interval 照实派生+谓词按窗照实记录。
+    // 双时格式单源：省秒形派生与生成器（pilot-window.mjs shortWindowForm）共用——快门 P3-3 陷阱防线）
+    if (fixture.fixture_kind === 'pilot-bundle') {
+      const tr = fixture.time_range;
+      if (tr && typeof tr.from === 'string' && typeof tr.until === 'string'
+        && (!Number.isFinite(Date.parse(tr.from)) || !Number.isFinite(Date.parse(tr.until)))) {
+        errors.push({ rule: 'VR-S25', pointer: '/time_range/from', message: '窗值非有效 RFC3339 日历时点（pattern 只查数字形状——99 时/2 月 30 日类须历法校验；review P2 修）' });
+      } else if (tr && typeof tr.from === 'string' && typeof tr.until === 'string') {
+        if (Date.parse(tr.from) >= Date.parse(tr.until)) {
+          errors.push({ rule: 'VR-S25', pointer: '/time_range/from', message: `窗口语义违例：from(${tr.from}) ≥ until(${tr.until})——半开区间须 from < until` });
+        } else {
+          const wantBounds = `半开 [${tr.from}, ${tr.until})`;
+          if (tr.bounds !== wantBounds) {
+            errors.push({ rule: 'VR-S25', pointer: '/time_range/bounds', message: `bounds 须照实派生自窗值：期望 ${JSON.stringify(wantBounds)}，实得 ${JSON.stringify(tr.bounds)}` });
+          }
+          const wantInterval = `[${shortWindowForm(tr.from)}, ${shortWindowForm(tr.until)})`;
+          if (mc && typeof mc.time_interval === 'string' && mc.time_interval !== wantInterval) {
+            errors.push({ rule: 'VR-S25', pointer: '/metadata_corpus/time_interval', message: `time_interval 须照实派生自窗值（省秒形）：期望 ${JSON.stringify(wantInterval)}，实得 ${JSON.stringify(mc.time_interval)}` });
+          }
+          if (mc && typeof mc.eligible_predicate === 'string' && !mc.eligible_predicate.includes(wantInterval)) {
+            errors.push({ rule: 'VR-S26', pointer: '/metadata_corpus/eligible_predicate', message: `eligible_predicate 须按窗生成照实记录：须含实际窗区间 ${JSON.stringify(wantInterval)}，实得 ${JSON.stringify(mc.eligible_predicate.slice(0, 60))}…` });
+          }
+        }
+      }
+    }
   }
 }
 
@@ -203,6 +260,18 @@ function crossFieldEvent(e, p, errors) {
   if (e.event_kind === 'observation' && e.observation_subtype === 'ticket_snapshot' && typeof e.source_hash8 === 'string'
       && e.event_id !== `${e.entity_id}:obs:${e.source_hash8}`) {
     fail('VR-F03', '/event_id', 'event_id ≠ entity_id:obs:source_hash8');
+  }
+  // VR-F03 merge_anchor（merge-anchor-materialization 门 P1-1(ii)：复用 :obs: hash 模式）：hash8 =
+  // sha256(canonical({merge_oid,merge_ts})) 前 8 位小写 hex——内容寻址（同锚恒等 event_id=幂等去重身份面；
+  // slug 由 entity_id 承载不入 hash）。守卫：载荷两值均过字形判定才执行公式（结构层 VR-S34 已报错的不叠轰，
+  // 防负例双命中——VR-F11 guard 同纪律）。
+  if (e.event_kind === 'observation' && e.observation_subtype === 'merge_anchor'
+      && typeof e.merge_oid === 'string' && /^[0-9a-f]{40}$/.test(e.merge_oid)
+      && typeof e.merge_ts === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(e.merge_ts)) {
+    const h8 = sha256(canon({ merge_oid: e.merge_oid, merge_ts: e.merge_ts })).slice(0, 8);
+    if (e.event_id !== `${e.entity_id}:obs:${h8}`) {
+      fail('VR-F03', '/event_id', `event_id ≠ entity_id:obs:hash8(canonical({merge_oid,merge_ts}))（期望尾段 ${h8}）`);
+    }
   }
   // VR-F04 derived：event_id = entity_id : drv : derivation_revision
   if (e.event_kind === 'observation' && e.observation_subtype === 'derived' && Number.isInteger(e.derivation_revision)

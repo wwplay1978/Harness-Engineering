@@ -1,0 +1,110 @@
+[
+  {
+    "path": "docs/00-index.md",
+    "sha256": "0d8a90f19d4baea2a323de96e09c74e0d059c241cb16159cdfb449ec151b4d0b"
+  },
+  {
+    "path": "docs/23-harness-stats-usage.md",
+    "sha256": "5381d0b1308eab9dfdf2af5d09d62acc44ff1f8c5c8d3c922d25bf150999f74e"
+  },
+  {
+    "path": "templates/stats/event-schema-v1.json",
+    "sha256": "f99ddaefcd2eb60c825f1a13a1deaf3978bab05bc119e104cd0e70ad20d09341"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-F03-merge-anchor-event-id.json",
+    "sha256": "89674c77470b31303a15c62d1afb3f0a9bea37f24a3b0e8eb138e38a886c8748"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S25-pilot-window-const.json",
+    "sha256": "b02b1d499a3bd05286a741085e37c3f79e6c04190a777119f974cf7ab8a2cdd8"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S26-pilot-predicate-const.json",
+    "sha256": "5e10059e62875f33e2fd54e60aaa8bfd71269f9e16651ae79ffd4cea80270e7d"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S34-merge-anchor-extra-field.json",
+    "sha256": "319bb74f3a44b00ea7379446cc5e1d12f6288a76367e5a049a7974fa042e56fb"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S34-merge-anchor-oid-form.json",
+    "sha256": "a034d55578ff5f607a541366a69704b3152e062f5e4ab660c2112774b29da8f5"
+  },
+  {
+    "path": "templates/stats/fixtures/negative/neg-VR-S34-merge-anchor-required.json",
+    "sha256": "69416a2349a3467a008d0df674d61744670044ec1d27cb2c0823c3b70fd7df19"
+  },
+  {
+    "path": "templates/stats/fixtures/positive/pos-16-merge-anchor-payload.json",
+    "sha256": "2186017d8e7eb89c674b7e4eed861b16a78e5697799973cbdd231409169e7287"
+  },
+  {
+    "path": "templates/stats/manifest-schemas/bundle-manifest-v1.json",
+    "sha256": "05c0bb5244aa319d541b6a5710200e703e72c5bd5281b93e21d52a7f223e1978"
+  },
+  {
+    "path": "templates/stats/manifest-schemas/native-corpus-v1.json",
+    "sha256": "3a92b611e8be3c5d1f51489b19a3b3ef63974cae0b276e8bcef1d7a06672b969"
+  },
+  {
+    "path": "templates/stats/obligations.md",
+    "sha256": "8f31cd79bed03890e407c787952b0f94b6010d81bf29e73bdec0e94d987dcc46"
+  },
+  {
+    "path": "templates/stats/pilot-bundle-schema.json",
+    "sha256": "fdf191b116313fe2c6028599289757ea07378e1a1a04020a689b7dffad8623e5"
+  },
+  {
+    "path": "templates/stats/traceability.md",
+    "sha256": "a56b232b5188a8d000327c1e49ca275defff580482413d8d58e896803cd9fae5"
+  },
+  {
+    "path": "templates/stats/week-bucket-rules.md",
+    "sha256": "57520d1fabed5cd5806186acbc5ee821e6c2b34cd2c17d956c914c3ca3163cbf"
+  },
+  {
+    "path": "templates/tools/stats2/cli.mjs",
+    "sha256": "bb3e39fe39a4e3242327a1b75832237d3eb3eb636516defbd360bb10cb7a305a"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-bundle.mjs",
+    "sha256": "3ae64305bade460b1535b8884dbda89a2a444d7b45a03298d0e9d754952a02f8"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-collect.mjs",
+    "sha256": "3a36ae438ea13b7db1bbf1989e9d4f294749ac63217d389d6995ab8d8bc31e2e"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-lifecycle.mjs",
+    "sha256": "b9c75d6037c08407c8aedcd25983858c79f531ccb0f1a8502230f75df354ad7b"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-mine.mjs",
+    "sha256": "d4c1d5da474ecb82c26faef59515671768dbd41d736cdd57f916ae5cdb4322e1"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-native.mjs",
+    "sha256": "d68becf9624fb70a40db079f7b14129e0b18bbfebd497218495f9497740af58d"
+  },
+  {
+    "path": "templates/tools/stats2/cmd-report.mjs",
+    "sha256": "2f8b692b2540e39bd7d8a157088b03d3f359bcbb8136d2e97bb3ce5c5b5ac967"
+  },
+  {
+    "path": "templates/tools/stats2/contract-validator.mjs",
+    "sha256": "81f43324b1881936d5538561805361be864c5af3900d1346ad25761bd09f77b1"
+  },
+  {
+    "path": "templates/tools/stats2/pilot-window.mjs",
+    "sha256": "ec813bbf0c71d17613abc0cec20d950c491007f8710551d0946658d19e6311c0"
+  },
+  {
+    "path": "templates/tools/stats2/project.mjs",
+    "sha256": "80dd91e1ecceea03ab53748769d7e75f8e4f3f240c18351b955a8970854b544a"
+  },
+  {
+    "path": "templates/tools/stats2/zcode-source.mjs",
+    "sha256": "3fda408c9a68d618bc6ec7027dc53e3d7925a534300392442d6fd9e1bdf121f8"
+  }
+]

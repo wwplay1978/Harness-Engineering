@@ -105,7 +105,7 @@
       "discriminator": "observation_subtype",
       "required": ["observation_subtype"],
       "properties": {
-        "observation_subtype": { "type": "string", "enum": ["ticket_snapshot", "derived"], "rule": "VR-S04" }
+        "observation_subtype": { "type": "string", "enum": ["ticket_snapshot", "derived", "merge_anchor"], "rule": "VR-S04", "description": "merge-anchor-materialization（追加方案门终判 (a)，2026-10-15）：22:204 枚举读作非封闭集——「ticket_snapshot, derived」为已列举值非穷尽（门裁定与 VR-S33/F31 追加先例同构：subtype 经 §5.2 ④ 方案门扩 merge_anchor 无须 22 正文改动，schema 修订即契约面全部；裁定承载=票面 r2「门裁定文本」节+docs/changes/merge-anchor-materialization.md）" }
       },
       "subschemas": {
         "ticket_snapshot": {
@@ -186,6 +186,17 @@
               },
               "additionalProperties": false
             }
+          },
+          "additionalProperties": false
+        },
+        "merge_anchor": {
+          "rule": "VR-S34",
+          "description": "merge-anchor-materialization（追加方案门终判 (a)，2026-10-15）：票级 merge 锚观察——bundle manifest ticket_merges（stats-5 P1-1(a) 取数面）经 mine 物化入仓。event_id 复用 :obs: hash 模式=entity_id:obs:hash8(canonical({merge_oid,merge_ts}))（门 P1-1(ii) 钉死——幂等 upsert 靠 event_id 恒等，多 bundle 顺序 mine 去重天然满足；hash 输入=实现裁量，登记 docs/changes/merge-anchor-materialization.md）。entity_id=票级单实体（pk=tickets/<slug>.md#merge——多 merge 由同实体多事件并存承载，消费面取 max merge_ts：P2-3/week-bucket-rules v1.1）",
+          "required": ["ticket_slug", "merge_oid", "merge_ts"],
+          "properties": {
+            "ticket_slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,64}$" },
+            "merge_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$", "description": "merge commit oid（git log --grep ^merge: ticket <slug> 取数——bundle manifest ticket_merges 同形）" },
+            "merge_ts": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14", "description": "merge commit committer 时戳（RFC3339 UTC 规范形——O-14 载荷时间字段扩面）" }
           },
           "additionalProperties": false
         }

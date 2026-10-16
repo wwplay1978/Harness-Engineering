@@ -1,7 +1,7 @@
 // stats2/cli.mjs — stats-2 子命令分发与全局参数
 // 命令面（票面 docs/tickets/stats-2.md 冻结）：
 //   init [--register-project <名> --project-path <路径>]        仓初始化/项目注册
-//   bundle create-zcode-pilot                                    冻结 pilot bundle 制作（唯一真实源接触位）
+//   bundle create-zcode-pilot [--from/--until <RFC3339-UTC>]    冻结 pilot bundle 制作（唯一真实源接触位；窗口参可选缺省九月窗）
 //   collect --bundle <id>                                        增量采集（§5.4 协议；failpoint API 见 failpoint-contract.md）
 //   validate | rebuild --from-source --bundle <id> | compact | prune   仓生命周期（审查 P0-2）
 //   verify --bundle <id>                                          pilot 对账（⑩⑫ + 默认最小输出 allowlist）
@@ -64,7 +64,7 @@ export function parseArgs(argv, multiKeys = []) {
 }
 
 const USAGE = `用法：node harness-stats.mjs <子命令> [参数]
-子命令：init | bundle create-zcode-pilot | bundle create-native-corpus | collect（--bundle <id> | --corpus <id>）
+子命令：init | bundle create-zcode-pilot [--from <RFC3339-UTC> --until <RFC3339-UTC>] | bundle create-native-corpus [--from <RFC3339-UTC> --until <RFC3339-UTC>] | collect（--bundle <id> | --corpus <id>）
         | mine | reconcile | validate | rebuild --from-source --bundle <id> | compact | prune | verify | migrate-audit
         | heldout-sample | heldout-live-sample | heldout-live-classify | heldout-planner-final | golden-candidates | pilot-report
         | report [--project <id>…] [--since <RFC3339-UTC>] [--until <RFC3339-UTC>] [--json | --out <reports/ 相对名>]

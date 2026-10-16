@@ -121,8 +121,20 @@ async function collectInner({ storeRoot, sid, bundleArg, nowIso, nowMs, fp, fpSt
     generation: EE.currentGeneration(storeRoot), updated_at: nowIso,
   };
   if (prevAudit && Number.isInteger(prevAudit.row_count) && observed.row_count < prevAudit.row_count) {
-    console.error(`SOURCE_REGRESSION：源行数回退（${prevAudit.row_count} → ${observed.row_count}）——fail-loud（22 §5.4-3）`);
-    return EXIT.FAIL;
+    if (!flags['accept-regression']) {
+      console.error(`SOURCE_REGRESSION：源行数回退（${prevAudit.row_count} → ${observed.row_count}）——fail-loud（22 §5.4-3）`);
+      return EXIT.FAIL;
+    }
+    // stats-hygiene-3：--accept-regression 显式覆写（人工核验宿主留存回收后方可加旗）——行数回退面降警告
+    // 继续采集（禁默认：无旗标路径行为字节级不变）；audit 侧车记 accepted_regression 留痕（who/旧新行数/时间戳，
+    // 随载荷入 payload_sha256）。旗标仅作用本面：下方 max-id 回退=更深的源损坏信号，恒 fail-loud 不受旗标作用。
+    console.error(`[ACCEPT-REGRESSION] SOURCE_REGRESSION：源行数回退（${prevAudit.row_count} → ${observed.row_count}）经 --accept-regression 显式覆写——降警告继续采集（人工核验留存回收前提；audit 留痕 accepted_regression；22 §5.4-3 禁默认 fail-loud 的唯一显式豁免面）`);
+    observed.accepted_regression = {
+      who: '--accept-regression',
+      prior_count: prevAudit.row_count,
+      observed_count: observed.row_count,
+      at: nowIso,
+    };
   }
   if (prevAudit && typeof prevAudit.max_id === 'string' && prevAudit.max_id !== ''
     && String(observed.max_id) < prevAudit.max_id) {

@@ -24,20 +24,14 @@ import { ensureStoreLayout, sweepTempDirs, ensureConfig, registerProject, makeOw
 import { sha256Hex, sha256File, writeJson, rfc3339, canon, fsyncDir } from './util.mjs';
 import { snapshotCopySource, observedModelUsageCount, quickCheckOk } from './zcode-source.mjs';
 import { validateFixture } from './contract-validator.mjs';
+import { normalizeAgent } from './project.mjs';
 import { EXIT } from './cli.mjs';
 
-// §5.8 冻结边界常量（与 pilot-bundle-schema.json VR-S25/VR-S26 同源）
-const PILOT = {
-  from: '2026-09-01T00:00:00Z',
-  until: '2026-10-01T00:00:00Z',
-  sqliteTimeField: 'model_usage.started_at',
-  metadataTimeField: 'createdAt',
-  bounds: '半开 [2026-09-01T00:00:00Z, 2026-10-01T00:00:00Z)',
-  metadataPredicate: 'project 判定（cwd/workspaceRoot 归属 AITrader2，规范化 project_id 匹配）AND createdAt ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)',
-  sqlitePredicate: 'model_usage.started_at ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)',
-  metadataInterval: '[2026-09-01T00:00Z, 2026-10-01T00:00Z)',
-};
-const FROM_MS = Date.parse(PILOT.from), UNTIL_MS = Date.parse(PILOT.until);
+// §5.8 冻结边界（pilot-window-parameterization：常量→缺省值派生——五冻结点统一自 --from/--until 派生，
+// 单源=pilot-window.mjs；缺省=九月窗行为字节级不变。语义约束面与 pilot-bundle-schema.json VR-S25/VR-S26 同源）
+import { parseWindowFlags, deriveWindow, bodyDateInWindow } from './pilot-window.mjs';
+const DEFAULT_WIN = deriveWindow();
+const PILOT_SQLITE_TIME_FIELD = 'model_usage.started_at', PILOT_METADATA_TIME_FIELD = 'createdAt';
 
 /** project 归属判定（冻结）：规范化 cwd = 项目根 ∨ 根/… 前缀 ∨ 根-worktrees… 前缀。 */
 export function projectBelongs(normCwd, projNorm) {
@@ -90,8 +84,8 @@ function toRfc3339Z(s) {
   return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
-/** metadata eligible 谓词执行（§5.8 原文语义）：返回扫描结果与排除聚合。 */
-export function scanMetadataCorpus(agentsRoot, projNorm) {
+/** metadata eligible 谓词执行（§5.8 原文语义；窗=pilot-window 派生对象，缺省=九月窗）：返回扫描结果与排除聚合。 */
+export function scanMetadataCorpus(agentsRoot, projNorm, win = DEFAULT_WIN) {
   const eligible = [], excluded = [];
   const bump = (reason) => { const e = excluded.find(x => x.reason === reason); if (e) e.count++; else excluded.push({ reason, count: 1 }); };
   let total = 0;
@@ -109,7 +103,8 @@ export function scanMetadataCorpus(agentsRoot, projNorm) {
         if (typeof cwd !== 'string' || !projectBelongs(normPath(cwd), projNorm)) { bump('project 判定不中（cwd/workspaceRoot 非本项目）'); continue; }
         if (created === null) { bump('解析失败（createdAt 不可解析）'); continue; }
         const cMs = Date.parse(created);
-        if (!(cMs >= FROM_MS && cMs < UNTIL_MS)) { bump('createdAt 区间外'); continue; }
+        if (!(cMs >= win.fromMs && cMs < win.untilMs)) { bump('createdAt 区间外'); continue; }
+        const agentNorm = normalizeAgent(meta.profileId);   // 与 collect 投影同源的规范化（P2-3 卡键单源语义）
         eligible.push({
           relative_path: relative(agentsRoot, p).replaceAll('\\', '/'),
           sha256: sha256File(p),
@@ -118,6 +113,7 @@ export function scanMetadataCorpus(agentsRoot, projNorm) {
           child_session_id: (typeof meta.childSessionId === 'string' && meta.childSessionId) ? meta.childSessionId : null,
           _role: normalizeRole(meta.profileId),
           _status: String(meta.status ?? ''),
+          _cardKey: cardKeyOf(agentNorm.role, agentNorm.variant),   // route-anchor r2 卡锚键（P2-3：role 含 variant）
         });
       }
     };
@@ -132,6 +128,61 @@ export function normalizeRole(profileId) {
   return String(profileId ?? '').replace(/^zcode-/, '');
 }
 
+// ── route-anchor-collection r2：三锚只读快照冻结面（门裁定五 P1 全吸收）──────────
+// 语义（P1-3）：bundle 制作时点配置指纹（窗粒度）——窗内变迁按构造不可观，披露归 report 对照面注记。
+// 红线（P2-5/P3-2）：repo/local/卡/log 全部只读快照（与 agents 元数据同形）；读取不触碰
+// judgeZeroWrite 证据原子（db 目录+cli/agents 树在冻结面读取域之外，读取零写入）。
+const ANCHOR_ABSENT = 'absent';   // P2-2 哨兵值域冻结：absent=确定不在场 / unknown=未观测
+
+/** 卡锚键粒度（P2-3）：role 含 variant（normalizeAgent 同源单源——dispatch 按 role+variant 取卡）。 */
+function cardKeyOf(role, variant) {
+  return variant ? `${role}-${variant}` : role;
+}
+
+/** host_version 探针（P3-1 指称=cli/log 启动事件）：~/.zcode/cli/log/zcode-*.jsonl 内最新
+ *  zcode_protocol.startup.started 行 context.version（文件名日期字典序=时间序，新到旧扫描）；
+ *  无可观测启动事件 → 'unknown'（未观测≠absent）。只读。 */
+export function probeHostVersion(zcodeHome) {
+  const logDir = join(zcodeHome, 'cli', 'log');
+  if (!existsSync(logDir)) return 'unknown';
+  const files = readdirSync(logDir).filter(f => /^zcode-.*\.jsonl$/.test(f)).sort();
+  for (let i = files.length - 1; i >= 0; i--) {
+    let last = null;
+    for (const line of readFileSync(join(logDir, files[i]), 'utf8').split('\n')) {
+      if (!line.includes('"zcode_protocol.startup.started"')) continue;   // 行级预过滤（日志量面）
+      try {
+        const v = JSON.parse(line)?.context?.version;
+        if (typeof v === 'string' && v) last = v;
+      } catch { /* 截断尾行跳过 */ }
+    }
+    if (last !== null) return last;
+  }
+  return 'unknown';
+}
+
+/** 三锚冻结（P1-4/P2-1/P2-2/P2-3/P2-5）：
+ *  repo 锚=消费仓 templates/models.config.json 内容 sha256（「规范仓真源指纹」——不声称生效面，
+ *  sync 滞后不可观性归 report 披露；git HEAD 已由 manifest git_head 承载不兼任）；
+ *  local 锚=zcodeHome/models.config.local.json sha256（缺席='absent'）；
+ *  卡锚=eligible corpus 规范化 role 含 variant 键 → zcodeHome/agents/<key>.md sha256 映射（缺席='absent'，
+ *  键集=corpus 键集——dispatch 按 role+variant 取必命中）；route_hash=三锚拼接 canon sha256（P2-1 确定性
+ *  派生非独立真源）。全部只读快照；**不入 bundle_id 内容寻址输入**（P2-4——采集器升级令锚变不换 id，
+ *  桩→真翻转点由 report 侧双侧 verified 判据消解）。 */
+export function freezeRouteAnchors({ projectDir, zcodeHome, eligible }) {
+  const fileHashOrAbsent = (p) => (existsSync(p) ? sha256File(p) : ANCHOR_ABSENT);
+  const repoHash = fileHashOrAbsent(join(projectDir, 'templates', 'models.config.json'));
+  const localHash = fileHashOrAbsent(join(zcodeHome, 'models.config.local.json'));
+  const cardKeys = [...new Set(eligible.map(f => f._cardKey))].sort();
+  const roleCardHashes = Object.fromEntries(cardKeys.map(k => [k, fileHashOrAbsent(join(zcodeHome, 'agents', `${k}.md`))]));
+  return {
+    repo_models_config_hash: repoHash,
+    local_override_hash: localHash,
+    role_card_hashes: roleCardHashes,
+    route_hash: sha256Hex(canon([repoHash, localHash, roleCardHashes])),
+    host_version: probeHostVersion(zcodeHome),
+  };
+}
+
 /** role_status_counts：键=规范化 `role|status` 字典序、值=count≥1（VR-F12 契约面）。 */
 export function aggregateRoleStatus(eligible) {
   const m = new Map();
@@ -142,18 +193,12 @@ export function aggregateRoleStatus(eligible) {
   return Object.fromEntries([...m.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1));
 }
 
-/** tickets/reviews 窗口内冻结：slug 清单（票面内容含窗口内日期）+ canonical 聚合 SHA（输入与顺序冻结）。 */
-export function freezeTicketsReviews(projectDir) {
+/** tickets/reviews 窗口内冻结：slug 清单（票面内容含窗口内日期——年份无关解析）+ canonical 聚合 SHA（输入与顺序冻结）。 */
+export function freezeTicketsReviews(projectDir, win = DEFAULT_WIN) {
   const ticketsDir = join(projectDir, 'docs', 'tickets');
   const reviewsDir = join(projectDir, 'docs', 'reviews');
   if (!existsSync(ticketsDir)) throw new Error(`项目仓缺 docs/tickets：${ticketsDir}`);
-  const inWindow = (body) => {
-    for (const m of body.matchAll(/2026-(\d{2})-(\d{2})/g)) {
-      const t = Date.parse(`${m[0]}T00:00:00Z`);
-      if (t >= FROM_MS && t < UNTIL_MS) return true;
-    }
-    return false;
-  };
+  const inWindow = (body) => bodyDateInWindow(body, win);
   const slugs = [];
   for (const f of readdirSync(ticketsDir).filter(x => x.endsWith('.md')).sort()) {
     if (inWindow(readFileSync(join(ticketsDir, f), 'utf8'))) slugs.push(f.replace(/\.md$/, ''));
@@ -240,6 +285,10 @@ export async function cmdBundle(opts) {
   if (!projectDir) { console.error('bundle create-zcode-pilot 需要 --project-dir（消费项目仓根）'); return EXIT.USAGE; }
   if (clock) console.log(`[AUDIT] --clock=${clock}（bundle 模式；created_at/observed_at 冻结于该时钟——P2-1 使用必记）`);
   const nowIso = clock ?? rfc3339();
+  // 窗口参数（pilot-window-parameterization：--from/--until 可选缺省九月窗；越界三拒收先于任何持久化写入——零副作用）
+  const winParsed = parseWindowFlags(flags, nowIso);
+  if (winParsed.error) { console.error(`USAGE（窗口）：${winParsed.error}`); return EXIT.USAGE; }
+  const win = deriveWindow(winParsed);
 
   // 仓布局+ACL（任何持久化写入前）→ TEMP 清扫 → 身份
   const checks = ensureStoreLayout(storeRoot);
@@ -266,7 +315,7 @@ export async function cmdBundle(opts) {
   let result = null;
   let buildError = null;
   try {
-    result = await buildBundle({ storeRoot, tempDir, dbPath, agentsRoot, projectDir, projectId, projNorm, nowIso, before });
+    result = await buildBundle({ storeRoot, tempDir, dbPath, agentsRoot, zcodeHome, projectDir, projectId, projNorm, nowIso, before, win });
   } catch (e) {
     buildError = e;
   } finally {
@@ -328,7 +377,7 @@ function judgeZeroWrite(before, after, copyProtocol) {
   return { evidence, problems, verdicts: { agentsEqual, dbDirEqual: dbDirVerdict.equal } };
 }
 
-async function buildBundle({ storeRoot, tempDir, dbPath, agentsRoot, projectDir, projectId, projNorm, nowIso, before }) {
+async function buildBundle({ storeRoot, tempDir, dbPath, agentsRoot, zcodeHome, projectDir, projectId, projNorm, nowIso, before, win }) {
   // 1)【P0-1 三审】源快照纯文件复制协议——永不打开活源 SQLite：
   //    复制前快照→磁盘预检→分块复制→复制后重算（变化→丢弃重试≥3→仍不稳 fail-loud"源不稳定"）
   const staging = join(tempDir, 'bundle');
@@ -346,7 +395,7 @@ async function buildBundle({ storeRoot, tempDir, dbPath, agentsRoot, projectDir,
   } finally { roCopy.close(); }
   checkpointSelfcontained(copyPath);
   const copySha = sha256File(copyPath);
-  const fin = await finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir, projectId, projNorm, nowIso, storeRoot });
+  const fin = await finishBundle({ staging, copySha, rowCount, agentsRoot, zcodeHome, projectDir, projectId, projNorm, nowIso, storeRoot, win });
   // ── P1-9：源侧证据+红线判定全部在 staging 内完成（此刻源接触已尽）→ 全绿才 rename ──
   const after = {
     db_dir: treeDigest(dirname(dbPath)),
@@ -424,10 +473,12 @@ function verifyReusedBundle(finalDir, staging, manifest, copySha) {
     problems.push(`既有 manifest 契约违规：${e.rule} ${e.pointer}——${e.message}`);
   }
   // ②canonical 相等（内容面恒等；运行时钟面排除——created_at=制作时刻、observed_at=行数观测时刻，
-  //   两者均为本次运行 --clock 依赖的时间戳，非内容寻址输入；其余全部字段 canonical 必须相等）
-  const { created_at: _ce, ...existingBody } = existing;
+  //   两者均为本次运行 --clock 依赖的时间戳，非内容寻址输入；其余全部字段 canonical 必须相等）。
+  //   route_anchor_freeze 同款排除（P2-4）：冻结面=制作时点环境观测（非内容寻址输入，锚变不换 id）——
+  //   既有 bundle 的冻结面权威（冻结语义不覆写）；采集器升级/环境演变不得破内容寻址复用。
+  const { created_at: _ce, route_anchor_freeze: _cf, ...existingBody } = existing;
   const { sqlite_copy: { observed_at: _oe }, ...existingRest } = existingBody;
-  const { created_at: _cs, ...stagingBody } = manifest;
+  const { created_at: _cs, route_anchor_freeze: _sf, ...stagingBody } = manifest;
   const { sqlite_copy: { observed_at: _os }, ...stagingRest } = stagingBody;
   if (canon(existingRest) !== canon(stagingRest)) problems.push('reused 核验失败：既有 manifest 与本次 staging manifest 内容面 canonical 不等（漂移；时钟面 created_at/observed_at 除外）');
   // ④db 副本字节恒等
@@ -452,9 +503,9 @@ function verifyReusedBundle(finalDir, staging, manifest, copySha) {
   if (problems.length) throw new Error(`REUSED_VERIFY_FAIL：\n  ${problems.join('\n  ')}`);
 }
 
-async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir, projectId, projNorm, nowIso, storeRoot }) {
-  // 3) metadata corpus 扫描（eligible 谓词）+ 物理拷贝
-  const corpus = scanMetadataCorpus(agentsRoot, projNorm);
+async function finishBundle({ staging, copySha, rowCount, agentsRoot, zcodeHome, projectDir, projectId, projNorm, nowIso, storeRoot, win }) {
+  // 3) metadata corpus 扫描（eligible 谓词——按窗执行）+ 物理拷贝
+  const corpus = scanMetadataCorpus(agentsRoot, projNorm, win);
   const rsc = aggregateRoleStatus(corpus.eligible);
   const rscSum = Object.values(rsc).reduce((a, b) => a + b, 0);
   if (rscSum !== corpus.eligible.length) throw new Error(`role_status_counts 合计 ${rscSum} ≠ eligible ${corpus.eligible.length}`);
@@ -465,8 +516,8 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
     if (sha256File(dst) !== f.sha256) throw new Error(`metadata 拷贝 hash 失配：${f.relative_path}`);
   }
 
-  // 4) tickets/reviews 冻结 + 物理拷贝
-  const tr = freezeTicketsReviews(projectDir);
+  // 4) tickets/reviews 冻结（按窗——年份无关日期解析）+ 物理拷贝
+  const tr = freezeTicketsReviews(projectDir, win);
   for (const s of tr.slugs) {
     const dst = join(staging, 'tickets', s + '.md');
     mkdirSync(dirname(dst), { recursive: true });
@@ -481,8 +532,11 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
   // 5) git HEAD + bundle_id（内容寻址：sqlite 副本 SHA + eligible 文件集摘要 + tickets/reviews SHA + git HEAD）
   //    stats-5：ticket_merges 观察 additive 落 manifest 但不入内容寻址输入（历史 bundle_id 稳定——同 id 复用
   //    面 git_head 不变 ⟹ 历史不变 ⟹ merge 观察确定性，reused canonical 相等不破）
+  //    route-anchor r2：三锚冻结面同款 additive 不入内容寻址输入（P2-4——锚=制作时点环境观测非内容；
+  //    采集器升级令锚变不换 id，翻转点由 report 侧双侧 verified 判据消解）
   const head = gitHead(projectDir);
   const ticketMerges = collectTicketMerges(projectDir, tr.slugs);
+  const routeAnchorFreeze = freezeRouteAnchors({ projectDir, zcodeHome, eligible: corpus.eligible });
   const idInput = canon({
     sqlite: copySha,
     metadata: corpus.eligible.map(f => [f.relative_path, f.sha256]),
@@ -490,7 +544,8 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
     git_head: head,
   });
   const idSha8 = sha256Hex(idInput).slice(0, 8);
-  const bundleId = `pilot-${projectId}-202609-${idSha8}`;
+  // 窗 token=from 的 UTC 年月（单 token 派生规则——pilot-window-parameterization P1-2；缺省 202609 同形）
+  const bundleId = `pilot-${projectId}-${win.token}-${idSha8}`;
 
   const manifest = {
     manifest_kind: 'pilot-bundle',
@@ -498,17 +553,17 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
     created_at: nowIso,
     project_id: projectId,
     time_range: {
-      sqlite_time_field: PILOT.sqliteTimeField,
-      metadata_time_field: PILOT.metadataTimeField,
-      from: PILOT.from,
-      until: PILOT.until,
-      bounds: PILOT.bounds,
+      sqlite_time_field: PILOT_SQLITE_TIME_FIELD,
+      metadata_time_field: PILOT_METADATA_TIME_FIELD,
+      from: win.from,
+      until: win.until,
+      bounds: win.bounds,
     },
     sqlite_copy: {
       sha256: copySha,
       row_count: rowCount,
       observed_at: nowIso,
-      eligible_predicate: PILOT.sqlitePredicate,
+      eligible_predicate: win.sqlitePredicate,
     },
     metadata_corpus: {
       corpus_root: agentsRoot.replaceAll('\\', '/'),
@@ -517,11 +572,11 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
       excluded: corpus.excluded.sort((a, b) => a.reason < b.reason ? -1 : 1),
       project_field: 'cwd/workspaceRoot',
       project_normalized: projectId,
-      time_field: PILOT.metadataTimeField,
-      time_interval: PILOT.metadataInterval,
-      eligible_predicate: PILOT.metadataPredicate,
+      time_field: PILOT_METADATA_TIME_FIELD,
+      time_interval: win.interval,
+      eligible_predicate: win.metadataPredicate,
       role_status_counts: rsc,
-      eligible_files: corpus.eligible.map(({ _role, _status, ...rest }) => rest),
+      eligible_files: corpus.eligible.map(({ _role, _status, _cardKey, ...rest }) => rest),
     },
     tickets_reviews: {
       slug_list: tr.slugs,
@@ -531,6 +586,7 @@ async function finishBundle({ staging, copySha, rowCount, agentsRoot, projectDir
     },
     git_head: head,
     ticket_merges: ticketMerges,   // stats-5 M3 取数面：可选字段 additive（schema 同步三件——历史无字段兼容）
+    route_anchor_freeze: routeAnchorFreeze,   // route-anchor r2：三锚冻结面 additive 可选（历史 bundle 无字段兼容；schema 两件同步）
   };
 
   // 6) manifest 过同一 contract-validator（P1-1：生产产物无法绕过 validator）

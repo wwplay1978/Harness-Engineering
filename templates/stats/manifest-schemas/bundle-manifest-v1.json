@@ -91,6 +91,19 @@
           },
           "additionalProperties": false
         }
+      },
+      "route_anchor_freeze": {
+        "type": "object",
+        "description": "route-anchor-collection r2（追加方案门五 P1 裁定）：三锚只读快照冻结面——bundle 制作时点配置指纹（窗粒度：窗内变迁不可观——P1-3）。可选字段 additive（历史 bundle 无此字段兼容：collect 投影遇缺=既有 unknown 桩面）；不入 bundle_id 内容寻址（P2-4：采集器升级令锚变不换 id——翻转点由 report 侧双侧 verified 判据消解）；reused canonical 比较排除（既有 bundle 冻结面权威）。与 pilot-bundle-schema.json 同步（对账登记 traceability.md）。",
+        "required": ["repo_models_config_hash", "local_override_hash", "role_card_hashes", "route_hash", "host_version"],
+        "properties": {
+          "repo_models_config_hash": { "type": "string", "pattern": "^([0-9a-f]{64}|absent)$", "description": "repo 锚（P1-4）=消费仓 templates/models.config.json 内容 sha256——「规范仓真源指纹」不声称生效面（sync 滞后不可观性归 report 披露；git HEAD 由 git_head 承载不兼任）；文件缺席='absent'" },
+          "local_override_hash": { "type": "string", "pattern": "^([0-9a-f]{64}|absent)$", "description": "local 锚=~/.zcode/models.config.local.json sha256；缺席哨兵='absent'（P2-2 值域冻结：absent=确定不在场 / unknown=未观测——两值域分立）" },
+          "role_card_hashes": { "type": "object", "description": "卡锚（P2-3/P2-5）=按 role 含 variant 键的角色卡 hash 映射表：键集=eligible corpus 规范化 role 键；值=~/.zcode/agents/<key>.md（部署副本只读快照）sha256 或 'absent'" },
+          "route_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27", "description": "三锚拼接 canon sha256（P2-1：确定性派生非独立真源——[repo, local, 卡映射] canonical 序冻结）" },
+          "host_version": { "type": "string", "minLength": 1, "description": "cli 版本真值（P3-1 指称=~/.zcode/cli/log 启动事件 context.version 探测——新到旧文件序最新启动行）；未观测='unknown'" }
+        },
+        "additionalProperties": false
       }
     },
     "additionalProperties": false

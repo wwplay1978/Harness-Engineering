@@ -36,10 +36,10 @@ Kimi/Codex 原生面：`bundle create-native-corpus`（参数同形）→ `colle
 | 命令 | 用途 |
 |---|---|
 | `init` | 建立事件仓（幂等） |
-| `bundle create-zcode-pilot --project-dir <根>` | 冻结 ZCode 派发面快照（唯一真实源接触位，只读） |
-| `bundle create-native-corpus --project-dir <根>` | 冻结 Kimi/Codex 原生面快照 |
+| `bundle create-zcode-pilot --project-dir <根> [--from <RFC3339-UTC> --until <RFC3339-UTC>]` | 冻结 ZCode 派发面快照（唯一真实源接触位，只读）。窗口参可选（成对给、缺省=2026-09 九月窗）；`--until`=**冻结窗上界**（半开、不含），与 report 的 `--until`（报告过滤上界）同名不同义；`--until` 不得晚于当前钟（`--clock` 注入值优先）——例：`--from 2026-10-01T00:00:00Z --until 2026-10-13T00:00:00Z` |
+| `bundle create-native-corpus --project-dir <根> [--from <RFC3339-UTC> --until <RFC3339-UTC>]` | 冻结 Kimi/Codex 原生面快照（窗口参同形同律；VR-S32 契约已解钉为语义约束——非九月窗 manifest 同过校验，pilot-window-parameterization r3） |
 | `collect --bundle/--corpus <id>` | 快照采集入仓（append 语义） |
-| `mine --bundle <id>` | 物化派生层（attempt 分类等） |
+| `mine --bundle <id>` | 物化派生层（attempt 分类+merge 锚——bundle manifest `ticket_merges` → `merge_anchor` 事件，event_id 内容寻址幂等） |
 | `reconcile --input <文件>` | 人工归因回灌（内容寻址归档） |
 | `validate` | 双面一致性校验 |
 | `verify --bundle <id>` | 票据×派发三方对账（含 orphan drift；差异率>5% exit≠0） |
@@ -92,10 +92,10 @@ node "$HOME\.agents\Harness-Engineering\templates\tools\b3-redact-check.mjs" 文
 
 事件仓纯本地（`~/.agents/harness-stats`，零上传零遥测）；采集只读快照冻结；report 默认 stdout 零落盘；对外共享前用 B3 门。
 
-## 8. 已知边界（2026-10-13）
+## 8. 已知边界（2026-10-15）
 
 - M2 auto 面数字：滚动重验批双门通过前维持 blocked（预计随后续票台账行累积触发）；
-- M3（流动）/M4（趋势）：M3 流动/M4 趋势已交付（stats-5）——M3-1 ticket cycle time 停摆子面 blocked（merge 锚物化面归后续票）；路由对照恒 NOT_ENOUGH_CHANGE_POINTS（锚采集面归后续票——诚实态非缺陷）；
+- M3（流动）/M4（趋势）：M3 流动/M4 趋势已交付（stats-5）；M3-1 ticket cycle time 已随 merge 锚物化出数（merge-anchor-materialization r2——`mine` 自 bundle manifest `ticket_merges` 派生 `merge_anchor` 事件；p50=merge_ts−首次派发、覆盖率分母=merged 票集、无锚票 n/a 不入样本；锚缺席语料=`no-merge-anchors` 如实非 0）；路由对照恒 NOT_ENOUGH_CHANGE_POINTS（锚采集面归后续票 route-anchor-collection——诚实态非缺陷）；
 - `heldout-*`/`pilot-report` 子命令：分类器开发/验收面，非使用者面。
 
 ## 9. 排障
@@ -103,4 +103,11 @@ node "$HOME\.agents\Harness-Engineering\templates\tools\b3-redact-check.mjs" 文
 - `退出码 64`：Node 版本 <22.16（升级后重试）；
 - 中文乱码：PowerShell 先 `$OutputEncoding=[Text.Encoding]::UTF8; chcp 65001`；
 - Windows 编码工件被 B3 拒（exit 2 UTF-16）：转存 UTF-8 后再检；
-- 报告数字与预期不符：先 `validate`（双面一致性）再 `verify`（三方对账），fail-loud 会指出差异面。
+- 报告数字与预期不符：先 `validate`（双面一致性）再 `verify`（三方对账），fail-loud 会指出差异面；
+- **bundle 期活源正在写入**（报「复制字节数不符」或 `SOURCE_UNSTABLE`）：采集窗口撞上宿主写库——改在无会话生成的静默窗重试，或关闭应用后采集（复制协议是纯文件读，不依赖运行中宿主；源静默即成功）；
+- **validate 报遗留红行**（存量演示行类阻断新采集）：走 E3 重建链——`rebuild --from-source --bundle <id>` 重建 → `collect --bundle/--corpus <id>` → **`mine --bundle <id>`（E3 后 re-mine 义务）** → `reconcile --input <文件>` → `validate`（上游实录：重建链跑完首次全绿）。**rebuild 只产 dispatch/model-request（projectBundleEvents 无 observation 面）**——票据快照/派生/merge 锚全靠重跑 mine 回归；未 re-mine 则 M3 周期时间/周桶 merge 锚归属**静默退回 n/a**（validate 输出 `notes` 含 re-mine 注记=机器可读核对面——merge-anchor-materialization 门实证陷阱 P2-1③）；
+
+- **collect 撞 SOURCE_REGRESSION 源行数回退**（源行数低于上轮 audit 位——宿主留存回收清理旧行等行为正确场景，如十月实录 31790→30489）：先**人工核验**确属留存回收（非源损坏/误采异源）；核验通过后加旗重试 `collect --bundle <id> --accept-regression`（降警告继续采集，audit 侧车留痕 `accepted_regression`；**禁默认**——无旗标恒 fail-loud 零写入）；仍不确定走 E3 重建链。**旗标仅作用行数回退面**——`MAX(model_usage.id)` 回退=更深的源损坏信号，带旗仍 fail（stats-hygiene-3）；
+- **validate 报遗留红行**（存量演示行类阻断新采集）：走 E3 重建链——`rebuild --from-source --bundle <id>` 重建 → `collect --bundle/--corpus <id>` → `reconcile --input <文件>` → `validate`（上游实录：重建链跑完首次全绿）；
+- **多窗乱序 collect**（先收十月窗再补收九月窗）：事件面 event_id 幂等、不重复计数，但 cursor 为 adapter 级单例、scanLowerBound 随 corpus 窗回退——**幂等安全但不建议**，按窗时序采集为宜（pilot-window-parameterization P3-2）。
+- **同月部分窗重采撞 REUSED_VERIFY_FAIL**：同月异窗+源零漂移→同 bundle_id 窗碰撞（fail-loud 防线=数据完整性非误报）——删旧快照或错开 from 日（pilot-window-parameterization 红队 P2-1）。

@@ -2,7 +2,7 @@
   "schema_id": "harness-stats-pilot-bundle-schema",
   "schema_version": "v1",
   "spec_anchor": "docs/22 §5.8 bounded pilot（D4'，行 283-292）+ §5.5-②（行 266）",
-  "description": "pilot bundle manifest schema=bundle-manifest-v1.json 的 pilot 特化（字段集同构全量复制 + 边界常量冻结）。冻结项：①时段=UTC 半开 [2026-09-01T00:00Z, 2026-10-01T00:00Z)（秒位规范形 00Z）；②metadata eligible 谓词原文逐字冻结。约束（22 §5.8 行 287）：全机 599 份 metadata 不得整批冻结——eligible 清单必须是谓词过滤结果而非全量。字段修订须与 bundle-manifest-v1.json 同步（对账登记于 traceability.md）。fixture 外形：{fixture_kind:'pilot-bundle', …字段}。",
+  "description": "pilot bundle manifest schema=bundle-manifest-v1.json 的 pilot 特化（字段集同构全量复制）。窗口约束（pilot-window-parameterization 2026-10-13 修订——本票裁决：VR-S25/S26 窗值 const 解钉为语义约束，窗口经 --from/--until 参数化、缺省=九月窗且生成串与原冻结原文逐字一致）：①时段=UTC 半开 [from, until)，from/until=RFC3339 UTC 规范形（秒位必填 Z 后缀）+from<until（跨字段）；bounds=`半开 [from, until)` 照实派生；metadata_corpus.time_interval=省秒形派生（bounds 全秒形/interval 省秒形双时格式保留）；②metadata eligible 谓词按窗生成照实记录（须含实际窗区间）。约束（22 §5.8 行 287，持续有效）：全机 599 份 metadata 不得整批冻结——eligible 清单必须是谓词过滤结果而非全量。字段修订须与 bundle-manifest-v1.json 同步（对账登记于 traceability.md）。fixture 外形：{fixture_kind:'pilot-bundle', …字段}。",
   "fixture_envelope": {
     "rule": "VR-S28",
     "type": "object",
@@ -23,14 +23,14 @@
       "project_id": { "type": "string", "minLength": 1, "description": "pilot=AITrader2 的稳定 project_id（冻结时由注册表钉定入 manifest）" },
       "time_range": {
         "type": "object",
-        "description": "22 §5.8 行 285：时段 2026-09-01T00:00Z 至 2026-10-01T00:00Z（UTC 半开区间）；SQLite 侧时间字段=model_usage.started_at，metadata 侧=createdAt——常量冻结（VR-S25）",
+        "description": "22 §5.8 行 285：UTC 半开区间窗口（pilot-window-parameterization 解钉：窗值 const→语义约束——RFC3339 规范形+from<until+bounds 照实派生，缺省九月窗）；SQLite 侧时间字段=model_usage.started_at，metadata 侧=createdAt（时间字段面仍 const——VR-S25）",
         "required": ["sqlite_time_field", "metadata_time_field", "from", "until", "bounds"],
         "properties": {
           "sqlite_time_field": { "type": "string", "const": "model_usage.started_at", "rule": "VR-S25" },
           "metadata_time_field": { "type": "string", "const": "createdAt", "rule": "VR-S25" },
-          "from": { "type": "string", "const": "2026-09-01T00:00:00Z", "rule": "VR-S25" },
-          "until": { "type": "string", "const": "2026-10-01T00:00:00Z", "rule": "VR-S25" },
-          "bounds": { "type": "string", "const": "半开 [2026-09-01T00:00:00Z, 2026-10-01T00:00:00Z)", "rule": "VR-S25" }
+          "from": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$", "rule": "VR-S25", "description": "窗下界（含）——RFC3339 UTC 规范形（秒位必填 Z 后缀）；跨字段：from < until" },
+          "until": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$", "rule": "VR-S25", "description": "窗上界（不含）——同 from 规范形；制作时不得晚于判定时钟（--clock ?? 运行时刻——CLI 面 fail-loud）" },
+          "bounds": { "type": "string", "minLength": 1, "rule": "VR-S25", "description": "半开区间文本=「半开 [from, until)」照实派生（全秒形——跨字段校验；双时格式：bounds 全秒形/time_interval 省秒形）" }
         },
         "additionalProperties": false
       },
@@ -56,8 +56,8 @@
           "project_field": { "type": "string", "minLength": 1 },
           "project_normalized": { "type": "string", "minLength": 1 },
           "time_field": { "type": "string", "const": "createdAt", "rule": "VR-S25" },
-          "time_interval": { "type": "string", "const": "[2026-09-01T00:00Z, 2026-10-01T00:00Z)", "rule": "VR-S25" },
-          "eligible_predicate": { "type": "string", "const": "project 判定（cwd/workspaceRoot 归属 AITrader2，规范化 project_id 匹配）AND createdAt ∈ [2026-09-01T00:00Z, 2026-10-01T00:00Z)", "rule": "VR-S26", "description": "22 §5.8 行 287 逐字冻结（v4 metadata eligible 谓词）" },
+          "time_interval": { "type": "string", "minLength": 1, "rule": "VR-S25", "description": "窗区间省秒形（「[from, until)」秒位 00 时省秒段；秒非 00 保全秒形——照实记录窗界）——跨字段照实派生校验（pilot-window-parameterization 解钉：原 const 九月字面）" },
+          "eligible_predicate": { "type": "string", "minLength": 1, "rule": "VR-S26", "description": "metadata eligible 谓词——按窗生成照实记录（跨字段：须含实际窗区间；缺省九月窗生成串与原冻结原文逐字一致——pilot-window-parameterization 解钉：原 const 逐字冻结）" },
           "role_status_counts": { "type": "object", "rule": "VR-F12", "description": "eligible metadata 的 role×status 聚合（键=规范化 `role|status` 字典序、值=count；Σ值=eligible_count——与 bundle-manifest-v1.json 同步新增，审查 P0-1；三恒等=manifest 声明值/bundle 内 eligible 重算值/collect 后 dispatch 聚合值）" },
           "eligible_files": { "type": "array", "items": { "type": "object", "required": ["relative_path", "sha256", "size_bytes", "created_at", "child_session_id"], "properties": { "relative_path": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27" }, "size_bytes": { "type": "integer", "minimum": 0 }, "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "rule": "VR-S14" }, "child_session_id": { "type": ["string", "null"], "minLength": 1 } }, "additionalProperties": false } }
         },
@@ -88,6 +88,19 @@
           },
           "additionalProperties": false
         }
+      },
+      "route_anchor_freeze": {
+        "type": "object",
+        "description": "route-anchor-collection r2（追加方案门五 P1 裁定）：三锚只读快照冻结面——bundle 制作时点配置指纹（窗粒度：窗内变迁不可观——P1-3）。可选字段 additive（历史 bundle 无此字段兼容：collect 投影遇缺=既有 unknown 桩面）；不入 bundle_id 内容寻址（P2-4：采集器升级令锚变不换 id——翻转点由 report 侧双侧 verified 判据消解）；reused canonical 比较排除（既有 bundle 冻结面权威）。与 bundle-manifest-v1.json 同步（对账登记 traceability.md）。",
+        "required": ["repo_models_config_hash", "local_override_hash", "role_card_hashes", "route_hash", "host_version"],
+        "properties": {
+          "repo_models_config_hash": { "type": "string", "pattern": "^([0-9a-f]{64}|absent)$", "description": "repo 锚（P1-4）=消费仓 templates/models.config.json 内容 sha256——「规范仓真源指纹」不声称生效面（sync 滞后不可观性归 report 披露；git HEAD 由 git_head 承载不兼任）；文件缺席='absent'" },
+          "local_override_hash": { "type": "string", "pattern": "^([0-9a-f]{64}|absent)$", "description": "local 锚=~/.zcode/models.config.local.json sha256；缺席哨兵='absent'（P2-2 值域冻结：absent=确定不在场 / unknown=未观测——两值域分立）" },
+          "role_card_hashes": { "type": "object", "description": "卡锚（P2-3/P2-5）=按 role 含 variant 键的角色卡 hash 映射表：键集=eligible corpus 规范化 role 键；值=~/.zcode/agents/<key>.md（部署副本只读快照）sha256 或 'absent'" },
+          "route_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$", "rule": "VR-S27", "description": "三锚拼接 canon sha256（P2-1：确定性派生非独立真源——[repo, local, 卡映射] canonical 序冻结）" },
+          "host_version": { "type": "string", "minLength": 1, "description": "cli 版本真值（P3-1 指称=~/.zcode/cli/log 启动事件 context.version 探测——新到旧文件序最新启动行）；未观测='unknown'" }
+        },
+        "additionalProperties": false
       }
     },
     "additionalProperties": false

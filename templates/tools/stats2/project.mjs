@@ -119,6 +119,27 @@ const routeAnchor = () => ({
   host_version: 'unknown', collector_version: COLLECTOR_VERSION,
 });
 
+/** 卡锚键（P2-3）：role 含 variant——与 cmd-bundle freezeRouteAnchors 卡键同形（键粒度单源语义）。 */
+const cardKeyOf = (role, variant) => (variant ? `${role}-${variant}` : role);
+
+/** route_anchor 投影（route-anchor-collection r2）：七字段自 bundle 冻结面（manifest.route_anchor_freeze）填充——
+ *  五真源（repo/local/卡映射/route_hash/host_version）+effective_model 恒 'unknown'（P1-5 裁定——schema 零改动，
+ *  真值化归后续票先沙盒实证再回门）+collector_version 既有。冻结面缺席（历史 bundle）→ 既有 unknown 桩面
+ *  （存量兼容④：九月窗 dispatch 桩值不误升——翻转点由 report 侧双侧 verified 判据消解）。
+ *  锚载体=投影直填不入 bundle_id（P2-4）；卡映射键缺席='absent'（P2-2：确定不在场）。 */
+function routeAnchorFor(freeze, role, variant) {
+  if (!freeze) return routeAnchor();
+  return {
+    effective_model: 'unknown',
+    route_hash: freeze.route_hash,
+    repo_models_config_commit: freeze.repo_models_config_hash,   // P1-4：承载文件内容 hash（字段名沿 schema 七字段）
+    local_override_hash: freeze.local_override_hash,
+    generated_role_card_hash: freeze.role_card_hashes?.[cardKeyOf(role, variant)] ?? 'absent',
+    host_version: freeze.host_version,
+    collector_version: COLLECTOR_VERSION,
+  };
+}
+
 /**
  * bundle 全量投影（rev=1 形态；revision/upsert 由 collect 侧叠加）。
  * 项目归属基面=projects.json 注册表别名（bundle 创建时登记；project_id 仅身份键，非路径前缀）。
@@ -213,7 +234,7 @@ export function projectBundleEvents({ storeRoot, bundleId, sid, nowIso, nowMs, o
       wall_clock_ms: completedAt != null ? Date.parse(completedAt) - Date.parse(createdAt) : null,
       attempt_kind: UNCLASSIFIED.attempt_kind, trigger_stage: UNCLASSIFIED.trigger_stage,
       secondary_cause: '', classifier_version: UNCLASSIFIED.classifier_version,
-      route_anchor: routeAnchor(),
+      route_anchor: routeAnchorFor(manifest.route_anchor_freeze ?? null, role, variant),
     });
   }
   for (const r of emitUsage) {

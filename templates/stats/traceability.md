@@ -4,6 +4,10 @@
 > 本文件承载票面交付物⑧（§9 全约束→后续票 traceability matrix + D1'–D10' 逐条落文）与⑨（schema 上下位五条逐项验收条目）+ 验收 5 的受控命名判定清单。
 > 计数同步（2026-10-08 stats-2 阶段一契约修订原子批）：义务 39→**41**（新增 O-40=VR-F11 组合 sanity、O-41=VR-F12 role_status_counts）、负例 40→**42**（neg-VR-F11/neg-VR-F12）、正例 8 不变；docs/22 gap-6② 组合注记与契约面同提交（P0-3 裁决）。
 > 字段同步（2026-10-12 stats-5 票级 merge 观察面批）：bundle manifest 可选字段 ticket_merges 扩（pilot-bundle-schema/manifest-schemas/bundle-manifest-v1/native-corpus-v1 三 schema 同步，additive 可选——create-zcode-pilot 逐 slug+create-native-corpus 通用扫描两制作面；义务/正负例计数不变）。
+> 计数不变登记（2026-10-13 pilot-window-parameterization 窗口参数化批）：VR-S25/VR-S26 窗值 const 解钉为语义约束（schema+validator 跨字段）+两负例重锚（测语义非字面）——正 18/负 56/义务 48 计数零变更（重锚在位、无增删）。
+> 计数不变登记（2026-10-13 pilot-window-parameterization r3 修复轮）：VR-S32 窗值 const 解钉为语义约束（native-corpus-v1.json schema+validator 跨字段——O-45 同步修订留痕；与 VR-S25/S26 同型，实现轮呈报、协调方裁定随票解钉）——正 18/负 56/义务 48 计数零变更（负例 neg-VR-S32-native-corpus-required 测缺 codex 必填节、窗字面自洽无需重锚、无增删）。
+> 计数同步（2026-10-15 merge-anchor-materialization r2 批——追加方案门终判 (a)，docs/changes/merge-anchor-materialization.md）：observation subtype 增 `merge_anchor`（O-49=VR-S34 载荷恰三字段 allowlist+VR-S04 枚举扩；门裁定=22:204 subtype 枚举非封闭集，22 正文零改动）+O-28（VR-F03）扩 merge_anchor event_id 公式支（复用 `:obs:` hash 模式，hash8=sha256(canon({merge_oid,merge_ts}))——门 P1-1(ii)）——义务 48→**49**、正例 18→**19**（pos-16-merge-anchor-payload）、负例 56→**60**（VR-S34×3+VR-F03 merge_anchor×1）。
+> 字段同步（2026-10-15 route-anchor-collection r2 批——追加方案门五 P1 全吸收，kimi-rac-gate-2026-10-15）：bundle manifest 可选字段 `route_anchor_freeze` 扩（pilot-bundle-schema/manifest-schemas/bundle-manifest-v1 两 schema 同步——zcode pilot bundle manifest 形状双定义位；native-corpus-v1 不适用〔kimi/codex 无 dispatch 源型〕，additive 可选——历史 bundle 无字段兼容，collect 投影遇缺=既有 unknown 桩面；不入 bundle_id 内容寻址〔P2-4〕；义务/正负例计数不变）。event-schema route_anchor 七字段零改动（P1-5：effective_model 恒 'unknown'——字段既有承载）。
 
 ## 1. D1'–D10' 决策落文矩阵（§9 行 330-341 逐条）
 
@@ -12,7 +16,7 @@
 | D1' | usage-vector first·五路（input/output/reasoning/cache-read/cache-write 分列；禁默认跨模型求和单值；$ 后置） | event-schema usage 五键恰集（VR-S17）+ fixtures pos-01/02（缺路=null 不补零） | stats-3 ②（Kimi→五路映射 fixture，reasoning=N/A 断言）；stats-6a（$ 估算，订阅模型 N/A 标注） |
 | D2' | 事件仓 `~/.agents/harness-stats/`（子目录 §5.1）；工具分发位 `~/.agents/Harness-Engineering/templates/tools/` | （目录布局非 schema 面——manifest 四层目录语义冻结于 manifest-schemas/ 注释） | stats-2（仓落成+SYNC 接线归后续发布票） |
 | D3' | 五级置信度；EXPLICIT＞DIRECT＞MANUAL_RECONCILED；CANDIDATE 永不入票级 | attribution 枚举（VR-S11）+ 上三级⇒ticket_slug 非空（VR-F08） | stats-3 ④（golden set precision/coverage + CANDIDATE 零入票级断言） |
-| D4' | bounded pilot 先行（边界 §5.8 冻结） | pilot-bundle-schema.json（时段半开常量 VR-S25 + eligible 谓词原文 VR-S26） | stats-2（pilot 冻结执行+⑦恒等+⑫引用计数） |
+| D4' | bounded pilot 先行（边界 §5.8 冻结）。**修订留痕（pilot-window-parameterization，2026-10-13：窗口参数化裁决——上游裁决=本票承接）**：窗值 const 解钉为语义约束（--from/--until 参数化、缺省九月窗生成值同原冻结字面） | pilot-bundle-schema.json（时段半开语义约束 VR-S25：RFC3339 规范形+from<until+bounds/time_interval 照实派生 + eligible 谓词按窗照实 VR-S26） | stats-2（pilot 冻结执行+⑦恒等+⑫引用计数）；pilot-window-parameterization（五冻结点参数化+契约解钉） |
 | D5' | stats-2=ZCode adapter pilot；Kimi/Codex 原生面=stats-3；首期不宣称 portable 完成 | （分期声明非 schema 面） | stats-2 / stats-3 票面 |
 | D6' | 默认不出本机+默认脱敏；多机聚合=stats-6c 另批 | （隐私红线由 allowlist 承载：schema 字段全量=计量元数据，无正文/消息/代码字段） | stats-4 ⑤（B3 脱敏检测零命中）；stats-6c（blocked，D6' 扩批前） |
 | D7' | 运行记录行补 childSessionId——独立 dogfood 票 | （不阻塞 stats-1…5；pilot 可低置信跑，§5.2 行 230 注记） | dogfood 票（独立，非 stats-N） |
@@ -36,7 +40,7 @@
 | H10 | 源回退检测（行数/max-id 回退即 fail loud） | （采集行为契约=22 §5.4-3；cursor schema 承载 terminal_cursor 复合推进位） | stats-2 ⑨（回退 fixture→fail loud） |
 | H11 | 排它锁 + generation 快照读 | failpoint-contract.md E1（锁三字段）+ E3（generation-N 协议）+ E4（report 固定 generation 快照） | stats-2 ⑥-E1/E3；stats-4 ⑦（report/collect/compaction 并发矩阵） |
 | H12 | report stdout 默认（--out 仅白名单 reports/） | report-manifest-v1.json 注记（report 输出契约=22 §5.6） | stats-4 ②（默认 stdout 零落盘+--out 白名单） |
-| H13 | pilot bundle eligible 谓词 | pilot-bundle-schema.json（谓词原文 const VR-S26+时段常量 VR-S25+eligible 计数自洽 VR-F10） | stats-2 ④⑦（.venv 排除/大小写归一；eligible 总数与聚合恒等） |
+| H13 | pilot bundle eligible 谓词。**修订留痕（pilot-window-parameterization，2026-10-13：窗口参数化裁决）**：谓词原文 const→按窗生成照实记录 | pilot-bundle-schema.json（谓词按窗照实 VR-S26+时段语义约束 VR-S25+eligible 计数自洽 VR-F10） | stats-2 ④⑦（.venv 排除/大小写归一；eligible 总数与聚合恒等）；pilot-window-parameterization（解钉+负例重锚恰中） |
 | H14 | 分类质量双门 + 数据集隔离 | classifier-acceptance.md（36 例回归集/held-out ≥20 新抽/合计>30% 降级+wrong>10% fail/三率口径） | stats-3 ⑤（双门+隔离验收） |
 | H15 | schema 上下位五条 | 本文件 §3（逐项验收条目） | 持续约束（每张 stats 票 review 门） |
 

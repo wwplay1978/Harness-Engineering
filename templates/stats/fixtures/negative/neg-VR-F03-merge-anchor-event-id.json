@@ -1,0 +1,21 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "跨字段层：merge_anchor event_id 尾段 ≠ hash8(canon({merge_oid,merge_ts}))（期望 3a180cc8，实得 deadbeef）——VR-F03 :obs: hash 模式恰中（载荷三字段全合法）",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/stats-1.md#merge:obs:deadbeef",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/stats-1.md#merge",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/stats-1.md#merge",
+   "collected_at": "2026-10-15T02:00:00Z",
+   "observation_subtype": "merge_anchor",
+   "ticket_slug": "stats-1",
+   "merge_oid": "4168cad2dcf7310d60663eaec5a2834e26d408fc",
+   "merge_ts": "2026-10-07T14:01:49Z"
+  }
+ ]
+}

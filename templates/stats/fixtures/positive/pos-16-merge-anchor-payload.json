@@ -1,0 +1,21 @@
+{
+ "fixture_kind": "event-corpus",
+ "description": "merge-anchor-materialization：merge_anchor 载荷恰三字段（O-49/VR-S34——追加方案门终判 (a)）——票级 merge 锚（真值=stats-1 merge oid/时戳复刻），event_id 复用 :obs: hash 模式（hash8=sha256(canon({merge_oid,merge_ts}))=3a180cc8）",
+ "events": [
+  {
+   "schema_version": "v1",
+   "event_kind": "observation",
+   "event_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/stats-1.md#merge:obs:3a180cc8",
+   "entity_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d:ticket-miner:tickets/stats-1.md#merge",
+   "source_instance_id": "0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d",
+   "adapter_id": "ticket-miner",
+   "adapter_type": "append-only",
+   "source_primary_key": "tickets/stats-1.md#merge",
+   "collected_at": "2026-10-15T02:00:00Z",
+   "observation_subtype": "merge_anchor",
+   "ticket_slug": "stats-1",
+   "merge_oid": "4168cad2dcf7310d60663eaec5a2834e26d408fc",
+   "merge_ts": "2026-10-07T14:01:49Z"
+  }
+ ]
+}

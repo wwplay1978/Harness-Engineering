@@ -36,8 +36,6 @@
 | [22-effectiveness-statistics.md](22-effectiveness-statistics.md) | 效能统计系统（**已采纳 v4**：四轮 Codex 对抗审查回灌 P0×4/P1×9/P1×4/P1×7（身份公式闭合+M2 读取语义/attempt 条件化+分类双门+数据集隔离/failpoint 注入契约/pilot bundle 谓词/stats-1 契约票化）；§10 聚焦确认 2026-10-01 通过（36 例回归集 36/36 绿）；D1'–D10' 已裁决；双面采集+事件仓+`harness-stats.mjs`） | 评估与观测 |
 | [23-harness-stats-usage.md](23-harness-stats-usage.md) | harness-stats 使用指南（使用者手册：命令速查/report 解读/接入/B3/排障——22 号的操作面配套） | 使用参考 |
 
-> 注（公开副本）：上表 06、08–14 及 backlog/工件节所涉内部工作档案与工件**仅存在于私有开发仓**——相应链接在公开仓无效，内容以私有仓为准。
-
 ## 文档身份分类（2026-09-28 起，导航表的前置滤镜）
 
 同仓 ≠ 同类。本仓文档分四种身份（判别口径与判定原则见 [21 号 §0](21-memory-system-analysis.md)）：

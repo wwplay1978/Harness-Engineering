@@ -110,13 +110,16 @@ function classifierGateRow(storeRoot) {
   return cur;
 }
 
-/** 行面（面二）：每实体最新 ticket_snapshot → {slug→[dev 行]}（attempt_no/角色列；D7' 前票面可缺席）。 */
+/** 行面（面二）：每实体最新 ticket_snapshot → {slug→[dev 行]}（attempt_no/角色列；D7' 前票面可缺席）。
+ *  stats-hygiene-2 交付物 5：latest 政策统一=collected_at 最新者胜（同刻事件序后者胜）——与 ledger 面
+ *  （attributionFace P2-1）/effectiveDerivations 同哲学；修复前按 source_revision 取最新，同实体多快照
+ *  （票文件变更后重 mine 的 append-only 历史面）下两面对称性破缺（rowFace 可取旧快照而 ledger 取新）。 */
 function rowFace(events) {
   const latestSnap = new Map();
   for (const e of events) {
     if (e.event_kind !== 'observation' || e.observation_subtype !== 'ticket_snapshot') continue;
     const prev = latestSnap.get(e.entity_id);
-    if (!prev || e.source_revision > prev.source_revision) latestSnap.set(e.entity_id, e);
+    if (!prev || (e.collected_at ?? '') >= (prev.collected_at ?? '')) latestSnap.set(e.entity_id, e);   // 同刻（>=）：事件序后者胜
   }
   const bySlug = new Map();
   for (const s of latestSnap.values()) {
@@ -154,9 +157,11 @@ export { TICKET_FACE };
  * P2-1（红队修复轮）：ledger 面只取每实体最新 ticket_snapshot（与 effectiveDerivations latest 政策同哲学——
  * collected_at 最新者胜、同刻事件序后者胜）；同 entity 多快照并存=票文件变更后重 mine 的 append-only 历史面，
  * 行 session_id 更正后旧快照不再入 join 域（已撤回证据不得完成升级）。
- * @returns {{face: Map, counts: {explicit_conflict, explicit_slug_divergence}, coverage: {covered, total}}}
+ * @returns {{face: Map, counts: {explicit_conflict, explicit_slug_divergence}, coverage: {covered, total}, upgraded_entity_ids: string[]}}
  *   basis∈{direct-worktree,explicit-ledger,conflict-refused,unattributed}——internals 诊断面（不入 JSON 体；
  *   MANUAL_RECONCILED 行锚=归档工件面非本 join，basis 如实落 unattributed=本面无机器证据承载）。
+ *   upgraded_entity_ids（stats-hygiene-2 交付物 4）：经 join 升级的 dispatch entity_id 清单（排序确定）——
+ *   CANDIDATE→EXPLICIT 回填+DIRECT 标签升两类；EXPLICIT→EXPLICIT 确认行不入。入 m1.attribution JSON 体。
  */
 export function attributionFace(events) {
   // ledger 面：每实体最新快照（P2-1）→ 非空 session_id → slug 集（同 session 出现多票=冲突面）
@@ -175,6 +180,7 @@ export function attributionFace(events) {
   }
   const face = new Map();
   let explicitConflict = 0, explicitSlugDivergence = 0, covered = 0, joinTotal = 0;
+  const upgradedEntityIds = new Set();   // stats-hygiene-2 交付物 4：经 join 升级的 dispatch entity_id（CANDIDATE→EXPLICIT 回填+DIRECT 标签升）
   for (const e of events) {
     if (e.event_kind !== 'dispatch') continue;
     let { attribution, ticket_slug } = e;
@@ -188,8 +194,11 @@ export function attributionFace(events) {
         const slug = [...hits][0];
         if (attribution === 'CANDIDATE') {
           attribution = 'EXPLICIT'; ticket_slug = slug; basis = 'explicit-ledger';   // 单票命中回填（唯一物质场景）
+          upgradedEntityIds.add(e.entity_id);   // 升级行①：CANDIDATE→EXPLICIT 回填
         } else if (attribution === 'DIRECT' || attribution === 'EXPLICIT') {
+          const labelUpgraded = attribution === 'DIRECT';   // EXPLICIT→EXPLICIT=确认非升级
           attribution = 'EXPLICIT';   // 标签升 EXPLICIT
+          if (labelUpgraded) upgradedEntityIds.add(e.entity_id);   // 升级行②：DIRECT 标签升
           if (slug === e.ticket_slug) basis = 'explicit-ledger';
           else { basis = 'direct-worktree'; explicitSlugDivergence++; }   // 分歧：slug 保留 worktree 归属
         }
@@ -201,13 +210,14 @@ export function attributionFace(events) {
     if (!basis) basis = (attribution === 'DIRECT' || attribution === 'EXPLICIT') ? 'direct-worktree' : 'unattributed';
     face.set(e.entity_id, { attribution, ticket_slug, basis });
   }
-  return { face, counts: { explicit_conflict: explicitConflict, explicit_slug_divergence: explicitSlugDivergence }, coverage: { covered, total: joinTotal } };
+  return { face, counts: { explicit_conflict: explicitConflict, explicit_slug_divergence: explicitSlugDivergence }, coverage: { covered, total: joinTotal }, upgraded_entity_ids: [...upgradedEntityIds].sort() };
 }
 
-function m2AutoFace(events, internals = null, attrFaceResult = null) {
-  // attrFaceResult（红队修复轮 P1-1）：调用方已算好的 attributionFace 结果可收参复用（消同报告重算）；
-  // 缺席时本函数自算（:775 untruncated 面与 :625 scoped 面两消费形并存——m3Face 传参模式同法）。
-  const { face: attrFace } = attrFaceResult ?? attributionFace(events);
+function m2AutoFace(events, internals, attrFaceResult) {
+  // attrFaceResult（红队修复轮 P1-1 收参；stats-hygiene-2 交付物 3 收紧为必传）：调用方在未过滤语料上
+  // 算好的 attributionFace 结果——全报告恰一次计算（cmdReport 唯一调用点），scoped/untruncated 两消费形
+  // 同面收参（m3Face 传参模式同法）；本函数不再自算（fallback 移除——消重算调用点）。
+  const { face: attrFace } = attrFaceResult;
   const faceOf = (e) => attrFace.get(e.entity_id) ?? { attribution: e.attribution, ticket_slug: e.ticket_slug, basis: null };
   const devDispatches = events.filter(isDevDispatch)
     .sort((a, b) => (a.created_at ?? '') < (b.created_at ?? '') ? -1 : (a.created_at ?? '') > (b.created_at ?? '') ? 1 : a.entity_id < b.entity_id ? -1 : 1);
@@ -355,32 +365,80 @@ function manualSubset(storeRoot, events) {
   };
 }
 
+/** merge-anchor-materialization r2：共享 merge 锚归属面（一处实现两处消费：本文件 m3Face/m4WeekTrend——
+ *  验收④ M4 周趋势与 M3 同源）。语料=merge_anchor 观察事件（mine 自 bundle manifest ticket_merges 物化）；
+ *  读取语义=untruncated（P2-2/WB-5：--since/--until/--project 不作用锚面——票级归属不受截断）；
+ *  多锚（revert+re-merge 形态=同票多事件并存）取 **max merge_ts** 胜（P2-3——week-bucket-rules v1.1）。
+ *  @returns Map<slug, {merge_oid, merge_ts, merge_ts_ms}> */
+export function mergeAnchorFace(events) {
+  const m = new Map();
+  for (const e of events) {
+    if (e.event_kind !== 'observation' || e.observation_subtype !== 'merge_anchor') continue;
+    const ms = Date.parse(e.merge_ts);
+    if (!Number.isFinite(ms)) continue;   // 非法时戳已被 VR-S14 拦（生产面）——防御性跳过
+    const prev = m.get(e.ticket_slug);
+    if (!prev || ms > prev.merge_ts_ms) m.set(e.ticket_slug, { merge_oid: e.merge_oid, merge_ts: e.merge_ts, merge_ts_ms: ms });
+  }
+  return m;
+}
+
 /** M3 流动计量（stats-5 交付物 1；dispatch 面——不受分类器门阻）。
  *  attribution-explicit-closure r2：attrFaceMap=共享归因面（attributionFace().face）——票级桶只收
- *  TICKET_FACE 且 slug 取 post-join 值（CANDIDATE null 面不入票级指标——22:94 消费权限）。 */
-function m3Face(scopedDispatches, attrFaceMap) {
-  // ticket cycle time：merge 锚物化面停该子面呈报（票面交付物 1 实现约束）——诚实骨架 blocked 非 0。
-  // 停摆根因：事件 schema observation_subtype 枚举 {ticket_snapshot,derived}+两载荷字段级 allowlist
-  // （VR-S29/VR-S30，additionalProperties:false）冻结，{slug,merge_oid,merge_ts} 锚无既有事件形态可承载
-  // （承载需 event schema 变更→回方案门 §5.2 ④）；bundle 侧 ticket_merges 观察面已交付（P1-1(a)）。
+ *  TICKET_FACE 且 slug 取 post-join 值（CANDIDATE null 面不入票级指标——22:94 消费权限）。
+ *  merge-anchor-materialization r2：anchorFace=共享锚面+untruncatedEvents（首次派发 untruncated 读取——
+ *  WB-5 票级语义）；merged 票集分母=P3-1 钉（TICKET_FACE∧terminal_completed developer 派发——与 m2
+ *  mergedTickets/b9matrix mergedTicketSlugs 同口径）。 */
+function m3Face({ scopedDispatches, attrFaceMap, anchorFace, untruncatedEvents }) {
+  const faceOf = (e) => attrFaceMap.get(e.entity_id) ?? { attribution: e.attribution, ticket_slug: e.ticket_slug, basis: null };
+  // merged 票集（分母——P3-1：仓内定义；git merge 观察面〔manifest ticket_merges〕不入分母、锚覆盖对其披露）
+  const mergedSet = new Set(scopedDispatches
+    .filter(e => (e.role === 'developer' || e.role === 'developer-rerun') && e.state === 'terminal_completed' && TICKET_FACE.has(faceOf(e).attribution))
+    .map(e => faceOf(e).ticket_slug));
+  // 首次派发面（untruncated·any role·TICKET_FACE——cycle 端点=票级真值不受时窗截断；m4 fallback 锚同哲学）
+  const firstDispMs = new Map();
+  for (const e of untruncatedEvents) {
+    if (e.event_kind !== 'dispatch' || !e.created_at) continue;
+    const f = faceOf(e);
+    if (!TICKET_FACE.has(f.attribution) || f.ticket_slug == null) continue;
+    const ms = Date.parse(e.created_at);
+    if (!Number.isFinite(ms)) continue;
+    const prev = firstDispMs.get(f.ticket_slug);
+    if (prev === undefined || ms < prev) firstDispMs.set(f.ticket_slug, ms);
+  }
+  // ticket cycle time（M3-1 出数——22:175 cycle=merge commit−首次派发）：样本=merged∩有锚票（多锚取
+  // max merge_ts——共享面已裁）；无锚票 n/a 不入样本分母（P2-2），覆盖率分母=merged 票集如实披露。
+  // p50 约定（P3-2 钉）：升序取 (s[(n-1)>>1]+s[n>>1])/2——奇数=中位值、偶数=中间两值均值（字节恒等面无自由度）。
+  const anchoredSlugs = [...mergedSet].filter(slug => anchorFace.has(slug));
+  const cycles = [];
+  for (const slug of anchoredSlugs) {
+    const first = firstDispMs.get(slug);
+    if (first === undefined) continue;
+    cycles.push(anchorFace.get(slug).merge_ts_ms - first);
+  }
+  const sorted = [...cycles].sort((a, b) => a - b);
+  const p50 = sorted.length === 0 ? null : (sorted[(sorted.length - 1) >> 1] + sorted[sorted.length >> 1]) / 2;
   const ticket_cycle_time = {
-    state: 'blocked',
-    reason: 'merge 锚物化面停该子面呈报：事件 schema 枚举+载荷 allowlist 冻结，锚承载需 schema 变更（stats-5 交付物 1 实现约束——回方案门 §5.2 ④）；bundle 侧 ticket_merges 观察面已交付（P1-1(a) 取数面裁断）',
-    p50_ms: null, coverage: null, denominator: null,
-    note: '锚面落位后输出 p50+覆盖率（n=有锚票/语料票数；非 dogfood merge 形态票=n/a 不入分母，覆盖率披露）',
+    state: sorted.length > 0 ? 'available' : 'no-merge-anchors',
+    reason: sorted.length > 0 ? null
+      : 'merged 票集内零锚覆盖（未 mine 观察面/E3 rebuild 后未 re-mine〔validate notes 核对面〕/锚采集 n-a）——p50 n/a 如实非 0；分母与覆盖率照出',
+    p50_ms: p50,
+    sample_size: sorted.length,
+    coverage: { covered: anchoredSlugs.length, total: mergedSet.size, rate: rateOf(anchoredSlugs.length, mergedSet.size) },
+    note: 'cycle=merge_ts−首次派发（untruncated——WB-5 票级语义；锚读取不受 --since/--until/--project 截断）；分母=merged 票集（TICKET_FACE∧terminal_completed developer 派发——P3-1 钉）；无锚票 n/a 不入 p50 样本分母；p50 偶数样本=中间两值均值（P3-2 钉）；多锚票取 max merge_ts（P2-3/week-bucket-rules v1.1）',
   };
   // agent/空闲分桶（面一时间线；空闲含人闸+排队——估算标注义务）：
-  // 票周期端点=首次派发→末次派发完成（merge 锚面停摆——周期上界估算，estimation=true 如实）
+  // P2-4 estimation 票级退役：锚在场票周期端点=merge_ts 真值（该票估算退役）；锚缺席票保持
+  // 「首次派发→末次派发完成」上界+估算标注（锚缺席态保留）——面级 estimation=任一 fallback 票在场即 true。
   const bySlug = new Map();
   for (const d of scopedDispatches) {
     if (!d.created_at) continue;
-    const f = attrFaceMap.get(d.entity_id) ?? { attribution: d.attribution, ticket_slug: d.ticket_slug };
+    const f = faceOf(d);
     if (!TICKET_FACE.has(f.attribution)) continue;   // CANDIDATE/UNATTRIBUTED null 面不入票级桶
     if (!bySlug.has(f.ticket_slug)) bySlug.set(f.ticket_slug, []);
     bySlug.get(f.ticket_slug).push(d);
   }
-  let tickets = 0, activeMs = 0, idleMs = 0;
-  for (const ds of bySlug.values()) {
+  let tickets = 0, activeMs = 0, idleMs = 0, anchoredTickets = 0, fallbackTickets = 0;
+  for (const [slug, ds] of bySlug) {
     let first = Infinity, lastEnd = -Infinity, act = 0;
     for (const d of ds) {
       const c = Date.parse(d.created_at);
@@ -390,16 +448,20 @@ function m3Face(scopedDispatches, attrFaceMap) {
       if (Number.isFinite(d.wall_clock_ms)) act += d.wall_clock_ms;
     }
     if (!Number.isFinite(first) || !Number.isFinite(lastEnd)) continue;
+    const a = anchorFace.get(slug);
+    const end = a ? a.merge_ts_ms : lastEnd;   // 锚在场=merge 真值端点；缺席=末次派发完成（上界估算）
     tickets++;
+    if (a) anchoredTickets++; else fallbackTickets++;
     activeMs += act;
-    idleMs += Math.max(0, lastEnd - first - act);
+    idleMs += Math.max(0, end - first - act);
   }
   return {
     ticket_cycle_time,
     agent_idle_buckets: {
-      estimation: true,
-      tickets, active_ms_total: activeMs, idle_ms_total: idleMs,
-      note: '空闲含人闸+排队（估算标注义务）；票周期端点=首次派发→末次派发完成（merge 锚面停摆——idle 为上界估算）',
+      estimation: fallbackTickets > 0,
+      tickets, anchored_tickets: anchoredTickets, fallback_estimated_tickets: fallbackTickets,
+      active_ms_total: activeMs, idle_ms_total: idleMs,
+      note: '空闲含人闸+排队；票周期端点=锚在场票取 merge_ts 真值（estimation 票级退役——P2-4），锚缺席票保持首次派发→末次派发完成上界（面级 estimation=true=任一 fallback 票在场）',
     },
   };
 }
@@ -414,12 +476,14 @@ function isoWeekStartMs(weekKey) {
 }
 
 /** M4-1 周趋势（week-bucket-rules.md 冻结规则 WB-1..WB-6——规则 ID 追溯）。
- *  事件面桶位=scoped 派发周桶；票级归属=untruncated 首次派发周桶（WB-1 fallback——merge 锚面停摆期全部
- *  fallback+attribution_basis 披露；WB-5 归属不受 --since/--until 截断）。
+ *  事件面桶位=scoped 派发周桶；票级归属=WB-1 真锚优先（merge_anchor 事件·untruncated 读取——多锚取
+ *  max merge_ts〔P2-3/week-bucket-rules v1.1〕），锚缺席票 fallback=untruncated 首次派发周桶（锚缺席态
+ *  保留）；WB-5 归属不受 --since/--until 截断。P2-4 混合态披露：attribution_basis 三值
+ *  （merge-anchor/first-dispatch-fallback/mixed）+attribution 两计数。
  *  P1-1（红队修复轮）：票级归属键=post-join 归因面 slug（attrFaceMap 传参——m3Face 同法）且只收
  *  TICKET_FACE（null 跳过，与 m2/m3 同面）——raw slug 下 CANDIDATE/UNATTRIBUTED 行聚 null 幻影桶、
  *  纯升级票（无 DIRECT 派发）缺桶/quality_rework_tickets 漏。 */
-function m4WeekTrend({ scoped, untruncated, gateBlocking, attrFaceMap, untruncatedReworkSlugs }) {
+function m4WeekTrend({ scoped, untruncated, gateBlocking, attrFaceMap, anchorFace, untruncatedReworkSlugs }) {
   const firstDispMsBySlug = new Map();   // WB-1 fallback 锚：未截断面首次派发（any role）
   for (const e of untruncated) {
     if (e.event_kind !== 'dispatch' || !e.created_at) continue;
@@ -430,8 +494,14 @@ function m4WeekTrend({ scoped, untruncated, gateBlocking, attrFaceMap, untruncat
     const prev = firstDispMsBySlug.get(f.ticket_slug);
     if (prev === undefined || ms < prev) firstDispMsBySlug.set(f.ticket_slug, ms);
   }
+  // WB-1 归属：锚在场票=merge 周桶（共享锚面与 M3 同源——验收④）；锚缺席票=首次派发周桶（fallback 保留）
   const attributionWeekBySlug = new Map();
-  for (const [slug, ms] of firstDispMsBySlug) attributionWeekBySlug.set(slug, isoWeekBucket(ms));
+  let anchoredTickets = 0, fallbackTickets = 0;
+  for (const [slug, ms] of firstDispMsBySlug) {
+    const a = anchorFace.get(slug);
+    if (a) { attributionWeekBySlug.set(slug, isoWeekBucket(a.merge_ts_ms)); anchoredTickets++; }
+    else { attributionWeekBySlug.set(slug, isoWeekBucket(ms)); fallbackTickets++; }
+  }
   // 桶位=事件面（scoped 派发）
   const dispByWeek = new Map();
   let minMs = Infinity, maxMs = -Infinity;
@@ -468,49 +538,70 @@ function m4WeekTrend({ scoped, untruncated, gateBlocking, attrFaceMap, untruncat
   }
   return {
     rules_anchor: 'templates/stats/week-bucket-rules.md',
-    attribution_basis: 'first-dispatch-fallback',
-    attribution_note: 'WB-1 fallback：merge 锚物化面停该子面呈报（stats-5）——锚面落位前全部票按首次派发周桶归属；WB-5 归属不受 --since/--until 截断（时窗只作用事件面）；票级归属=post-join 归因面 slug（CANDIDATE/UNATTRIBUTED null 面不入票级——与 m2/m3 同面）',
+    attribution_basis: anchoredTickets === 0 ? 'first-dispatch-fallback' : (fallbackTickets === 0 ? 'merge-anchor' : 'mixed'),
+    attribution: { merge_anchor_tickets: anchoredTickets, first_dispatch_fallback_tickets: fallbackTickets },
+    attribution_note: 'WB-1：锚在场票按 merge 周桶归属（merge_anchor 事件·untruncated 读取·多锚取 max merge_ts——P2-3/week-bucket-rules v1.1）；锚缺席票 fallback=首次派发周桶（锚缺席态保留）；混合语料 basis=mixed+两计数披露（P2-4）；WB-5 归属不受 --since/--until 截断（时窗只作用事件面）；票级归属=post-join 归因面 slug（CANDIDATE/UNATTRIBUTED null 面不入票级——与 m2/m3 同面）',
     weeks,
   };
 }
 
-/** M4-4 路由变更对照（P1-2 诚实骨架制/D3）：verified 变更点=route_anchor 三锚组（repo commit/local hash/
- *  卡 hash——P3-3 收窄）非 unknown 的变更；<2 → NOT_ENOUGH_CHANGE_POINTS（诚实态非缺陷——生产桩值恒
- *  unknown，锚采集面归后续票 route-anchor-collection，spec-gap 登记）。 */
+/** M4-4 路由变更对照（route-anchor-collection r2 门裁定修订——五 P1 吸收）：
+ *  P1-1 **同键比较**：变更点=同 role 含 variant 键内相邻锚组变化（跨角色交替不计——消日常角色交替伪变更点洪水）；
+ *  P1-2 **双侧 verified**：前后锚组均非 unknown/absent 才入对照（桩→真翻转/absent↔hash=基线建立日非变更点）；
+ *  P1-3 **窗粒度语义**：锚=bundle 制作时点只读快照（窗内变迁不可观；变更点时戳=后窗该键首派发）；
+ *  P1-4 repo 锚=templates/models.config.json 内容 hash（规范仓真源指纹——不声称生效面，sync 滞后不可观）；
+ *  P1-5 effective_model 恒 'unknown'（schema 零改动；真值化归后续票）。NOT_ENOUGH 判据维持 ≥2 verified 变更点。 */
 function m4RouteComparison(scoped) {
-  const UNKNOWN = 'unknown';
+  const UNKNOWN = 'unknown', ABSENT = 'absent';
   const ANCHOR_KEYS = ['repo_models_config_commit', 'local_override_hash', 'generated_role_card_hash'];
   const disp = scoped.filter(e => e.event_kind === 'dispatch' && e.created_at)
     .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : a.entity_id < b.entity_id ? -1 : 1));
+  const keyOf = (d) => (d.variant ? `${d.role}-${d.variant}` : d.role);   // P1-1/P2-3：键粒度=role 含 variant
   const groupOf = (d) => ANCHOR_KEYS.map(k => String(d.route_anchor?.[k] ?? UNKNOWN));
-  const verified = (g) => g.every(v => v !== UNKNOWN);
-  const miss = { dispatches_total: disp.length, repo_commit_unknown: 0, local_override_hash_unknown: 0, generated_role_card_hash_unknown: 0, fully_anchored: 0 };
+  const verified = (g) => g.every(v => v !== UNKNOWN && v !== ABSENT);   // P2-2：absent（确定不在场）与 unknown（未观测）均非真锚
+  const miss = {
+    dispatches_total: disp.length,
+    repo_commit_unknown: 0, local_override_hash_unknown: 0, generated_role_card_hash_unknown: 0,
+    repo_commit_absent: 0, local_override_hash_absent: 0, generated_role_card_hash_absent: 0,
+    fully_anchored: 0,
+  };
   for (const d of disp) {
     const g = groupOf(d);
-    if (g[0] === UNKNOWN) miss.repo_commit_unknown++;
-    if (g[1] === UNKNOWN) miss.local_override_hash_unknown++;
-    if (g[2] === UNKNOWN) miss.generated_role_card_hash_unknown++;
+    if (g[0] === UNKNOWN) miss.repo_commit_unknown++; else if (g[0] === ABSENT) miss.repo_commit_absent++;
+    if (g[1] === UNKNOWN) miss.local_override_hash_unknown++; else if (g[1] === ABSENT) miss.local_override_hash_absent++;
+    if (g[2] === UNKNOWN) miss.generated_role_card_hash_unknown++; else if (g[2] === ABSENT) miss.generated_role_card_hash_absent++;
     if (verified(g)) miss.fully_anchored++;
   }
-  const points = [];
-  for (let i = 1; i < disp.length; i++) {
-    const prev = disp[i - 1], cur = disp[i];
-    const pg = groupOf(prev), cg = groupOf(cur);
-    if (pg.join('\u0000') === cg.join('\u0000')) continue;   // 锚组不变=非变更点
-    if (!verified(cg)) continue;   // verified-only：变更后锚组三锚齐才入对照
-    points.push({
-      at: cur.created_at, repo_commit: cg[0], local_hash: cg[1], card_hash: cg[2],
-      effective_model_before: prev.route_anchor?.effective_model ?? null,
-      effective_model_after: cur.route_anchor?.effective_model ?? null,
-    });
+  // P1-1 同键比较：键内时序相邻对照（全局相邻异角色对不入 diff——角色序列回声非路由变迁）
+  const byKey = new Map();
+  for (const d of disp) {
+    const k = keyOf(d);
+    if (!byKey.has(k)) byKey.set(k, []);
+    byKey.get(k).push(d);
   }
+  const points = [];
+  for (const [key, list] of byKey) {
+    for (let i = 1; i < list.length; i++) {
+      const prev = list[i - 1], cur = list[i];
+      const pg = groupOf(prev), cg = groupOf(cur);
+      if (pg.join('\u0000') === cg.join('\u0000')) continue;   // 锚组不变=非变更点
+      if (!verified(pg) || !verified(cg)) continue;   // P1-2 双侧 verified：翻转/基线建立不入对照
+      points.push({
+        at: cur.created_at, key,
+        repo_commit: cg[0], local_hash: cg[1], card_hash: cg[2],
+        effective_model_before: prev.route_anchor?.effective_model ?? null,
+        effective_model_after: cur.route_anchor?.effective_model ?? null,
+      });
+    }
+  }
+  points.sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : a.key < b.key ? -1 : 1));
   const ok = points.length >= 2;
   return {
     state: ok ? 'ok' : 'NOT_ENOUGH_CHANGE_POINTS',
     verified_change_points: points.length,
     points: ok ? points : [],
     anchor_missing: miss,
-    note: 'verified=变更点后锚组三锚（repo models config commit/local override hash/生成角色卡 hash）非 unknown；生产现状如实：routeAnchor 桩值恒 unknown→恒 NOT_ENOUGH（诚实态非缺陷）；锚采集面归后续票 route-anchor-collection（spec-gap 登记）',
+    note: 'verified=同键（role 含 variant）相邻对照锚组双侧均非 unknown/absent（P1-1 同键比较消角色交替伪点；P1-2 桩→真翻转/absent↔hash=基线建立日非变更点）；锚=bundle 制作时点只读快照——窗粒度配置指纹（窗内变迁不可观，变更点时戳=后窗该键首派发——P1-3）；repo 锚=templates/models.config.json 内容 hash=规范仓真源指纹不声称生效面（sync 滞后不可观——P1-4）；effective_model 恒 unknown（P1-5）；锚采集面=route-anchor-collection r2',
   };
 }
 
@@ -636,8 +727,14 @@ export async function cmdReport(opts) {
     return Object.fromEntries(Object.keys(t).sort().map(k => [k, t[k]]));
   };
   // 共享归因面（attribution-explicit-closure r2）：EXPLICIT join 消费侧——M1 分布/coverage/candidates/
-  // excluded_unattributed 与 m2/m3/B9 票级准入同源（一处实现三处消费）
-  const attrFace = attributionFace(scoped);
+  // excluded_unattributed 与 m2/m3/B9 票级准入同源（一处实现三处消费）。
+  // stats-hygiene-2 交付物 2/3：在**未过滤语料**（events）上恰一次计算，scoped 消费方按 entity_id 查用——
+  // --project/--since/--until 过滤不再令升级票 ledger 证据缺席（§V.1：observation 归属映射取 dispatch
+  // pre-join slug→project，纯升级票无可命中派发 → ledger 快照被过滤出语料 → scoped 自算面看不到）。
+  const attrFace = attributionFace(events);
+  // 共享 merge 锚面（merge-anchor-materialization r2）：与 attrFace 同法在**未过滤语料**上恰一次计算
+  // （untruncated 读取——P2-2/WB-5）；m3Face/m4WeekTrend 两消费方同面（验收④ M4 与 M3 同源）。
+  const anchorFace = mergeAnchorFace(events);
   const faceOf = (e) => attrFace.face.get(e.entity_id) ?? { attribution: e.attribution, ticket_slug: e.ticket_slug, basis: null };
   const m1 = {
     dispatches_total: dispatches.length,
@@ -700,7 +797,11 @@ export async function cmdReport(opts) {
       return {
         ...c,
         explicit_conflict: attrFace.counts.explicit_conflict, explicit_slug_divergence: attrFace.counts.explicit_slug_divergence,
-        note: 'post-join 派生值（消费侧 EXPLICIT join 归因面——attribution-explicit-closure 裁决记录，非 collect 原值；explicit 含 DIRECT 标签升级〔slug 分歧时归属保留 worktree〕；MANUAL_RECONCILED 行由 m2.manual_reconciled_subset 面承载不入四计数）',
+        // stats-hygiene-2 交付物 4（canonical 落位登记：m1.attribution 对象内新键，explicit_slug_divergence
+        // 之后 note 之前）：经 join 升级的 dispatch entity_id 清单（CANDIDATE→EXPLICIT 回填+DIRECT 标签升；
+        // 排序确定）——供事后机读（reconcile/审计面），门红态照出（M1 attribution 面 dispatch 派生不受门阻）。
+        upgraded_entity_ids: attrFace.upgraded_entity_ids,
+        note: 'post-join 派生值（消费侧 EXPLICIT join 归因面——attribution-explicit-closure 裁决记录，非 collect 原值；explicit 含 DIRECT 标签升级〔slug 分歧时归属保留 worktree〕；MANUAL_RECONCILED 行由 m2.manual_reconciled_subset 面承载不入四计数；归因面在未过滤语料上计算——stats-hygiene-2 交付物 2/3）',
       };
     })(),
     // M1 披露（P1-2 消解）：有 child_session_id 的 dispatch 可 join 面 covered/total——随票龄增长可见
@@ -744,12 +845,12 @@ export async function cmdReport(opts) {
     m2.attempt_distribution = null;
     m2.qa_defect_density = null;
   } else {
-    Object.assign(m2, m2AutoFace(scoped, internals));
+    Object.assign(m2, m2AutoFace(scoped, internals, attrFace));
   }
   m2.manual_reconciled_subset = manualSubset(storeRoot, scoped);
 
   // ── stats-5：M3 流动计量（dispatch 面——不受门阻）──
-  const m3 = m3Face(scoped.filter(e => e.event_kind === 'dispatch'), attrFace.face);
+  const m3 = m3Face({ scopedDispatches: scoped.filter(e => e.event_kind === 'dispatch'), attrFaceMap: attrFace.face, anchorFace, untruncatedEvents: events });
 
   // ── stats-5：M4 趋势与摩擦（两态分层 D2：错误门红→M2 维度行 blocked 非 0；合计门降级→照常+LOW_COVERAGE 标注）──
   const m4Join = gate.blocking ? null : internals;
@@ -787,12 +888,13 @@ export async function cmdReport(opts) {
       })()
     : { state: 'blocked', buckets: null, transfer_semantics: TRANSFER_SEMANTICS, note: '门红态分子源受阻（wrong_label_gate=fail）——行标 blocked 非 0' };
   // 周趋势归属面=untruncated join（WB-5：票级归属不受 --since/--until 截断）。
-  // P1-1（红队修复轮）：untruncated 归因面一次计算两处消费——m4WeekTrend 收参（m3Face 模式同法）+
-  // m2AutoFace 收参（消三次重算之一——review 轮 P3-4 部分吸收；门红态 m4WeekTrend 票级计数仍需本面）。
-  const untruncatedAttrFace = attributionFace(filtered);
-  const untruncatedInternals = gate.blocking ? null : (() => { const it = {}; m2AutoFace(filtered, it, untruncatedAttrFace); return it; })();
+  // P1-1（红队修复轮）：untruncated 归因面两处消费——m4WeekTrend 收参（m3Face 模式同法）+m2AutoFace
+  // 收参（门红态 m4WeekTrend 票级计数仍需本面）。
+  // stats-hygiene-2 交付物 3：归因面已上移至未过滤语料（events）恰一次计算（见 m1 前唯一调用点）——
+  // 本处收参复用同一 attrFace（filtered 面重算调用点移除）。
+  const untruncatedInternals = gate.blocking ? null : (() => { const it = {}; m2AutoFace(filtered, it, attrFace); return it; })();
   const weekTrend = m4WeekTrend({
-    scoped, untruncated: filtered, gateBlocking: gate.blocking, attrFaceMap: untruncatedAttrFace.face,
+    scoped, untruncated: filtered, gateBlocking: gate.blocking, attrFaceMap: attrFace.face, anchorFace,
     untruncatedReworkSlugs: untruncatedInternals ? [...untruncatedInternals.reworkAttemptsBySlug.keys()] : [],
   });
   const m4 = {
@@ -921,7 +1023,7 @@ export async function cmdReport(opts) {
   }
   lines.push(`[M2] 人工归因子集 entities=${m2.manual_reconciled_subset.entities} tickets=${m2.manual_reconciled_subset.tickets}`);
   // stats-5：M3/M4/一屏摘要（终端表——本地时区显示面非恒等体）
-  lines.push(`[M3] 周期时间 ${m3.ticket_cycle_time.state}（merge 锚物化面停该子面呈报——详见 --json reason）· agent/空闲 active ${m3.agent_idle_buckets.active_ms_total}ms / idle ${m3.agent_idle_buckets.idle_ms_total}ms（estimation）`);
+  lines.push(`[M3] 周期时间 ${m3.ticket_cycle_time.state}（p50 ${m3.ticket_cycle_time.p50_ms ?? 'n/a'}ms · 覆盖 ${m3.ticket_cycle_time.coverage.covered}/${m3.ticket_cycle_time.coverage.total}——分母=merged 票集）· agent/空闲 active ${m3.agent_idle_buckets.active_ms_total}ms / idle ${m3.agent_idle_buckets.idle_ms_total}ms${m3.agent_idle_buckets.estimation ? '（estimation——锚缺席票上界）' : '（锚端点真值——估算退役）'}`);
   lines.push(`[M4] 周趋势 ${summary.week_sparkline.text}`);
   lines.push(`[M4] 返工成本占比 ${rework_cost_share.state === 'available'
     ? TOKEN_LANES.map(k => `${k} ${rework_cost_share.lanes[k].share ?? 'n/a'}`).join(' ')

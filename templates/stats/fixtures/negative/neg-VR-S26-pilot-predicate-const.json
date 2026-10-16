@@ -1,6 +1,6 @@
 {
   "fixture_kind": "pilot-bundle",
-  "description": "结构层：metadata eligible 谓词原文被改写（非正文逐字）",
+  "description": "语义层：metadata eligible 谓词未按窗照实记录（不含实际窗区间——pilot-window-parameterization 重锚：原「const 原文改写」改测照实记录语义）",
   "manifest_kind": "pilot-bundle",
   "bundle_id": "bundle-neg",
   "created_at": "2026-09-25T02:00:00Z",

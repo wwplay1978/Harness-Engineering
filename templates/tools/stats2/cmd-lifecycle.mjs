@@ -162,7 +162,16 @@ export function cmdValidate(opts) {
   // P1-7（三审）：audit 侧车纳入 validate——缺失/损坏/伪 legacy/legacy 降级/绑定不一致均入 problems（非空）
   problems.push(...auditConsistencyProblems(storeRoot, { events, gen }));
   const gens = existsSync(EE.eventsRoot(storeRoot)) ? readdirSync(EE.eventsRoot(storeRoot)).filter(d => /^gen-\d{4}$/.test(d)).sort() : [];
-  const out = { command: 'validate', generation: gen, generations: gens, segments: segments.length, events: events.length, problems };
+  // E3 re-mine 义务注记（merge-anchor-materialization P2-1③：门实证陷阱——非 problem=观察面缺席非契约违规，
+  // 机器可读核对面）：语料非空而零 observation 事件=未 mine 或 E3 rebuild 后未 re-mine
+  // （rebuild --from-source 只产 dispatch/model-request——projectBundleEvents 无 observation 面）；
+  // 观察（ticket_snapshot/derived/merge_anchor）全靠重跑 mine --bundle <id> 回归，否则 M3 周期时间/
+  // 周桶 merge 锚归属静默退回 n/a。
+  const notes = [];
+  if (events.length > 0 && !events.some(e => e.event_kind === 'observation')) {
+    notes.push('E3-re-mine 义务：语料零 observation 事件（未 mine 或 rebuild --from-source 后未 re-mine——观察面〔ticket_snapshot/derived/merge_anchor〕不在 E3 投影面）——重跑 mine --bundle <id> 回归，否则 M3/周桶锚归属静默退回 n/a（merge-anchor-materialization 门实证陷阱 P2-1③）');
+  }
+  const out = { command: 'validate', generation: gen, generations: gens, segments: segments.length, events: events.length, problems, notes };
   console.log(JSON.stringify(out, null, 2));
   if (problems.length) { console.error(`VALIDATE_FAIL：${problems.length} 项问题`); return EXIT.FAIL; }
   return EXIT.OK;
