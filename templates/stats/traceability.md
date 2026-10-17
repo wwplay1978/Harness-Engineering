@@ -21,7 +21,7 @@
 | D6' | 默认不出本机+默认脱敏；多机聚合=stats-6c 另批 | （隐私红线由 allowlist 承载：schema 字段全量=计量元数据，无正文/消息/代码字段） | stats-4 ⑤（B3 脱敏检测零命中）；stats-6c（blocked，D6' 扩批前） |
 | D7' | 运行记录行补 childSessionId——独立 dogfood 票 | （不阻塞 stats-1…5；pilot 可低置信跑，§5.2 行 230 注记） | dogfood 票（独立，非 stats-N） |
 | D8' | stats-6 拆 6a/6b/6c 独立验收 | （拆票声明非 schema 面） | stats-6a/6b/6c 票面 |
-| D9' | Node ≥22.16 + 原生 `node:sqlite.backup()`（零第三方） | 本票环境断言：validate-schema 仅 node: 标准库（fs/crypto/path），禁 node:sqlite（不触源）——工具头注已冻结 | stats-2（backup 双路径实现+§5.4-7 TEMP 协议）；B5 check-env 版本校验联动 |
+| D9' | Node ≥22.16（TEMP 封闭副本只读打开=node:sqlite 消费面基线）+ 纯文件复制协议+三方摘要恒等（copy==before==after）。**修订留痕（snapshot-aba-hardening，2026-10-12 改裁）**：原裁 Online Backup 因零写入红线退役 | 本票环境断言：validate-schema 仅 node: 标准库（fs/crypto/path），禁 node:sqlite（不触源）——工具头注已冻结 | stats-2 改裁 2026-10-12+snapshot-aba-hardening 三方恒等收口；B5 check-env 版本校验联动 |
 | D10' | 历史 metrics 不做任何映射；三仓旧列存档；重算以事件仓为准 | （口径权威=docs/04 §4，非本票 schema 面） | stats-4 ③（三 pass 分列输出）+ docs/04 注记（已随 v3 存档） |
 
 ## 2. §9 硬约束清单（行 343 十五项）→ 冻结位与后续票

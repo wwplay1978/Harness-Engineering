@@ -74,17 +74,28 @@ function classifierGateRow(storeRoot) {
     note: 'planner-final 工件缺席——默认红态（P1-3/P1-4：无在档双门终值即红，不冒充绿）' };
   if (!existsSync(reportsDir)) return cur;
   const candidates = [];
+  const invalid = [];   // gate-reader-fail-closed 交付物 2：模式匹配但不可解析/工件不符的文件（防回退判定面）
   for (const f of readdirSync(reportsDir).filter(f => f.startsWith('heldout-planner-final-') && f.endsWith('.json')).sort()) {
     try {
       const j = JSON.parse(readFileSync(join(reportsDir, f), 'utf8'));
       if (j?.artifact_kind === 'heldout-planner-final') candidates.push({ file: f, j });
-    } catch { /* 损坏工件不入候选（fail-open 限于门状态行——数字面已由 blocked 态保守处置） */ }
+      else invalid.push(f);   // 可解析但 artifact_kind 不符=坏工件（与 JSON 损坏同处置）
+    } catch { invalid.push(f); /* 损坏工件不入候选（数字面已由 blocked 态保守处置）；新于选定最新有效工件时下方防回退红 */ }
   }
   if (candidates.length === 0) return cur;
   // 最新=generated_at 最大（并列取文件名逆序——确定性选择）
   candidates.sort((a, b) => (a.j.generated_at ?? '') < (b.j.generated_at ?? '') ? -1
     : (a.j.generated_at ?? '') > (b.j.generated_at ?? '') ? 1 : b.file < a.file ? -1 : 1);
   const latest = candidates[candidates.length - 1];
+  // gate-reader-fail-closed 交付物 2：latest-invalid 防回退——不可解析/工件不符文件若文件名排序新于
+  // 当前选定的最新有效候选 → 红（不回退旧工件）；仅旧于时维持跳过现状（已被取代、无害）。corrupt 态
+  // 无 generated_at 可比——文件名序为唯一可用序参（注记披露）；candidates 排序现状不动（主序 generated_at）。
+  const newestInvalid = invalid.length > 0 ? invalid[invalid.length - 1] : null;   // 升序数组末位=文件名序最新
+  if (newestInvalid !== null && newestInvalid > latest.file) {
+    cur.source_artifact = `reports/${newestInvalid}`;
+    cur.note = `最新工件 reports/${newestInvalid} 不可解析（损坏 JSON 或 artifact_kind 不符）——不回退旧工件（防 latest-invalid 回退绿；corrupt 态无 generated_at 可比，判定用文件名序——选定候选 ${latest.file}）`;
+    return cur;
+  }
   cur.source_artifact = `reports/${latest.file}`;
   cur.classifier_version_artifact = latest.j.classifier_version ?? null;
   cur.version_match = cur.classifier_version_artifact === CLASSIFIER_VERSION;
@@ -102,6 +113,14 @@ function classifierGateRow(storeRoot) {
   }
   if (wrongGate === 'fail') {
     cur.note = `错误门红（wrong_label_gate=fail——wrong_label_rate=${cur.gates_final.wrong_label_rate}）:classifier-acceptance:19 阻断 M2 数字面`;
+    return cur;
+  }
+  if (wrongGate !== 'pass') {
+    // gate-reader-fail-closed 交付物 1：严格枚举——'pass' 唯一放行值；其余任意字符串（unknown/error/
+    // 大小写或空白变体/空串）→ 红+未识别值注记（JSON.stringify 原值）。禁归一化（trim/大小写兜底
+    // 一律不做——写侧产出非枚举值即坏工件，读侧不代偿）；值域收紧不改绿路径产出（现网真工件
+    // 两值形态：cmd-phase4 写侧恒 'pass'|'fail'）。
+    cur.note = `工件 wrong_label_gate=${JSON.stringify(wrongGate)} 非枚举值（'pass'|'fail'）——未识别值视红（读侧不代偿写侧非枚举产出；无 trim/大小写归一化）`;
     return cur;
   }
   cur.state = 'green';

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "templates/tools/stats2/cmd-report.mjs",
+    "sha256": "66bb3531051ece1d82d12c4bc83c968003eb6a357d75654e9d3df5db05738884"
+  },
+  {
+    "path": "templates/stats/traceability.md",
+    "sha256": "263f2978882752f8638b42ae1b127e670ce8ca8a8968b50d78a84f51bf27e513"
+  },
+  {
+    "path": "templates/agents/archiver.md",
+    "sha256": "7c5acccab4dac1475b0efd52530b894e81ed8ee72d02ab0ff8d494d03a62f8a2"
+  },
+  {
+    "path": "templates/tools/sync-harness.mjs",
+    "sha256": "ed9504b435db6f5945b6e7431e5576862c9ecef48780795d9529811169efe919"
+  },
+  {
+    "path": "docs/07-migration-playbook.md",
+    "sha256": "da239b461f2d1ba0b535dbc76f23ce7d32d88196c3efce10963db7a4767cc3bb"
+  },
+  {
+    "path": "templates/tools/privacy-fullscan.mjs",
+    "sha256": "449adc27c62a143302573f5664d1711f8116bae392fc9906e8eb8de1f2faf834"
+  }
+]

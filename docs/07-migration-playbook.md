@@ -140,7 +140,7 @@ node templates/tools/sync-harness.mjs          # 只读体检（有漂移 exit 1
 node templates/tools/sync-harness.mjs --apply  # 同步自动集到用户域
 ```
 
-- **自动集**：六角色 base、harness-audit 技能、delegate-kimi 技能、变体生成器、models.config.json、pre-merge-check.mjs（消费位=标准位 `~/.agents/Harness-Engineering/templates/tools/`，2026-09-15 对抗审查 P2-2 纳管——防门控防线修订后消费位静默过期）——源=templates/（git 版本化），用户域/标准位均为部署副本
+- **自动集**：六角色 base、harness-audit 技能、delegate-kimi 技能、变体生成器、models.config.json、pre-merge-check.mjs（消费位=标准位 `~/.agents/Harness-Engineering/templates/tools/`，2026-09-15 对抗审查 P2-2 纳管——防门控防线修订后消费位静默过期）、stats 工件族（`templates/stats/` 目录全量含 fixtures+`templates/tools/stats2/` 全模块+harness-stats.mjs+b3-redact-check.mjs——release-round-6 SYNC 接线，消费位=标准位 `~/.agents/Harness-Engineering/templates/` 同构镜像；目录族条目=遍历时目录全量，新增文件随 sync 自动入集）——源=templates/（git 版本化），用户域/标准位均为部署副本
 - **hooks 执行位（`~/.zcode/hooks/harness/`）只报告、永不代写**：AI 可改 templates 源（guard 白名单内），若脚本自动传播即等于 AI 可换掉运行中的 guard 自毁防线——该路径人工 cp（脚本打印现成命令）
 - 用户级 config.json 三正式注册与项目结构（AGENTS/文档目录/宪法恒等对照）随跑随报，同样只报告；**宪法恒等对照（v3）**以规范仓 `templates/AGENTS-template.md` 为基准，对项目根 AGENTS.md 做 normalize（strip BOM + CRLF→LF）后比较完整正文——全文相同=[OK]，正文不同而首行同源=[DRIFT]（宪法漂移，人工对照），首行不同=[MIGRATE]（旧制 span 渲染版启发式）；sync 只报告、**永不写回项目 AGENTS.md**，宪法换版由人工按 spec 19 §6 执行并复核（旧 `constitution-affecting-baseline` 日期基线已退役，历史与裁决见 docs/08 与 spec 19 D3；相关配置状态由 spec 19 §3.4 与 sync 源码定义，本行不重复）；盘点发现的归属=各自项目，跨项目发现不构成当前项目的任务
 - **新项目接入后**：把项目根路径加入 `~/.zcode/harness-projects.json`（JSON 数组；首跑缺失会自动 seed 本机默认集），此后该项目的结构盘点随跑随报

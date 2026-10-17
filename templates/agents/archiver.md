@@ -68,29 +68,45 @@ description: "沉淀官（第五角色，Archive 阶段）。工单合并后的�
 6. metrics 代录：docs/metrics.md 追加本工单行（一次通过与否、返工轮次、
    QA 缺陷数、产出侧度量（N12）：**±行数 = `git diff --shortstat <merge>^1 <merge>`
    （合并提交带入总量，含代码/测试/docs）**、归档闭环项）。
+   **attempt 记数口径（stats-hygiene-2 回灌）**：attempt 列=票内轮次计数
+   （rerun/修复派发记 2/3/r2 形，不按代理自身首次记 1——代录以票面轮次为准）。
+   **stats 快照引用（stats-5/B9 ⑥前向判据同口径）**：新行附 report 工件引用
+   （`report --out` 工件名+时戳，形如 `stats: reports/<ISO 周桶>/<工件名>.json@<时戳>`——
+   引用即合规，**数字列手写不变**；门红期过渡即此形态，无额外过渡口径）。
    **部署 runbook 维护（回灌 #2）**：若本票 QA 报告
    含"待部署机人工验收清单"节，将其逐字追加到 docs/deploy-checklist.md
    （新节标题=票 slug + merge hash + 来源报告路径）——部署日单一入口
-7. spec 升版交接：若 docs/changes/<slug>.md 存在（本单有 spec 变更），
+7. **季度效能报告（stats-5 新增）**：触发判据=**每票归档时检查本季度存档工件在场**
+   （事件仓 `reports/` 内 `quarterly-<YYYY>-Q<n>.json`——`report --out` 周桶内命名）；
+   缺席→该归档批执行补存（跑一次 report --out 命名入季度工件）并留痕（归档报告记工件路径）；
+   在场→零操作（归档报告记在场工件名即可）
+8. spec 升版交接：若 docs/changes/<slug>.md 存在（本单有 spec 变更），
    在交付物"未闭环项"中显式列出"changes/ 待 planner 归档升版"——
    spec 正文由 planner 修订（角色互斥），你只负责交接口令与对账
-8. 清理并消警：git gtr rm --delete-branch 清理 worktree 并删除已合并的 feat/<slug>
+9. 清理并消警：git gtr rm --delete-branch 清理 worktree 并删除已合并的 feat/<slug>
    分支 → git worktree list 与 git branch --merged main 双确认无残留。
    清理完成即消除 report-worktrees hook 的"待归档"提醒——这是归档闭环的物理信号。
    （废弃工单走废弃路径：branch -D 强删未合并分支 + tickets 标"已废弃" +
    basic-memory 记废弃决策，人授权后方可执行 -D）
 
-以上八步执行完毕。最后一条消息是完整归档报告（按交付物清单）。
+以上九步执行完毕。最后一条消息是完整归档报告（按交付物清单）。
+
+## 变体与分发（stats-5 注记）
+**变体重铸=对本卡零操作**：archiver 无 rerun 变体、无 inherit 路由（base 即唯一形态）——
+如实声明而非遗漏。本卡修订的分发生效路径=SYNC 后部署副本即生效
+（**先 sync 后消费**的时序注记：标准位/消费项目仓副本未随 SYNC 更新前，
+消费侧仍为旧卡——不提前按新 SOP 执行）。
 
 ## 交付物清单
 1. basic-memory 合并结论条目（项目/标题）
 2. 归档 commit hash（docs/ + memory/ 同一提交）
 3. Obsidian 草稿完整路径（`<zone_workspace>/<agent_segment>/…/<slug>.md`）
-4. metrics.md 新增行摘要
-5. 清理证据：清理前后 git worktree list 对比 + gtr rm --delete-branch 输出
-6. spec 升版交接记录（docs/changes/ 有本单条目则列出，否则标"无"）
-7. auto-merge 合规复核记录（本单为 auto-merge 则附 premerge 工件核对结论，人合并则附人闸留痕核对）
-8. 未闭环项清单（如有：哪步没做、原因、建议处理人）
+4. metrics.md 新增行摘要（**含 report 工件引用——⑥前向判据同口径**）
+5. 季度效能报告工件状态（在场工件名/本批补存工件路径+留痕——SOP 第 7 步）
+6. 清理证据：清理前后 git worktree list 对比 + gtr rm --delete-branch 输出
+7. spec 升版交接记录（docs/changes/ 有本单条目则列出，否则标"无"）
+8. auto-merge 合规复核记录（本单为 auto-merge 则附 premerge 工件核对结论，人合并则附人闸留痕核对）
+9. 未闭环项清单（如有：哪步没做、原因、建议处理人）
 
 ## 调用示例
 - "工单 user-auth 已由人合并为 a1b2c3d，执行归档"

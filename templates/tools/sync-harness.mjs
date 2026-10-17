@@ -9,6 +9,8 @@
 //     脚本自动传播即等于 AI 可换掉运行中的 guard 自毁防线——该路径必须过人手（docs/05 §3；
 //     运行中的执行位另受 guard 自防御条款物理保护）
 //   - rerun 变体（*-rerun.md）是 generate-role-variants.mjs 的编译产物：不入清单、不删除
+//   - 目录族条目（dir:true，release-round-6 起）：SYNC 数组支持目录粒度——展开=遍历时该目录
+//     全量文件（新增文件自动入集，免逐文件维护 ~百件清单）；目录缺失/为空=[MISS-SRC] fail-loud
 //   - 用户级 config.json / 项目 AGENTS.md 同为只报告（前者混有 hindsight 等非本仓库内容，
 //     后者是人工宪法）——v3 起项目宪法与零参数模板做逐字节恒等比对（normalize=LF+strip BOM），
 //     日期基线（constitution-affecting-baseline）退役
@@ -20,7 +22,7 @@
 //   - 尾段机器锚点扫描 = 投产消费面 tripwire（templates/ + docs/07/16/17/18；历史记录类
 //     文档不入扫描面），命中即计入漂移由人判定
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, sep } from 'node:path';
 import { homedir } from 'node:os';
 
 const repo = join(import.meta.dirname, '..', '..');   // templates/tools/ → 仓库根
@@ -40,7 +42,33 @@ const SYNC = [
   { src: 'templates/tools/generate-role-variants.mjs', dst: join(HOME, '.zcode', 'tools', 'generate-role-variants.mjs'), why: '变体生成器' },
   { src: 'templates/models.config.json', dst: join(HOME, '.zcode', 'models.config.json'), why: 'OPT-2 路由表' },
   { src: 'templates/tools/pre-merge-check.mjs', dst: join(HOME, '.agents', 'Harness-Engineering', 'templates', 'tools', 'pre-merge-check.mjs'), why: '自治合并门控断言（消费位恒等同步，对抗审查 P2-2）' },
+  // ── stats 工件族（release-round-6 SYNC 接线；消费位=标准位同构镜像，沿 pre-merge-check 先例）──
+  { src: 'templates/stats/', dst: join(HOME, '.agents', 'Harness-Engineering', 'templates', 'stats'), dir: true, why: 'stats 契约族全量含 fixtures（消费位 contract-validator.mjs 以 ../../stats 解析整树——整树在位=运行前提）' },
+  { src: 'templates/tools/stats2/', dst: join(HOME, '.agents', 'Harness-Engineering', 'templates', 'tools', 'stats2'), dir: true, why: 'stats2 模块族全量（cli 总装+store/parser/classifier 等，stats 契约的执行面）' },
+  { src: 'templates/tools/harness-stats.mjs', dst: join(HOME, '.agents', 'Harness-Engineering', 'templates', 'tools', 'harness-stats.mjs'), why: 'stats CLI 壳' },
+  { src: 'templates/tools/b3-redact-check.mjs', dst: join(HOME, '.agents', 'Harness-Engineering', 'templates', 'tools', 'b3-redact-check.mjs'), why: 'B3 脱敏检测器（发布对账门）' },
 ];
+
+// 目录族条目展开为逐文件条目（清单=遍历时目录全量；排序稳定保证 --check 报告可 diff）
+const walkFiles = (d, acc = []) => {
+  for (const e of readdirSync(d).sort()) {
+    const f = join(d, e);
+    if (statSync(f).isDirectory()) walkFiles(f, acc);
+    else acc.push(f);
+  }
+  return acc;
+};
+const SYNC_FILES = SYNC.flatMap(it => {
+  if (!it.dir) return [it];
+  const srcAbs = join(repo, it.src);
+  const files = existsSync(srcAbs) && statSync(srcAbs).isDirectory() ? walkFiles(srcAbs) : [];
+  if (files.length === 0) return [{ ...it, missSrc: true }];
+  return files.map(f => ({
+    src: relative(repo, f).split(sep).join('/'),
+    dst: join(it.dst, relative(srcAbs, f)),
+    why: it.why,
+  }));
+});
 
 // ── hooks 执行位（只报告）+ 三正式注册（只报告）──────────────────
 const HOOKS = ['guard-worktree', 'inject-memory', 'report-worktrees'];
@@ -50,8 +78,9 @@ console.log(apply ? '== APPLY（写入用户域）==' : '== CHECK（默认只读
 console.log(`repo = ${repo}\n`);
 
 // 1) 自动集
-console.log('-- 自动集（角色/技能/生成器/路由表/合并门控）--');
-for (const it of SYNC) {
+console.log('-- 自动集（角色/技能/生成器/路由表/合并门控/stats 工件族）--');
+for (const it of SYNC_FILES) {
+  if (it.missSrc) { console.log(`[MISS-SRC] ${it.src} 目录缺失或为空——先补齐再同步`); drift++; continue; }
   const srcAbs = join(repo, it.src);
   const s = read(srcAbs);
   if (s === null) { console.log(`[MISS-SRC] ${it.src} 仓库缺源头——先补齐再同步`); drift++; continue; }
